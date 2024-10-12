@@ -37,6 +37,7 @@ const RAW_RUNTIME_STATE =
           ["globals", "npm:15.11.0"],\
           ["react", "npm:18.3.1"],\
           ["react-dom", "virtual:f137ff3578b6791cfb4c30ce29217a79972eb78444b5cf96999706689b050e1e40bb7ce0f80ce13b5f6445a5c7523954084e27dfb2ffd0c338aeeff6791d00b5#npm:18.3.1"],\
+          ["turbo", "npm:2.1.3"],\
           ["typescript", "patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>::version=5.6.3&hash=8c6c40"],\
           ["typescript-eslint", "virtual:f137ff3578b6791cfb4c30ce29217a79972eb78444b5cf96999706689b050e1e40bb7ce0f80ce13b5f6445a5c7523954084e27dfb2ffd0c338aeeff6791d00b5#npm:8.8.1"],\
           ["vite", "virtual:f137ff3578b6791cfb4c30ce29217a79972eb78444b5cf96999706689b050e1e40bb7ce0f80ce13b5f6445a5c7523954084e27dfb2ffd0c338aeeff6791d00b5#npm:5.4.8"]\
@@ -3276,6 +3277,75 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["turbo", [\
+      ["npm:2.1.3", {\
+        "packageLocation": "../../../.yarn/berry/cache/turbo-npm-2.1.3-7dc3fd9a0f-10c0.zip/node_modules/turbo/",\
+        "packageDependencies": [\
+          ["turbo", "npm:2.1.3"],\
+          ["turbo-darwin-64", "npm:2.1.3"],\
+          ["turbo-darwin-arm64", "npm:2.1.3"],\
+          ["turbo-linux-64", "npm:2.1.3"],\
+          ["turbo-linux-arm64", "npm:2.1.3"],\
+          ["turbo-windows-64", "npm:2.1.3"],\
+          ["turbo-windows-arm64", "npm:2.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["turbo-darwin-64", [\
+      ["npm:2.1.3", {\
+        "packageLocation": "./.yarn/unplugged/turbo-darwin-64-npm-2.1.3-c882829f1b/node_modules/turbo-darwin-64/",\
+        "packageDependencies": [\
+          ["turbo-darwin-64", "npm:2.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["turbo-darwin-arm64", [\
+      ["npm:2.1.3", {\
+        "packageLocation": "./.yarn/unplugged/turbo-darwin-arm64-npm-2.1.3-1fbd9d3174/node_modules/turbo-darwin-arm64/",\
+        "packageDependencies": [\
+          ["turbo-darwin-arm64", "npm:2.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["turbo-linux-64", [\
+      ["npm:2.1.3", {\
+        "packageLocation": "./.yarn/unplugged/turbo-linux-64-npm-2.1.3-91b91a9f73/node_modules/turbo-linux-64/",\
+        "packageDependencies": [\
+          ["turbo-linux-64", "npm:2.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["turbo-linux-arm64", [\
+      ["npm:2.1.3", {\
+        "packageLocation": "./.yarn/unplugged/turbo-linux-arm64-npm-2.1.3-3576df0e37/node_modules/turbo-linux-arm64/",\
+        "packageDependencies": [\
+          ["turbo-linux-arm64", "npm:2.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["turbo-windows-64", [\
+      ["npm:2.1.3", {\
+        "packageLocation": "./.yarn/unplugged/turbo-windows-64-npm-2.1.3-0ce6c28c56/node_modules/turbo-windows-64/",\
+        "packageDependencies": [\
+          ["turbo-windows-64", "npm:2.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["turbo-windows-arm64", [\
+      ["npm:2.1.3", {\
+        "packageLocation": "./.yarn/unplugged/turbo-windows-arm64-npm-2.1.3-df563f3f19/node_modules/turbo-windows-arm64/",\
+        "packageDependencies": [\
+          ["turbo-windows-arm64", "npm:2.1.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["type-check", [\
       ["npm:0.4.0", {\
         "packageLocation": "../../../.yarn/berry/cache/type-check-npm-0.4.0-60565800ce-10c0.zip/node_modules/type-check/",\
@@ -3515,6 +3585,7 @@ const RAW_RUNTIME_STATE =
           ["globals", "npm:15.11.0"],\
           ["react", "npm:18.3.1"],\
           ["react-dom", "virtual:f137ff3578b6791cfb4c30ce29217a79972eb78444b5cf96999706689b050e1e40bb7ce0f80ce13b5f6445a5c7523954084e27dfb2ffd0c338aeeff6791d00b5#npm:18.3.1"],\
+          ["turbo", "npm:2.1.3"],\
           ["typescript", "patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>::version=5.6.3&hash=8c6c40"],\
           ["typescript-eslint", "virtual:f137ff3578b6791cfb4c30ce29217a79972eb78444b5cf96999706689b050e1e40bb7ce0f80ce13b5f6445a5c7523954084e27dfb2ffd0c338aeeff6791d00b5#npm:8.8.1"],\
           ["vite", "virtual:f137ff3578b6791cfb4c30ce29217a79972eb78444b5cf96999706689b050e1e40bb7ce0f80ce13b5f6445a5c7523954084e27dfb2ffd0c338aeeff6791d00b5#npm:5.4.8"]\
