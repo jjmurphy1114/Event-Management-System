@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -7,16 +6,13 @@ import {
 } from "react-router-dom";
 import './App.css';
 import { database } from '../../backend/firebaseConfig';
-import EventsPage from '../routes/EventsPage';
-import HomePage from '../routes/HomePage';
+import EventsPage from './routes/EventsPage';
+import HomePage from './routes/HomePage';
 
 function Root() {
   const navigate = useNavigate();
   return (
-    <div>
-      {/* Add Outlet if you have nested routes */}
       <Outlet />
-    </div>
   );
 }
 
