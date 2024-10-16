@@ -1,0 +1,48 @@
+import { useState } from 'react';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
+import './App.css';
+import { database } from '../../backend/firebaseConfig';
+import EventsPage from '../routes/EventsPage';
+import HomePage from '../routes/HomePage';
+
+function Root() {
+  const navigate = useNavigate();
+  return (
+    <div>
+      {/* Add Outlet if you have nested routes */}
+      <Outlet />
+    </div>
+  );
+}
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    errorElement: <div>Error Page</div>,
+    element: <Root />,
+    children: [
+      // Define child routes here if needed
+      { 
+        path: "", 
+        element: <HomePage /> 
+      },
+      { 
+        path: "events", 
+        element: <EventsPage database={database} /> 
+      },
+    ],
+  },
+]);
+
+function App() {
+  return (
+    <RouterProvider router={router} />
+  );
+}
+
+export default App;
