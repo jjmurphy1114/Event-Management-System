@@ -2,31 +2,12 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { database } from './firebaseConfig'
+import EventsPage from '../apps/frontend/routes/EventsPage.tsx'
 
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getDatabase } from 'firebase/database';
 
 function App() {
   const [count, setCount] = useState(0)
-
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-      apiKey: "AIzaSyC5b_gVBSgn-WQqvniO1VU1Cze5ANsj-kc",
-      authDomain: "zm-parties-2.firebaseapp.com",
-      projectId: "zm-parties-2",
-      storageBucket: "zm-parties-2.appspot.com",
-      messagingSenderId: "115188668937",
-      appId: "1:115188668937:web:32c25b823d96726fe876d8",
-      measurementId: "G-P5R0BYBFNV",
-      databaseURL: "https://zm-parties-2-default-rtdb.firebaseio.com/"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const database = getDatabase(app);
 
   return (
     <>
@@ -38,7 +19,7 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>ZM PARTIES BITCH</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
@@ -50,6 +31,7 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
+      <EventsPage database={database} />
     </>
   )
 }
