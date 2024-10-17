@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ref, push, onValue, set, update, remove, Database } from "firebase/database";
 import Event from '../../../backend/Event'
-import { Route, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface EventsPageProps {
   database: Database;
@@ -97,11 +97,11 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
   return (
-    <div>
-      <button type="button" onClick={handleRedirect} className="px-4 py-2 mb-2 bg-indigo-500 text-white font-semibold rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200">
+    <div className='w-full min-h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100'>
+      <button type="button" onClick={handleRedirect} className="px-4 py-2 mb-2 mt-4 bg-indigo-500 text-white font-semibold rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200">
       Back to Home
     </button>
-    <div className="p-8 bg-gradient-to-b from-blue-50 to-gray-100 min-h-screen">
+    <div className="p-8 w-full bg-gradient-to-b from-blue-50 to-gray-100 min-h-screen">
       {/* Error message */}
       {error && <p className="text-red-500 font-medium mb-2">{error}</p>}
     
