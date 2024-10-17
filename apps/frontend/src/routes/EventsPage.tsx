@@ -13,6 +13,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const eventsRef = ref(database, 'events');
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [editError, setEditError] = useState('');
+  const [editingEventId, setEditingEventId] = useState<string | null>(null); // ID of event in edit mode
 
   const handleRedirect = () => {
     navigate('/');
@@ -34,7 +36,6 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   // Function to add an event to Firebase
   function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number) {
     const event = new Event(name, date, type, maxMales, maxFemales);
-    
     const newEventRef = push(eventsRef); // Creates a unique ID
     set(newEventRef, { ...event })
       .then(() => console.log("Event added to Firebase"))
@@ -63,9 +64,31 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
 
-  const editEvent = (id: string, updatedEvent: Event) => {
-    const eventRef = ref(database, `events/${id}`);
-    update(eventRef, updatedEvent);
+   // Handler for updating an existing event
+   const handleEditEvent = (id: string) => {
+    setEditingEventId(id);
+  };
+
+  const handleSaveEdit = (id: string) => {
+    const updatedEvent = events.find((event) => event.id === id);
+    if (updatedEvent) {
+      if (updatedEvent.name == ""){
+        setEditError("Name is required");
+      } else if (updatedEvent.date == ""){
+        setEditError("No date??");
+      } else if (updatedEvent.type == ""){
+        setEditError("Type is empty");
+      } else if (updatedEvent.maxMales <= 0){
+        setEditError("I'm ok with this but this was probably a mistake");
+      } else if (updatedEvent.maxFemales <= 0){
+        setEditError("WHY WOULD YOU REMOVE THEM BRUH");
+      } else {
+        setEditError('');
+        const eventRef = ref(database, `events/${id}`);
+        update(eventRef, updatedEvent);
+        setEditingEventId(null);
+      }
+    }
   };
 
   const deleteEvent = (id: string) => {
@@ -76,7 +99,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   return (
     <div>
       <button type="button" onClick={handleRedirect} className="px-4 py-2 mb-2 bg-indigo-500 text-white font-semibold rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200">
-      Back
+      Back to Home
     </button>
     <div className="p-8 bg-gradient-to-b from-blue-50 to-gray-100 min-h-screen">
       {/* Error message */}
@@ -150,17 +173,88 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => (
           <li key={event.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-200">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">{event.name}</h2>
-            <p className="text-gray-600 mb-1">Date: {event.date}</p>
-            <p className="text-gray-600 mb-1">Type: {event.type}</p>
-            <p className="text-gray-600 mb-1">Max Male Guests: {event.maxMales}</p>
-            <p className="text-gray-600 mb-1">Max Female Guests: {event.maxFemales}</p>
-            <button
-              onClick={() => deleteEvent(event.id)}
-              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-200"
-            >
-              Delete
-            </button>
+            {editingEventId === event.id ? (
+              <div>
+                {/* Error message */}
+                {editError && <p className="text-red-500 font-medium mb-2">{editError}</p>}
+              <div>
+                <label htmlFor="editName" className="block text-sm font-medium text-gray-700">Event Name</label>
+                <input
+                  id="editName"
+                  type="text"
+                  value={event.name}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, name: e.target.value } : ev)))}
+                  className="border p-2 w-full mb-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="editDate" className="block text-sm font-medium text-gray-700">Date</label>
+                <input
+                  id="editDate"
+                  type="date"
+                  value={event.date}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, date: e.target.value } : ev)))}
+                  className="border p-2 w-full mb-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="editType" className="block text-sm font-medium text-gray-700">Event Type</label>
+                <input
+                  id="editType"
+                  type="text"
+                  value={event.type}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, type: e.target.value } : ev)))}
+                  className="border p-2 w-full mb-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="editMales" className="block text-sm font-medium text-gray-700">Males Per Guest</label>
+                <input
+                  id="editMales"
+                  type="number"
+                  value={event.maxMales}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, maxMales: e.target.value } : ev)))}
+                  className="border p-2 w-full mb-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="editFemales" className="block text-sm font-medium text-gray-700">Females Per Guest</label>
+                <input
+                  id="editFemales"
+                  type="number"
+                  value={event.maxFemales}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, maxFemales: e.target.value } : ev)))}
+                  className="border p-2 w-full mb-2"
+                />
+              </div>
+                <button
+                  onClick={() => handleSaveEdit(event.id)}
+                  className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 mb-2">{event.name}</h2>
+                <p className="text-gray-600">Date: {event.date}</p>
+                <p className="text-gray-600">Type: {event.type}</p>
+                <p className="text-gray-600">Max Male Guests: {event.maxMales}</p>
+                <p className="text-gray-600">Max Female Guests: {event.maxFemales}</p>
+                <button
+                  onClick={() => handleEditEvent(event.id)}
+                  className="mt-4 mr-2 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteEvent(event.id)}
+                  className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
           </li>
         ))}
       </ul>
