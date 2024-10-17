@@ -21,8 +21,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen min-w-screen bg-gray-100 py-10 px-5 md:px-90">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen min-w-screen bg-gradient-to-b from-blue-50 to-gray-100 py-10 px-5 md:px-80">
+      <div className="w-full mx-auto">
         <h1 className="text-4xl font-bold text-center text-indigo-600 mb-10">ZM PARTIES</h1>
         
         <div className="bg-white shadow-md rounded-lg p-6">
