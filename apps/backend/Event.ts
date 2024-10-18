@@ -9,6 +9,7 @@ export default class SocialEvent {
     femaleGuestList: string[] = [];
     maleWaitList: string[] = [];
     femaleWaitList: string[] = [];
+    open: boolean = false;
   
     constructor(
       name: string,
@@ -16,12 +17,14 @@ export default class SocialEvent {
       type: string,
       maxMaleGuestsPerPerson: number,
       maxFemaleGuestsPerPerson: number,
+      open: boolean
     ) {
       this.name = name;
       this.date = date;
       this.type = type;
       this.maxMales = maxMaleGuestsPerPerson;
       this.maxFemales = maxFemaleGuestsPerPerson;
+      this.open = open;
     }
   
     addMaleGuest(guestName: string): void {

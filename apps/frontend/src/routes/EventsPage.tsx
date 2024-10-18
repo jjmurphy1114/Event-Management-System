@@ -9,7 +9,7 @@ interface EventsPageProps {
 
 const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [newEvent, setNewEvent] = useState({ name: '', date: '', type: '' , maxMales: 0, maxFemales: 0});
+  const [newEvent, setNewEvent] = useState({ name: '', date: '', type: '' , maxMales: 0, maxFemales: 0, open: true});
   const eventsRef = ref(database, 'events');
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -34,8 +34,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
  
   // Function to add an event to Firebase
-  function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number) {
-    const event = new Event(name, date, type, maxMales, maxFemales);
+  function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number, open: boolean) {
+    const event = new Event(name, date, type, maxMales, maxFemales, open);
     const newEventRef = push(eventsRef); // Creates a unique ID
     set(newEventRef, { ...event })
       .then(() => console.log("Event added to Firebase"))
@@ -44,7 +44,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
   // Handler for form submission
   const handleAddEvent = () => {
-    const { name, date, type, maxMales, maxFemales } = newEvent;
+    const { name, date, type, maxMales, maxFemales, open } = newEvent;
     // Make sure none of the fields are empty
     if (name == ""){
       setError("Name is required");
@@ -58,8 +58,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       setError("Sausage party!! Fix this asap");
     } else {
       setError("");
-      addEventToDatabase(name, date, type, parseInt(maxMales), parseInt(maxFemales));
-      setNewEvent({ name: '', date: '', type: '', maxMales: 0, maxFemales: 0 }); // Clear form
+      addEventToDatabase(name, date, type, parseInt(maxMales), parseInt(maxFemales), open);
+      setNewEvent({ name: '', date: '', type: '', maxMales: 0, maxFemales: 0, open: true}); // Clear form
     }
   };
 
@@ -94,6 +94,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const deleteEvent = (id: string) => {
     const eventRef = ref(database, `events/${id}`);
     remove(eventRef);
+  };
+
+   // Handle switch toggle for open/close event
+   const toggleEventOpen = (id: string, currentStatus: boolean) => {
+    const eventRef = ref(database, `events/${id}`);
+    update(eventRef, { open: !currentStatus })
+      .then(() => console.log("Event open status updated"))
+      .catch((error) => console.error("Error updating event:", error));
   };
 
   return (
@@ -158,6 +166,17 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               value={newEvent.maxFemales}
               onChange={(e) => setNewEvent({ ...newEvent, maxFemales: e.target.value })}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <div>
+            <label htmlFor="open" className="block text-sm font-medium text-gray-700">Open List?</label>
+            <input
+              id="open"
+              type="checkbox"
+              checked={newEvent.open}
+              onChange={(e) => setNewEvent({ ...newEvent, open: e.target.checked })}
+              className="border border-gray-300 rounded-md px-4 py-2 mt-2 focus:outline-none"
+              style={{ transform: 'scale(2)'}}
             />
           </div>
             <button
@@ -241,6 +260,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 <p className="text-gray-600">Type: {event.type}</p>
                 <p className="text-gray-600">Max Male Guests: {event.maxMales}</p>
                 <p className="text-gray-600">Max Female Guests: {event.maxFemales}</p>
+                {/* Toggle Switch for Open/Closed */}
+                <p className="text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={event.open}
+                      onChange={() => toggleEventOpen(event.id, event.open)}
+                      className="mr-2"
+                    />
+                    {event.open ? "List Open" : "List Closed"}
+                  </p>
                 <button
                   onClick={() => handleEditEvent(event.id)}
                   className="mt-4 mr-2 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600"
