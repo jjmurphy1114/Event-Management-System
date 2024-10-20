@@ -105,13 +105,13 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
   return (
-    <div className='w-full min-h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100'>
+    <div className='w-screen h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100'>
       <button type="button" onClick={handleRedirect} className="px-4 py-2 mb-2 mt-4 bg-indigo-500 text-white font-semibold rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200">
       Back to Home
     </button>
-    <div className="p-8 w-full bg-gradient-to-b from-blue-50 to-gray-100 min-h-screen">
+    <div className="p-8 w-full bg-gradient-to-b items-center justify-center from-blue-50 to-gray-100 min-h-screen">
       {/* Error message */}
-      {error && <p className="text-red-500 font-medium mb-2">{error}</p>}
+      {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
     
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Manage Events</h1>
       {/* Event Input Form */}
@@ -149,7 +149,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
             />
           </div>
           <div>
-            <label htmlFor="males" className="block text-sm font-medium text-gray-700">Male Invites Per Guest</label>
+            <label htmlFor="males" className="block text-sm font-medium text-gray-700">Male Invites Per Brother</label>
             <input
               id="males"
               type="number"
@@ -159,7 +159,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
             />
           </div>
           <div>
-            <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per guest</label>
+            <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per Brother</label>
             <input
               id="females"
               type="number"

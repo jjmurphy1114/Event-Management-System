@@ -8,6 +8,7 @@ import './App.css';
 import { database } from '../../backend/firebaseConfig';
 import EventsPage from './routes/EventsPage';
 import HomePage from './routes/HomePage';
+import LoginPage from "./routes/LoginPage";
 
 function Root() {
   const navigate = useNavigate();
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
         path: "events", 
         element: <EventsPage database={database} /> 
       },
+      {
+        path: "login",
+        element: <LoginPage/>
+      }
     ],
   },
 ]);
