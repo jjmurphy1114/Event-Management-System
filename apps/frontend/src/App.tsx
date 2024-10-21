@@ -9,11 +9,13 @@ import { database } from '../../backend/firebaseConfig';
 import EventsPage from './routes/EventsPage';
 import HomePage from './routes/HomePage';
 import LoginPage from "./routes/LoginPage";
+import SignUpPage from "./routes/SignUpPage";
+import WaitingApproval from "./routes/WaitingApproval";
 
 function Root() {
   const navigate = useNavigate();
   return (
-      <Outlet />
+      <Outlet/>
   );
 }
 
@@ -35,7 +37,16 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <LoginPage/>
+      },
+      {
+        path: "/signup",
+        element: <SignUpPage/>
+      },
+      {
+        path: "/waiting-approval",
+        element: <WaitingApproval/>
       }
+
     ],
   },
 ]);
