@@ -11,6 +11,7 @@ import HomePage from './routes/HomePage';
 import LoginPage from "./routes/LoginPage";
 import SignUpPage from "./routes/SignUpPage";
 import WaitingApproval from "./routes/WaitingApproval";
+import SocialSettings from "./routes/SocialSettings";
 
 function Root() {
   const navigate = useNavigate();
@@ -45,7 +46,11 @@ const router = createBrowserRouter([
       {
         path: "/waiting-approval",
         element: <WaitingApproval/>
-      }
+      },
+      {
+        path: "/social-settings",
+        element: <SocialSettings/>
+      },
 
     ],
   },

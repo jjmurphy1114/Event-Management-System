@@ -46,7 +46,7 @@ export default function SignUpPage() {
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-gradient-to-b from-blue-100 to-gray-200">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-sm">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Sign Up</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
@@ -87,12 +87,21 @@ export default function SignUpPage() {
             placeholder="Enter your password"
           />
         </div>
-        <button
-          onClick={handleSignUp}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Sign Up
-        </button>
+        <div className='flex items-center justify-between'>
+            <button
+            onClick={handleSignUp}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+            Sign Up
+            </button>
+            <button
+            onClick={() => {navigate('/login')}}
+            className="bg-indigo-500 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+            Back
+            </button>
+        </div>
+       
       </div>
     </div>
   );
