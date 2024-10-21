@@ -3,6 +3,7 @@ import { ref, onValue, update, remove } from 'firebase/database';
 import { database } from '../../../backend/firebaseConfig'; // Firebase config
 import User from '../../../backend/User';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function SocialSettings() {
   const [users, setUsers] = useState<User[]>([]);
@@ -24,11 +25,17 @@ export default function SocialSettings() {
     update(userRef, { approved: true });
   };
 
-  // Delete user from DB
-  const deleteUser = (userId: string) => {
-    const userRef = ref(database, `users/${userId}`);
-    remove(userRef);
-  }
+  const deleteUser = async (id: string) => {
+    try {
+        // Call the server-side API to delete the user
+        await axios.delete(`/api/delete-user/${id}`);
+        console.log("Successfully deleted user");
+        // Also remove the user from the client-side state
+        remove(ref(database, `users/${id}`))
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+  };
 
   // Change the status (Default, Social, Admin) for a user
   const changeStatus = (userId: string, newStatus: string) => {
