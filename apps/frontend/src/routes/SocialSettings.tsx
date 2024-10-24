@@ -58,7 +58,7 @@ export default function SocialSettings() {
     </button>
       <div className="container mx-auto bg-white p-6 shadow-md rounded-lg">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-700">Manage Users</h1>
-        <table className="min-w-full bg-white text-gray-700 items-center">
+        <table className="min-w-full bg-white text-gray-700 items-center text-center">
           <thead>
             <tr>
               <th className="py-2">Email</th>
@@ -71,8 +71,8 @@ export default function SocialSettings() {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td className="border px-4 py-2">{user.email}</td>
-                <td className="border px-4 py-2">
+                <td className="border px-4 py-2 items-center text-center">{user.email}</td>
+                <td className="border px-4 py-2 items-center text-center">
                   <select
                     value={user.status}
                     onChange={(e) => changeStatus(user.id, e.target.value)}
@@ -83,7 +83,7 @@ export default function SocialSettings() {
                     <option value="Admin">Admin</option>
                   </select>
                 </td>
-                <td className="border px-4 py-2">
+                <td className="border px-4 py-2 items-center text-center">
                   {user.approved ? (
                     <span className="text-green-500 font-bold">Approved</span>
                   ) : (
@@ -95,7 +95,7 @@ export default function SocialSettings() {
                     </button>
                   )}
                 </td>
-                <td className='border px-4 py-2'>
+                <td className='border px-4 py-2 items-center text-center'>
                     <input type='checkbox' 
                            checked={user.priviliges} 
                            onChange={(e) => changeSocialPriviliges(user.id, e.target.checked)}
@@ -103,7 +103,7 @@ export default function SocialSettings() {
                            style={{ transform: 'scale(2)'}}
                            />
                 </td>
-                <td className='border px-4 py-2'>
+                <td className='border px-4 py-2 items-center text-center'>
                     <button
                         onClick={() => deleteUser(user.id)}
                         className='bg-red-700 hover:bg-red-700 rounded-md px-4 py-2 mt-2 focus:outline-none text-white'
