@@ -27,14 +27,12 @@ export default function SocialSettings() {
 
   const deleteUser = async (id: string) => {
     try {
-        // Call the server-side API to delete the user
-        await axios.delete(`/api/delete-user/${id}`);
-        console.log("Successfully deleted user");
-        // Also remove the user from the client-side state
-        remove(ref(database, `users/${id}`))
-      } catch (error) {
-        console.error("Error deleting user:", error);
-      }
+      remove(ref(database, `users/${id}`)); // Remove from Realtime Database
+      const response = await axios.delete(`http://localhost:5000/api/delete-user/${id}`);
+      console.log("Successfully deleted user:", response.data);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
   };
 
   // Change the status (Default, Social, Admin) for a user
