@@ -1,4 +1,4 @@
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 const auth = getAuth();
 
@@ -19,4 +19,8 @@ signOut(auth).then(() => {
     const errorCode = error.code;
     const errorMessage = error.message;
     
+});
+
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error("Failed to set persistence:", error);
 });
