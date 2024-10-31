@@ -28,6 +28,8 @@ export default function SignUpPage() {
             email: user.email,
             displayName: name, // Store display name in the database
             status: 'pending', // Set status to pending for approval
+            approved: false,
+            privileges: false
           });
 
           console.log('Sign-up successful with display name:', user.displayName);

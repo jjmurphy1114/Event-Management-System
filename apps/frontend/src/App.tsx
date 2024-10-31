@@ -3,6 +3,7 @@ import {
   RouterProvider,
   Outlet,
   useNavigate,
+  useLocation
 } from "react-router-dom";
 import './App.css';
 import { useEffect, useState } from "react";
@@ -111,22 +112,24 @@ function RoleProtectedRoute({ element, allowedStatuses }: { element: React.React
 
 
 function Root() {
-  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Define routes where the Banner should not be shown
+  const hideBannerRoutes = ["/login", "/signup", "/waiting-approval",];
+  const showBanner = !hideBannerRoutes.includes(location.pathname);
+
   return (
-      <Outlet/>
+    <>
+      {showBanner && <Banner />}
+      <Outlet />
+    </>
   );
 }
-
 const router = createBrowserRouter([
   {
     path: "/",
     errorElement: <div>Error Page</div>,
-    element: (
-      <>
-        <Banner/>
-        <Root />
-      </>
-        ),
+    element: <Root />,
     children: [
       // Define child routes here if needed
       { 

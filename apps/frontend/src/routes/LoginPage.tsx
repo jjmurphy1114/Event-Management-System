@@ -15,7 +15,7 @@ export default function LoginPage() {
         const user = userCredential.user;
         console.log('Signed in:', user);
         setError('');
-        navigate('/events'); // Navigate to events page upon successful login
+        navigate('/'); 
       })
       .catch((error) => {
         const errorCode = error.code;

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ref, onValue, update, remove } from 'firebase/database';
+import { ref, onValue, update, remove, get } from 'firebase/database';
 import { database } from '../../../backend/firebaseConfig'; // Firebase config
 import User from '../../../backend/User';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 
 export default function SocialSettings() {
   const [users, setUsers] = useState<User[]>([]);
@@ -26,25 +27,69 @@ export default function SocialSettings() {
   };
 
   const deleteUser = async (id: string) => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    
+    // Prevent the current user from deleting themselves
+    if (currentUser && currentUser.uid === id) {
+      console.error("Error: You cannot delete your own account.");
+      alert("Error: You cannot delete your own account.");
+      return;
+    }
+  
     try {
-      remove(ref(database, `users/${id}`)); // Remove from Realtime Database
+      // Check if there is more than 1 user in the database
+      const usersRef = ref(database, `users`);
+      const usersSnapshot = await get(usersRef);
+  
+      if (usersSnapshot.exists()) {
+        const users = usersSnapshot.val();
+        const userCount = Object.keys(users).length;
+  
+        if (userCount <= 1) {
+          console.error("Cannot remove user, only 1 user in database");
+          alert("Cannot remove user, only 1 user in database");
+          return;
+        }
+      }
+  
+      // Proceed with deletion if conditions are met
+      await remove(ref(database, `users/${id}`)); // Remove from Realtime Database
       const response = await axios.delete(`http://localhost:5000/api/delete-user/${id}`);
       console.log("Successfully deleted user:", response.data);
+  
     } catch (error) {
       console.error("Error deleting user:", error);
     }
   };
 
   // Change the status (Default, Social, Admin) for a user
-  const changeStatus = (userId: string, newStatus: string) => {
-    const userRef = ref(database, `users/${userId}`);
-    update(userRef, { status: newStatus });
-  };
+const changeStatus = async (userId: string, newStatus: string) => {
+  const userRef = ref(database, `users/${userId}`);
+  const userSnapshot = await get(userRef);
+  const user = userSnapshot.val();
 
-  const changeSocialPriviliges = (userId: string, newPriviliges: boolean) => {
-    const userRef = ref(database, `users/${userId}`);
-    update(userRef, { priviliges: newPriviliges });
+  // Only update if approved is true
+  if (user && user.approved === true) {
+    update(userRef, { status: newStatus });
+  } else {
+    console.error("User must be approved to change status.");
   }
+};
+
+// Change social privileges for a user
+const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) => {
+  const userRef = ref(database, `users/${userId}`);
+  const userSnapshot = await get(userRef);
+  const user = userSnapshot.val();
+
+  // Only update if approved is true
+  if (user && user.approved === true) {
+    update(userRef, { privileges: newPrivileges });
+  } else {
+    console.error("User must be approved to change privileges.");
+  }
+};
 
   const handleRedirect = () => {
     navigate('/');
@@ -98,7 +143,7 @@ export default function SocialSettings() {
                 <td className='border px-4 py-2 items-center text-center'>
                     <input type='checkbox' 
                            checked={user.priviliges} 
-                           onChange={(e) => changeSocialPriviliges(user.id, e.target.checked)}
+                           onChange={(e) => changeSocialPrivileges(user.id, e.target.checked)}
                            className="border border-gray-300 rounded-md px-4 py-2 mt-2 focus:outline-none"
                            style={{ transform: 'scale(2)'}}
                            />

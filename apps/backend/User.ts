@@ -3,19 +3,19 @@ export default class User {
     email: string;
     approved: boolean;
     status: string
-    priviliges: boolean
+    privileges: boolean
 
     constructor(
         name: string,
         email: string,
         approved: boolean,
         status: string,
-        priviliges: boolean
+        privileges: boolean
     ) {
         this.name = name;
         this.email = email;
         this.approved = approved;
         this.status = status;
-        this.priviliges = priviliges;
+        this.privileges = privileges;
     }
 }
