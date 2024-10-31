@@ -142,7 +142,7 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
                 </td>
                 <td className='border px-4 py-2 items-center text-center'>
                     <input type='checkbox' 
-                           checked={user.priviliges} 
+                           checked={user.privileges} 
                            onChange={(e) => changeSocialPrivileges(user.id, e.target.checked)}
                            className="border border-gray-300 rounded-md px-4 py-2 mt-2 focus:outline-none"
                            style={{ transform: 'scale(2)'}}

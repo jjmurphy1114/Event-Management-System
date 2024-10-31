@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
+import { ref, get, child } from "firebase/database";
+import { database } from '../../../backend/firebaseConfig';
 
 export default function LoginPage() { 
   const [email, setEmail] = useState<string>('');
@@ -11,11 +13,21 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         const user = userCredential.user;
         console.log('Signed in:', user);
         setError('');
-        navigate('/'); 
+
+       // Check if the user is approved
+      const userRef = ref(database, `users/${user.uid}`);
+      const approvedSnapshot = await get(child(userRef, "approved"));
+      const isApproved = approvedSnapshot.exists() ? approvedSnapshot.val() : false;
+
+      if (isApproved) {
+        navigate('/'); // Navigate to home if approved
+      } else {
+        navigate('/waiting-approval'); // Redirect to approval page if not approved
+      }
       })
       .catch((error) => {
         const errorCode = error.code;

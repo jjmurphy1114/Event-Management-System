@@ -29,63 +29,67 @@ setPersistence(auth, browserLocalPersistence).catch((error) => {
 const useUserStatus = () => {
   const [user, setUser] = useState<any>(null);
   const [status, setStatus] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [approved, setApproved] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         const userRef = ref(database, `users/${currentUser.uid}`);
-        get(child(userRef, "status")).then((snapshot) => {
+        get(userRef).then((snapshot) => {
           if (snapshot.exists()) {
-            setStatus(snapshot.val());
+            const userData = snapshot.val();
+            setStatus(userData.status || "Default");
+            setApproved(userData.approved || false);
           }
           setLoading(false);
         });
       } else {
         setUser(null);
         setStatus(null);
+        setApproved(null);
         setLoading(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
-  return { user, status, loading };
+  return { user, status, approved, loading };
 };
 
 const useRequireApproval = () => {
-  const { user, loading } = useUserStatus();
+  const { user, approved, loading } = useUserStatus();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
         navigate("/login");
-      } else if (user.status == "pending") {
+      } else if (approved === false) {
         navigate("/waiting-approval");
       }
     }
-  }, [user, navigate, loading]);
+  }, [user, approved, navigate, loading]);
 
   return { user, loading };
 };
 
 const useRequireStatus = (allowedStatuses: string[]) => {
-  const { user, status, loading } = useUserStatus();
+  const { user, status, approved, loading } = useUserStatus();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
         navigate("/login");
-      } else if (user.status == "pending") {
+      } else if (approved === false) {
         navigate("/waiting-approval");
       } else if (!allowedStatuses.includes(status ?? "Default")) {
         navigate("/");
       }
     }
-  }, [user, status, allowedStatuses, navigate, loading]);
+  }, [user, status, approved, allowedStatuses, navigate, loading]);
 
   return { user, status, loading };
 };
