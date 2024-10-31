@@ -16,6 +16,7 @@ import SignUpPage from "./routes/SignUpPage";
 import WaitingApproval from "./routes/WaitingApproval";
 import SocialSettings from "./routes/SocialSettings";
 import User from "../../backend/User";
+import Banner from "./elements/Banner";
 
 
 const auth = getAuth();
@@ -120,7 +121,12 @@ const router = createBrowserRouter([
   {
     path: "/",
     errorElement: <div>Error Page</div>,
-    element: <Root />,
+    element: (
+      <>
+        <Banner/>
+        <Root />
+      </>
+        ),
     children: [
       // Define child routes here if needed
       { 
