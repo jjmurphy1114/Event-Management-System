@@ -1,14 +1,29 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { useState, useEffect } from "react";
 
 function Banner() {
   const auth = getAuth();
-  const user = auth.currentUser;
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true); // Loading state for auth
+
+  useEffect(() => {
+    // Track auth state changes to ensure user info is loaded on first render
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false); // Stop loading once auth state is determined
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
   const handleSignOut = () => {
     signOut(auth).catch((error) => console.error("Error signing out:", error));
   };
+
+  if (loading) {
+    return <div className="bg-gray-800 fixed top-0 left-0 right-0 h-16 shadow-md z-50"></div>;
+  }
 
   return (
     <nav className="bg-gray-800 fixed top-0 left-0 right-0 shadow-md z-50 h-16 mb-10">
