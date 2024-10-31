@@ -21,16 +21,16 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen min-w-screen bg-gradient-to-b from-blue-50 to-gray-100 py-10 px-5 md:px-80">
+    <div className="h-screen w-screen bg-gradient-to-b flex justify-center items-top from-blue-50 to-gray-100 py-10 px-5 md:px-80 pt-20">
       <div className="w-full mx-auto">
         <h1 className="text-4xl font-bold text-center text-indigo-600 mb-10">ZM PARTIES</h1>
         
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="bg-white shadow-md item-center rounded-lg p-6">
           {events.length > 0 ? (
             <ul className="space-y-4">
               {events.map((event) => (
                 <li key={event.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                  <Link to={`/events/${event.id}`} className="text-lg font-semibold text-indigo-500 hover:underline">
+                  <Link to={`/events/${event.id}`} className="text-lg items-center text-center font-semibold text-indigo-500 hover:underline">
                     {event.name}
                   </Link>
                 </li>
