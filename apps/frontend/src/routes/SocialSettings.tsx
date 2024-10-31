@@ -97,10 +97,7 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
 
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-b from-blue-50 to-gray-100 p-10">
-    <button type="button" onClick={handleRedirect} className="px-4 py-2 mb-2 mt-4 bg-indigo-500 text-white font-semibold rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200">
-      Back to Home
-    </button>
+    <div className="h-screen w-screen bg-gradient-to-b from-blue-50 to-gray-100 p-10 pt-20">
       <div className="container mx-auto bg-white p-6 shadow-md rounded-lg">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-700">Manage Users</h1>
         <table className="min-w-full bg-white text-gray-700 items-center text-center">
