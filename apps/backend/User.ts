@@ -1,18 +1,18 @@
 export default class User {
-    name: string;
+    displayName: string;
     email: string;
     approved: boolean;
     status: string
     privileges: boolean
 
     constructor(
-        name: string,
+        displayName: string,
         email: string,
         approved: boolean,
         status: string,
         privileges: boolean
     ) {
-        this.name = name;
+        this.displayName = displayName;
         this.email = email;
         this.approved = approved;
         this.status = status;

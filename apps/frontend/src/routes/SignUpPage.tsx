@@ -3,10 +3,12 @@ import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase
 import { ref, set } from 'firebase/database'; // Or use Firestore for more flexibility
 import { database } from '../../../backend/firebaseConfig'; // Your Firebase config
 import { useNavigate } from 'react-router-dom';
+import User from '../../../backend/User';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [newUser, setNewUser] = useState<User>({displayName: '', email: '', approved: false, status: 'Default', privileges: false});
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
   const auth = getAuth();
@@ -24,13 +26,7 @@ export default function SignUpPage() {
         .then(() => {
           // Save user info in the database, including the display name
           const userRef = ref(database, `users/${user.uid}`);
-          set(userRef, {
-            email: user.email,
-            displayName: name, // Store display name in the database
-            status: 'pending', // Set status to pending for approval
-            approved: false,
-            privileges: false
-          });
+          set(userRef, {...newUser});
 
           console.log('Sign-up successful with display name:', user.displayName);
           setError('');
@@ -45,6 +41,16 @@ export default function SignUpPage() {
       });
   };
 
+  const handleNameInput = (name: string) => {
+    setName(name);
+    setNewUser({...newUser, displayName: name});
+  }
+
+  const handleEmailInput = (email: string) => {
+    setEmail(email);
+    setNewUser({...newUser, email: email});
+  }
+
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-gradient-to-b from-blue-100 to-gray-200">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-sm">
@@ -58,7 +64,7 @@ export default function SignUpPage() {
             id="naem"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => handleNameInput(e.target.value)}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Enter your name"
           />
@@ -71,7 +77,7 @@ export default function SignUpPage() {
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleEmailInput(e.target.value)}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Enter your email"
           />
