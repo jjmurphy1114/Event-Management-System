@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
+import bannerImage from '../assets/ZM Parties.png';
 
 function Banner() {
   const auth = getAuth();
@@ -31,7 +32,7 @@ function Banner() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-          <img src="./apps/frontend/src/assets/ZM Parties.png" className="w-10 h-10 mr-3"/>
+          <img src={bannerImage} className="w-10 h-10 mr-3"/>
             <Link to="/" className="text-white text-2xl font-bold">
               ZM PARTIES
             </Link>

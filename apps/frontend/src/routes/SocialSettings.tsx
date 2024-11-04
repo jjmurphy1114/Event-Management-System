@@ -55,8 +55,8 @@ export default function SocialSettings() {
   
       // Proceed with deletion if conditions are met
       await remove(ref(database, `users/${id}`)); // Remove from Realtime Database
-      const response = await axios.delete(`http://localhost:5000/api/delete-user/${id}`);
-      console.log("Successfully deleted user:", response.data);
+      await axios.delete(`http://localhost:5000/api/delete-user/${id}`);
+      console.log("Successfully deleted user");
   
     } catch (error) {
       console.error("Error deleting user:", error);

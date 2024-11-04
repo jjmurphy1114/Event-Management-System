@@ -20,5 +20,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["apps/frontend/src", "apps/backend/firebaseConfig.ts"]
+  "include": ["apps/frontend/src", "apps/backend/firebaseConfig.ts", "apps/backend/server.ts"]
 }
