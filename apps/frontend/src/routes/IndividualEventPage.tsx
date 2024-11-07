@@ -7,17 +7,13 @@ import Guest from "../../../backend/Guest";
 import { getAuth } from "firebase/auth";
 
 const IndividualEventPage = () => {
-  // Get the event ID from the URL parameters
+  
   const { id } = useParams<{ id: string }>();
-  // State to store the event details
   const [event, setEvent] = useState<Event | null>(null);
-  // State to store the name of the male guest being added
   const [maleGuestName, setMaleGuestName] = useState("");
-  // State to store the name of the female guest being added
   const [femaleGuestName, setFemaleGuestName] = useState("");
-  // State to store error messages
   const [error, setError] = useState("");
-  // Get the current authenticated user
+  const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -147,6 +143,35 @@ const IndividualEventPage = () => {
     }
   };
 
+  // Function to get a user's name from their ID
+  const getNameFromID = async (userID: string) => {
+    try {
+      // Reference to the user's data in Firebase
+      const userRef = ref(database, `users/${userID}`);
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        return snapshot.val().name; // Return the user's name if it exists
+      } else {
+        console.error("No user found with ID: ", userID); // Log an error if no user is found
+        return "Unknown User";
+      }
+    } catch (error) {
+      console.error("Error fetching user name: ", error); // Log an error if fetching fails
+      return "Unknown User";
+    }
+  };
+
+  // Function to get and cache the user's name to avoid multiple fetches
+  const fetchUserName = async (userID: string) => {
+    if (userNames[userID]) {
+      return userNames[userID]; // Return cached name if available
+    } else {
+      const name = await getNameFromID(userID);
+      setUserNames(prevNames => ({ ...prevNames, [userID]: name })); // Cache the name
+      return name;
+    }
+  }
+
   if (!event) {
     return <div>Loading event details...</div>; // Display loading message if event details are not yet available
   }
@@ -157,15 +182,16 @@ const IndividualEventPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 flex space-x-8">
+      <h1 h1 className="text-4xl font-bold text-center text-gray-800 mb-10 w-100">DIDDY PARTY</h1>
       {/* Male Guests Section */}
       <div className="flex-1">
-        <h2 className="text-3xl font-bold mb-4 text-center">Male Guests</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center text-black">Male Guests</h2>
         <div className="mb-8 space-y-4">
           {maleGuests.length > 0 ? (
             maleGuests.map((guest, index) => (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md">
                 <p className="text-lg font-semibold">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added by: {guest.addedBy}</p>
+                <p className="text-sm text-gray-700">Added by: {userNames[guest.addedBy] || "Loading..."}</p>
               </div>
             ))
           ) : (
@@ -194,13 +220,13 @@ const IndividualEventPage = () => {
 
       {/* Female Guests Section */}
       <div className="flex-1">
-        <h2 className="text-3xl font-bold mb-4 text-center">Female Guests</h2>
+        <h2 className="text-3xl font-bold mb-4 text-center text-black">Female Guests</h2>
         <div className="mb-8 space-y-4">
           {femaleGuests.length > 0 ? (
             femaleGuests.map((guest, index) => (
               <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md">
                 <p className="text-lg font-semibold">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added by: {guest.addedBy}</p>
+                <p className="text-sm text-gray-700">Added by: {userNames[guest.addedBy] || "Loading..."}</p>
               </div>
             ))
           ) : (
