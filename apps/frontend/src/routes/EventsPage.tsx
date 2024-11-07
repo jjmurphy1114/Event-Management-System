@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ref, push, onValue, set, update, remove, Database } from "firebase/database";
 import Event from '../../../backend/Event'
+import Guest from '../../../backend/Guest';
 import { useNavigate } from 'react-router-dom';
 
 interface EventsPageProps {
@@ -9,7 +10,19 @@ interface EventsPageProps {
 
 const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [newEvent, setNewEvent] = useState({ name: '', date: '', type: '' , maxMales: 0, maxFemales: 0, open: true});
+  const [newEvent, setNewEvent] = useState({
+    name: '',
+    date: '',
+    type: '',
+    maxMales: 0,
+    maxFemales: 0,
+    maxGuests: 0,
+    open: true,
+    maleGuestList: [] as Guest[],
+    femaleGuestList: [] as Guest[],
+    maleWaitList: [] as Guest[],
+    femaleWaitList: [] as Guest[],
+  });
   const eventsRef = ref(database, 'events');
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -34,17 +47,29 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
  
   // Function to add an event to Firebase
-  function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number, open: boolean) {
-    const event = new Event(name, date, type, maxMales, maxFemales, open);
+  function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number, maxGuests: number, open: boolean) {
+    const event = new Event(name, date, type, maxMales, maxFemales, maxGuests, open);
     const newEventRef = push(eventsRef); // Creates a unique ID
-    set(newEventRef, { ...event })
+    set(newEventRef, {
+      name: event.name,
+      date: event.date,
+      type: event.type,
+      maxMales: event.maxMales,
+      maxFemales: event.maxFemales,
+      maxGuests: event.maxGuests,
+      open: event.open,
+      maleGuestList: event.maleGuestList,
+      femaleGuestList: event.femaleGuestList,
+      maleWaitList: event.maleWaitList,
+      femaleWaitList: event.femaleWaitList,
+    })
       .then(() => console.log("Event added to Firebase"))
       .catch((error) => console.error("Error adding event:", error));
   }
 
   // Handler for form submission
   const handleAddEvent = () => {
-    const { name, date, type, maxMales, maxFemales, open } = newEvent;
+    const { name, date, type, maxMales, maxFemales, maxGuests, open } = newEvent;
     // Make sure none of the fields are empty
     if (name == ""){
       setError("Name is required");
@@ -56,10 +81,12 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       setError("I'm ok with this but this was probably a mistake");
     } else if (maxFemales <= 0){
       setError("Sausage party!! Fix this asap");
+    } else if (maxGuests <= 0){
+      setError("Can't have a party without guests");
     } else {
       setError("");
-      addEventToDatabase(name, date, type, parseInt(maxMales), parseInt(maxFemales), open);
-      setNewEvent({ name: '', date: '', type: '', maxMales: 0, maxFemales: 0, open: true}); // Clear form
+      addEventToDatabase(name, date, type, parseInt(maxMales), parseInt(maxFemales), parseInt(maxGuests), open);
+      setNewEvent({ name: '', date: '', type: '', maxMales: 0, maxFemales: 0, maxGuests: 0, open: true, maleGuestList: [], femaleGuestList: [], maleWaitList: [], femaleWaitList: [] }); // Clear form
     }
   };
 
@@ -82,10 +109,24 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
         setEditError("I'm ok with this but this was probably a mistake");
       } else if (updatedEvent.maxFemales <= 0){
         setEditError("WHY WOULD YOU REMOVE THEM BRUH");
+      }  else if (updatedEvent.maxGuests <= 0){
+        setError("Can't have a party without guests");
       } else {
         setEditError('');
         const eventRef = ref(database, `events/${id}`);
-        update(eventRef, updatedEvent);
+        update(eventRef, {
+          name: updatedEvent.name,
+          date: updatedEvent.date,
+          type: updatedEvent.type,
+          maxMales: updatedEvent.maxMales,
+          maxFemales: updatedEvent.maxFemales,
+          maxGuests: updatedEvent.maxGuests,
+          open: updatedEvent.open,
+          maleGuestList: updatedEvent.maleGuestList ?? [],
+          femaleGuestList: updatedEvent.femaleGuestList ?? [],
+          maleWaitList: updatedEvent.maleWaitList ?? [],
+          femaleWaitList: updatedEvent.femaleWaitList ?? [],
+        });
         setEditingEventId(null);
       }
     }
@@ -169,6 +210,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
             />
           </div>
           <div>
+            <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
+            <input
+              id="maxGuests"
+              type="number"
+              value={newEvent.maxGuests}
+              onChange={(e) => setNewEvent({ ...newEvent, maxGuests: e.target.value })}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <div>
             <label htmlFor="open" className="block text-sm font-medium text-gray-700">Open List?</label>
             <input
               id="open"
@@ -227,7 +278,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 />
               </div>
               <div>
-                <label htmlFor="editMales" className="block text-sm font-medium text-gray-700">Males Per Guest</label>
+                <label htmlFor="editMales" className="block text-sm font-medium text-gray-700">Males Per Brother</label>
                 <input
                   id="editMales"
                   type="number"
@@ -237,12 +288,22 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 />
               </div>
               <div>
-                <label htmlFor="editFemales" className="block text-sm font-medium text-gray-700">Females Per Guest</label>
+                <label htmlFor="editFemales" className="block text-sm font-medium text-gray-700">Females Per Brother</label>
                 <input
                   id="editFemales"
                   type="number"
                   value={event.maxFemales}
                   onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, maxFemales: e.target.value } : ev)))}
+                  className="border p-2 w-full mb-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="editMaxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
+                <input
+                  id="editMaxGuests"
+                  type="number"
+                  value={event.maxGuests}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, maxGuests: e.target.value } : ev)))}
                   className="border p-2 w-full mb-2"
                 />
               </div>
@@ -258,8 +319,9 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 <h2 className="text-xl font-bold text-gray-800 mb-2">{event.name}</h2>
                 <p className="text-gray-600">Date: {event.date}</p>
                 <p className="text-gray-600">Type: {event.type}</p>
-                <p className="text-gray-600">Max Male Guests: {event.maxMales}</p>
-                <p className="text-gray-600">Max Female Guests: {event.maxFemales}</p>
+                <p className="text-gray-600">Max Male Guests Per: {event.maxMales}</p>
+                <p className="text-gray-600">Max Female Guests Per: {event.maxFemales}</p>
+                <p className="text-gray-600">Max Invites Per: {event.maxGuests}</p>
                 {/* Toggle Switch for Open/Closed */}
                 <p className="text-gray-600">
                     <input

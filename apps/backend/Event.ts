@@ -1,46 +1,59 @@
 // Event.ts
-export default class SocialEvent {
+import Guest from "./Guest"
+
+export default class Event {
     name: string;
     date: string;
     type: string;
     maxMales: number;
     maxFemales: number;
-    maleGuestList: string[] = [];
-    femaleGuestList: string[] = [];
-    maleWaitList: string[] = [];
-    femaleWaitList: string[] = [];
+    maxGuests: number;
+    maleGuestList: Guest[] = [];
+    femaleGuestList: Guest[] = [];
+    maleWaitList: Guest[] = [];
+    femaleWaitList: Guest[] = [];
     open: boolean = false;
   
     constructor(
       name: string,
       date: string,
       type: string,
-      maxMaleGuestsPerPerson: number,
-      maxFemaleGuestsPerPerson: number,
-      open: boolean
+      maxMales: number,
+      maxFemales: number,
+      maxGuests: number,
+      open: boolean,
+      maleGuestList: Guest[],
+      femaleGuestList: Guest[],
+      maleWaitList: Guest[],
+      femaleWaitList: Guest[] 
     ) {
       this.name = name;
       this.date = date;
       this.type = type;
-      this.maxMales = maxMaleGuestsPerPerson;
-      this.maxFemales = maxFemaleGuestsPerPerson;
+      this.maxMales = maxMales;
+      this.maxFemales = maxFemales;
+      this.maxGuests = maxGuests;
       this.open = open;
+      this.maleGuestList = maleGuestList ?? [];
+      this.femaleGuestList = femaleGuestList ?? [];
+      this.maleWaitList = maleWaitList ?? [];
+      this.femaleWaitList = femaleWaitList ?? [];
     }
   
-    addMaleGuest(guestName: string): void {
-        this.maleGuestList.push(guestName);
+    addMaleGuest(guest: Guest): void {
+        this.maleGuestList.push(guest);
     }
   
-    addFemaleGuest(guestName: string): void {
-        this.femaleGuestList.push(guestName);
+    addFemaleGuest(guest: Guest): void {
+        this.femaleGuestList.push(guest);
     }
 
-    addMaleWaitList(guestName: string): void {
-        this.maleGuestList.push(guestName);
+    addMaleWaitList(guest: Guest): void {
+        this.maleGuestList.push(guest);
     }
 
-    addFemaleWaitList(guestName: string): void {
-        this.femaleGuestList.push(guestName);
+    addFemaleWaitList(guest: Guest): void {
+        this.femaleGuestList.push(guest);
     }
   }
   

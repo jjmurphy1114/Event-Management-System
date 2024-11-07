@@ -18,6 +18,7 @@ import WaitingApproval from "./routes/WaitingApproval";
 import SocialSettings from "./routes/SocialSettings";
 import User from "../../backend/User";
 import Banner from "./elements/Banner";
+import IndividualEventPage from "./routes/IndividualEventPage.tsx";
 
 
 const auth = getAuth();
@@ -160,6 +161,11 @@ const router = createBrowserRouter([
         path: "/social-settings",
         element: <RoleProtectedRoute allowedStatuses={["Social", "Admin"]} element={<SocialSettings/>} /> 
       },
+      {
+        path: "/events/:id",
+        element: <ProtectedRoute element={<IndividualEventPage/>} />
+      },
+
 
     ],
   },
