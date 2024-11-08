@@ -4,6 +4,7 @@ import { database } from "../../../backend/firebaseConfig";
 import { ref, get, update } from "firebase/database";
 import Event from "../../../backend/Event";
 import Guest from "../../../backend/Guest";
+import User from "../../../backend/User";
 import { getAuth } from "firebase/auth";
 
 const IndividualEventPage = () => {
@@ -15,6 +16,7 @@ const IndividualEventPage = () => {
   const [error, setError] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   const [eventName, setEventName] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -31,6 +33,17 @@ const IndividualEventPage = () => {
       }
     };
     fetchEvent();
+
+    const fetchAdminStatus = async () => {
+      if (user) {
+        const userRef = ref(database, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists() && snapshot.val().status === 'Admin') {
+          setIsAdmin(true);
+        }
+      }
+    };
+    fetchAdminStatus();
   }, [id]);
 
   // Function to count the number of guests added by a specific user
@@ -59,8 +72,6 @@ const IndividualEventPage = () => {
       setError(`Guest name cannot be empty.`);
       return;
     }
-
-    const isAdmin = false; // Replace with logic to fetch user status if needed.
 
     // Check if the user can add more guests
     if (isAdmin || totalUserGuests < maxGuests) {
@@ -234,7 +245,7 @@ const IndividualEventPage = () => {
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                   <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                 </div>
-                {user?.uid === guest.addedBy && (
+                {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
                       onClick={() => handleDeleteGuest('male', index)}
                       className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 justify-end"
@@ -279,7 +290,7 @@ const IndividualEventPage = () => {
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                     <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                   </div>
-                  {user?.uid === guest.addedBy && (
+                  {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
                       onClick={() => handleDeleteGuest('female', index)}
                       className="ml-auto bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
