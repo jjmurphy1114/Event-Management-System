@@ -150,7 +150,7 @@ const IndividualEventPage = () => {
       const userRef = ref(database, `users/${userID}`);
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
-        return snapshot.val().name; // Return the user's name if it exists
+        return snapshot.val().displayName; // Return the user's name if it exists
       } else {
         console.error("No user found with ID: ", userID); // Log an error if no user is found
         return "Unknown User";
@@ -166,9 +166,9 @@ const IndividualEventPage = () => {
     if (userNames[userID]) {
       return userNames[userID]; // Return cached name if available
     } else {
-      const name = await getNameFromID(userID);
-      setUserNames(prevNames => ({ ...prevNames, [userID]: name })); // Cache the name
-      return name;
+      const displayName = await getNameFromID(userID);
+      setUserNames(prevNames => ({ ...prevNames, [userID]: displayName })); // Cache the name
+      return displayName;
     }
   }
 
@@ -190,8 +190,8 @@ const IndividualEventPage = () => {
           {maleGuests.length > 0 ? (
             maleGuests.map((guest, index) => (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md">
-                <p className="text-lg font-semibold">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added by: {userNames[guest.addedBy] || "Loading..."}</p>
+                <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
               </div>
             ))
           ) : (
@@ -225,8 +225,8 @@ const IndividualEventPage = () => {
           {femaleGuests.length > 0 ? (
             femaleGuests.map((guest, index) => (
               <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md">
-                <p className="text-lg font-semibold">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added by: {userNames[guest.addedBy] || "Loading..."}</p>
+                <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
               </div>
             ))
           ) : (
