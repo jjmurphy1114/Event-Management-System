@@ -65,52 +65,46 @@ const IndividualEventPage = () => {
     // Check if the user can add more guests
     if (isAdmin || totalUserGuests < maxGuests) {
       if (gender === 'male' && (isAdmin || userAddedMales < maxMales)) {
-        // Add male guest to the list
-        const newGuest = new Guest(newGuestName, userId);
-        const updatedMaleGuestList = [...(event.maleGuestList || []), newGuest];
+        const newGuest = new Guest(newGuestName, userId, false);
+        const updatedMaleGuestList = [...(event.maleGuestList || []), newGuest].filter(Boolean);
 
         try {
-          // Update Firebase Database with the new male guest
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { maleGuestList: updatedMaleGuestList });
           setEvent(prevEvent => ({
             ...prevEvent!,
             maleGuestList: updatedMaleGuestList,
           }));
-          setMaleGuestName(""); // Clear input field for male guest name
-          setError(""); // Reset error message
+          setMaleGuestName("");
+          setError("");
         } catch (error) {
           console.error("Error updating male guest list: ", error);
         }
       } else if (gender === 'female' && (isAdmin || userAddedFemales < maxFemales)) {
-        // Add female guest to the list
-        const newGuest = new Guest(newGuestName, userId);
-        const updatedFemaleGuestList = [...(event.femaleGuestList || []), newGuest];
+        const newGuest = new Guest(newGuestName, userId, false);
+        const updatedFemaleGuestList = [...(event.femaleGuestList || []), newGuest].filter(Boolean);
 
         try {
-          // Update Firebase Database with the new female guest
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
           setEvent(prevEvent => ({
             ...prevEvent!,
             femaleGuestList: updatedFemaleGuestList,
           }));
-          setFemaleGuestName(""); // Clear input field for female guest name
-          setError(""); // Reset error message
+          setFemaleGuestName("");
+          setError("");
         } catch (error) {
           console.error("Error updating female guest list: ", error);
         }
       } else {
-        setError(`Invite limit for ${gender} guests reached.`); // Set error if invite limit is reached
+        setError(`Invite limit for ${gender} guests reached.`);
       }
     } else {
-      // Add guest to the waitlist if the total invite limit is reached
-      const newGuest = new Guest(newGuestName, userId);
+      const newGuest = new Guest(newGuestName, userId, false);
       if (gender === 'male') {
-        const updatedMaleWaitList = [...(event.maleWaitList || []), newGuest];
+        const updatedMaleWaitList = [...(event.maleWaitList || []), newGuest].filter(Boolean);
 
         try {
-          // Update Firebase Database with the new male waitlist guest
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { maleWaitList: updatedMaleWaitList });
           setEvent(prevEvent => ({
@@ -121,10 +115,9 @@ const IndividualEventPage = () => {
           console.error("Error updating male waitlist: ", error);
         }
       } else {
-        const updatedFemaleWaitList = [...(event.femaleWaitList || []), newGuest];
+        const updatedFemaleWaitList = [...(event.femaleWaitList || []), newGuest].filter(Boolean);
 
         try {
-          // Update Firebase Database with the new female waitlist guest
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
           setEvent(prevEvent => ({
@@ -136,11 +129,11 @@ const IndividualEventPage = () => {
         }
       }
 
-      setError("Added to waitlist due to invite limit."); // Set error message for waitlist
+      setError("Added to waitlist due to invite limit.");
       if (gender === 'male') {
-        setMaleGuestName(""); // Clear input field for male guest name
+        setMaleGuestName("");
       } else {
-        setFemaleGuestName(""); // Clear input field for female guest name
+        setFemaleGuestName("");
       }
     }
   };
@@ -173,6 +166,33 @@ const IndividualEventPage = () => {
       return displayName;
     }
   }
+
+  // Function to handle deleting guests from the list and on firebase
+  const handleDeleteGuest = async (gender: 'male' | 'female', index: number) => {
+    if (!event || !user) return;
+    try {
+      if (gender === 'male') {
+        const updatedMaleGuestList = event.maleGuestList.filter((_, i) => i !== index).filter(Boolean);
+        const eventRef = ref(database, `events/${id}`);
+        await update(eventRef, { maleGuestList: updatedMaleGuestList });
+        setEvent(prevEvent => ({
+          ...prevEvent!,
+          maleGuestList: updatedMaleGuestList,
+        }));
+      } else if (gender === 'female') {
+        const updatedFemaleGuestList = event.femaleGuestList.filter((_, i) => i !== index).filter(Boolean);
+        const eventRef = ref(database, `events/${id}`);
+        await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
+        setEvent(prevEvent => ({
+          ...prevEvent!,
+          femaleGuestList: updatedFemaleGuestList,
+        }));
+      }
+    } catch (error) {
+      console.error("Error deleting guest: ", error);
+    }
+  };
+
 
   if (!event) {
     return <div>Loading event details...</div>; // Display loading message if event details are not yet available
@@ -209,9 +229,19 @@ const IndividualEventPage = () => {
         <div className="mb-8 space-y-4">
           {maleGuests.length > 0 ? (
             maleGuests.map((guest, index) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md">
-                <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
+                <div className="grid-rows-2">
+                  <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                </div>
+                {user?.uid === guest.addedBy && (
+                    <button
+                      onClick={() => handleDeleteGuest('male', index)}
+                      className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 justify-end"
+                    >
+                      Delete
+                    </button>
+                  )}
               </div>
             ))
           ) : (
@@ -242,16 +272,26 @@ const IndividualEventPage = () => {
           </div>
         </div>
         <div className="mb-8 space-y-4">
-          {femaleGuests.length > 0 ? (
-            femaleGuests.map((guest, index) => (
-              <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md">
-                <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No female guests added yet.</p>
-          )}
+        {femaleGuests.length > 0 ? (
+              femaleGuests.map((guest, index) => (
+                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
+                  <div className="grid-rows-2">
+                    <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                  </div>
+                  {user?.uid === guest.addedBy && (
+                    <button
+                      onClick={() => handleDeleteGuest('female', index)}
+                      className="ml-auto bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No female guests added yet.</p>
+            )}
         </div>
        
       </div>
