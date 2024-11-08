@@ -55,7 +55,7 @@ function Banner() {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <span className="text-gray-300 text-sm">Hello, {user.displayName || user.email}</span>
+                <span className="text-gray-300 text-sm">{user.displayName || user.email}</span>
                 <button
                   onClick={handleSignOut}
                   className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"

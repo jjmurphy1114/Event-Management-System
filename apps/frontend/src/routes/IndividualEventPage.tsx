@@ -14,6 +14,7 @@ const IndividualEventPage = () => {
   const [femaleGuestName, setFemaleGuestName] = useState("");
   const [error, setError] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
+  const [eventName, setEventName] = useState("");
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -24,6 +25,7 @@ const IndividualEventPage = () => {
       const snapshot = await get(eventRef);
       if (snapshot.exists()) {
         setEvent(snapshot.val()); // Set the event state if the event exists
+        setEventName(snapshot.val().name);
       } else {
         console.error("No event found!");
       }
@@ -181,26 +183,14 @@ const IndividualEventPage = () => {
   const femaleGuests = event.femaleGuestList || [];
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 flex space-x-8">
-      <h1 h1 className="text-4xl font-bold text-center text-gray-800 mb-10 w-100">DIDDY PARTY</h1>
+    <div className="w-screen h-screen grid flex-col grid-cols-2 items-start bg-white shadow overflow-auto">
+      <h1 h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       {/* Male Guests Section */}
-      <div className="flex-1">
-        <h2 className="text-3xl font-bold mb-4 text-center text-black">Male Guests</h2>
-        <div className="mb-8 space-y-4">
-          {maleGuests.length > 0 ? (
-            maleGuests.map((guest, index) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md">
-                <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No male guests added yet.</p>
-          )}
-        </div>
+      <>
+      <div className="flex-1 m-10">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
         <div>
-          <h3 className="text-xl font-semibold mb-2">Add Male Guest</h3>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 mb-5">
             <input
               type="text"
               value={maleGuestName}
@@ -216,26 +206,26 @@ const IndividualEventPage = () => {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Female Guests Section */}
-      <div className="flex-1">
-        <h2 className="text-3xl font-bold mb-4 text-center text-black">Female Guests</h2>
         <div className="mb-8 space-y-4">
-          {femaleGuests.length > 0 ? (
-            femaleGuests.map((guest, index) => (
-              <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md">
+          {maleGuests.length > 0 ? (
+            maleGuests.map((guest, index) => (
+              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md">
                 <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                 <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
               </div>
             ))
           ) : (
-            <p className="text-gray-500">No female guests added yet.</p>
+            <p className="text-gray-500">No male guests added yet.</p>
           )}
         </div>
+        
+      </div>
+
+      {/* Female Guests Section */}
+      <div className="flex-1 m-10">
+        <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
         <div>
-          <h3 className="text-xl font-semibold mb-2">Add Female Guest</h3>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 mb-5">
             <input
               type="text"
               value={femaleGuestName}
@@ -251,7 +241,21 @@ const IndividualEventPage = () => {
             </button>
           </div>
         </div>
+        <div className="mb-8 space-y-4">
+          {femaleGuests.length > 0 ? (
+            femaleGuests.map((guest, index) => (
+              <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md">
+                <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No female guests added yet.</p>
+          )}
+        </div>
+       
       </div>
+      </>
     </div>
   );
 };
