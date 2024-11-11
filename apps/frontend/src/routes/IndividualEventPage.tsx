@@ -218,6 +218,7 @@ const IndividualEventPage = () => {
       <h1 h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       {/* Male Guests Section */}
       <>
+      <div id="Male Section">
       <div className="flex-1 m-10">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
         <div>
@@ -259,10 +260,40 @@ const IndividualEventPage = () => {
             <p className="text-gray-500">No male guests added yet.</p>
           )}
         </div>
-        
+      </div>
+
+      {/* Male Waitlist Section */}
+      <div className="flex-1 m-10">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Waitlist</h2>
+        <div>
+        </div>
+        <div className="mb-8 space-y-4">
+          {maleGuests.length > 0 ? (
+            maleGuests.map((guest, index) => (
+              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
+                <div className="grid-rows-2">
+                  <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                </div>
+                {(user?.uid === guest.addedBy || isAdmin) && (
+                    <button
+                      onClick={() => handleDeleteGuest('male', index)}
+                      className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 justify-end"
+                    >
+                      Delete
+                    </button>
+                  )}
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No male guests on the waitlist yet.</p>
+          )}
+        </div>
+      </div>
       </div>
 
       {/* Female Guests Section */}
+      <div id="Female Section">
       <div className="flex-1 m-10">
         <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
         <div>
@@ -304,7 +335,35 @@ const IndividualEventPage = () => {
               <p className="text-gray-500">No female guests added yet.</p>
             )}
         </div>
-       
+      </div>
+      {/* Female Waitlist Section */}
+      <div className="flex-1 m-10">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
+        <div>
+        </div>
+        <div className="mb-8 space-y-4">
+        {femaleGuests.length > 0 ? (
+              femaleGuests.map((guest, index) => (
+                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
+                  <div className="grid-rows-2">
+                    <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                  </div>
+                  {(user?.uid === guest.addedBy || isAdmin) && (
+                    <button
+                      onClick={() => handleDeleteGuest('female', index)}
+                      className="ml-auto bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No female guests added to waitlist</p>
+            )}
+        </div>
+      </div>
       </div>
       </>
     </div>
