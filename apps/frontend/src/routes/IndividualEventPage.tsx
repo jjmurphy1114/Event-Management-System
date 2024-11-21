@@ -11,6 +11,7 @@ const IndividualEventPage = () => {
   
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
   const [maleGuestName, setMaleGuestName] = useState("");
   const [femaleGuestName, setFemaleGuestName] = useState("");
   const [error, setError] = useState("");
@@ -23,28 +24,52 @@ const IndividualEventPage = () => {
   // Fetch event details from the Firebase Realtime Database when the component mounts
   useEffect(() => {
     const fetchEvent = async () => {
-      const eventRef = ref(database, `events/${id}`);
-      const snapshot = await get(eventRef);
-      if (snapshot.exists()) {
-        setEvent(snapshot.val()); // Set the event state if the event exists
-        setEventName(snapshot.val().name);
-      } else {
-        console.error("No event found!");
+      try {
+        const eventRef = ref(database, `events/${id}`);
+        const snapshot = await get(eventRef);
+        if (snapshot.exists()) {
+          setEvent(snapshot.val());
+        } else {
+          setError("Event not found.");
+        }
+      } catch (fetchError) {
+        console.error("Error fetching event data:", fetchError);
+        setError("Failed to load event data.");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchEvent();
 
     const fetchAdminStatus = async () => {
-      if (user) {
-        const userRef = ref(database, `users/${user.uid}`);
-        const snapshot = await get(userRef);
-        if (snapshot.exists() && snapshot.val().status === 'Admin') {
-          setIsAdmin(true);
+      try {
+        if (user) {
+          const userRef = ref(database, `users/${user.uid}`);
+          const snapshot = await get(userRef);
+          if (snapshot.exists() && snapshot.val().status === "Admin") {
+            setIsAdmin(true);
+          }
         }
+      } catch (fetchError) {
+        console.error("Error fetching user data:", fetchError);
       }
     };
+
+    fetchEvent();
     fetchAdminStatus();
-  }, [id]);
+  }, [id, user]);
+
+  // Guarded render
+  if (loading) {
+    return <div className="text-center mt-20 text-gray-700 text-xl">Loading event details...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-20 text-red-500 text-xl">{error}</div>;
+  }
+
+  if (!event) {
+    return <div className="text-center mt-20 text-gray-700 text-xl">No event data available.</div>;
+  }
 
   // Function to count the number of guests added by a specific user
   const countUserGuests = (guestList: Guest[], userId: string) => {
