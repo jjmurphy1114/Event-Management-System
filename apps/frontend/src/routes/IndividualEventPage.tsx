@@ -140,7 +140,7 @@ const IndividualEventPage = () => {
         }
       }
 
-      setError("Added to waitlist due to invite limit.");
+      setError("Added to waitlist due to " + `${gender}` + " invite limit.");
       if (gender === 'male') {
         setMaleGuestName("");
       } else {
@@ -179,43 +179,69 @@ const IndividualEventPage = () => {
   }
 
   // Function to handle deleting guests from the list and on firebase
-  const handleDeleteGuest = async (gender: 'male' | 'female', index: number) => {
+  const handleDeleteGuest = async (
+    gender: 'male' | 'female',
+    index: number,
+    listType: 'guestList' | 'waitList'
+  ) => {
     if (!event || !user) return;
+  
     try {
       if (gender === 'male') {
-        const updatedMaleGuestList = event.maleGuestList.filter((_, i) => i !== index).filter(Boolean);
-        const eventRef = ref(database, `events/${id}`);
-        await update(eventRef, { maleGuestList: updatedMaleGuestList });
-        setEvent(prevEvent => ({
-          ...prevEvent!,
-          maleGuestList: updatedMaleGuestList,
-        }));
+        if (listType === 'guestList') {
+          const updatedMaleGuestList = event.maleGuestList.filter((_, i) => i !== index).filter(Boolean);
+          const eventRef = ref(database, `events/${id}`);
+          await update(eventRef, { maleGuestList: updatedMaleGuestList });
+          setEvent((prevEvent) => ({
+            ...prevEvent!,
+            maleGuestList: updatedMaleGuestList,
+          }));
+        } else if (listType === 'waitList') {
+          const updatedMaleWaitList = event.maleWaitList.filter((_, i) => i !== index).filter(Boolean);
+          const eventRef = ref(database, `events/${id}`);
+          await update(eventRef, { maleWaitList: updatedMaleWaitList });
+          setEvent((prevEvent) => ({
+            ...prevEvent!,
+            maleWaitList: updatedMaleWaitList,
+          }));
+        }
       } else if (gender === 'female') {
-        const updatedFemaleGuestList = event.femaleGuestList.filter((_, i) => i !== index).filter(Boolean);
-        const eventRef = ref(database, `events/${id}`);
-        await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
-        setEvent(prevEvent => ({
-          ...prevEvent!,
-          femaleGuestList: updatedFemaleGuestList,
-        }));
+        if (listType === 'guestList') {
+          const updatedFemaleGuestList = event.femaleGuestList.filter((_, i) => i !== index).filter(Boolean);
+          const eventRef = ref(database, `events/${id}`);
+          await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
+          setEvent((prevEvent) => ({
+            ...prevEvent!,
+            femaleGuestList: updatedFemaleGuestList,
+          }));
+        } else if (listType === 'waitList') {
+          const updatedFemaleWaitList = event.femaleWaitList.filter((_, i) => i !== index).filter(Boolean);
+          const eventRef = ref(database, `events/${id}`);
+          await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
+          setEvent((prevEvent) => ({
+            ...prevEvent!,
+            femaleWaitList: updatedFemaleWaitList,
+          }));
+        }
       }
     } catch (error) {
-      console.error("Error deleting guest: ", error);
+      console.error('Error deleting guest: ', error);
     }
   };
-
-
-  if (!event) {
-    return <div>Loading event details...</div>; // Display loading message if event details are not yet available
-  }
 
   // Extract male and female guests from the event object
   const maleGuests = event.maleGuestList || [];
   const femaleGuests = event.femaleGuestList || [];
+  const maleWaitListed = event.maleWaitList || [];
+  const femaleWaitListed = event.femaleWaitList || [];
 
   return (
     <div className="w-screen h-screen grid flex-col grid-cols-2 items-start bg-white shadow overflow-auto">
-      <h1 h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
+      <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
+      <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
+        {/* Error message */}
+        {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
+      </div>
       {/* Male Guests Section */}
       <>
       <div id="Male Section">
@@ -248,7 +274,7 @@ const IndividualEventPage = () => {
                 </div>
                 {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
-                      onClick={() => handleDeleteGuest('male', index)}
+                      onClick={() => handleDeleteGuest('male', index, 'guestList')}
                       className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 justify-end"
                     >
                       Delete
@@ -268,8 +294,8 @@ const IndividualEventPage = () => {
         <div>
         </div>
         <div className="mb-8 space-y-4">
-          {maleGuests.length > 0 ? (
-            maleGuests.map((guest, index) => (
+          {maleWaitListed.length > 0 ? (
+            maleWaitListed.map((guest, index) => (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
                 <div className="grid-rows-2">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
@@ -277,7 +303,7 @@ const IndividualEventPage = () => {
                 </div>
                 {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
-                      onClick={() => handleDeleteGuest('male', index)}
+                      onClick={() => handleDeleteGuest('male', index, 'waitList')}
                       className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 justify-end"
                     >
                       Delete
@@ -323,7 +349,7 @@ const IndividualEventPage = () => {
                   </div>
                   {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
-                      onClick={() => handleDeleteGuest('female', index)}
+                      onClick={() => handleDeleteGuest('female', index, 'guestList')}
                       className="ml-auto bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
@@ -336,14 +362,15 @@ const IndividualEventPage = () => {
             )}
         </div>
       </div>
+
       {/* Female Waitlist Section */}
       <div className="flex-1 m-10">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
         <div>
         </div>
         <div className="mb-8 space-y-4">
-        {femaleGuests.length > 0 ? (
-              femaleGuests.map((guest, index) => (
+        {femaleWaitListed.length > 0 ? (
+              femaleWaitListed.map((guest, index) => (
                 <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
                   <div className="grid-rows-2">
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
@@ -351,7 +378,7 @@ const IndividualEventPage = () => {
                   </div>
                   {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
-                      onClick={() => handleDeleteGuest('female', index)}
+                      onClick={() => handleDeleteGuest('female', index, 'waitList')}
                       className="ml-auto bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
