@@ -39,6 +39,12 @@ const IndividualEventPage = () => {
           const femaleGuestList = eventData.femaleGuestList || [];
           const maleWaitList = eventData.maleWaitList ? [...eventData.maleWaitList] : [];
           const femaleWaitList = eventData.femaleWaitList ? [...eventData.femaleWaitList] : [];
+
+          // Display error if the event is closed
+          if (!eventData.open) {
+            setError("The event list is currently closed and no guests can be added");
+          }
+
   
           // Fetch user names for all guests
           const guestListUserIDs = [
@@ -65,7 +71,7 @@ const IndividualEventPage = () => {
         } else {
           setError("Event not found.");
         }
-  
+
         // Fetch admin status for the current user
         if (user) {
           const userRef = ref(database, `users/${user.uid}`);
@@ -90,10 +96,6 @@ const IndividualEventPage = () => {
     return <div className="text-center mt-20 text-gray-700 text-xl">Loading event details...</div>;
   }
 
-  if (error) {
-    return <div className="text-center mt-20 text-red-500 text-xl">{error}</div>;
-  }
-
   if (!event) {
     return <div className="text-center mt-20 text-gray-700 text-xl">No event data available.</div>;
   }
@@ -107,6 +109,10 @@ const IndividualEventPage = () => {
   const handleAddGuest = async (gender: 'male' | 'female') => {
     if (!event || !user) {
       console.error("Event or user not available. Event:", event, "User:", user);
+      return;
+    }
+
+    if (!event.open) {
       return;
     }
   
