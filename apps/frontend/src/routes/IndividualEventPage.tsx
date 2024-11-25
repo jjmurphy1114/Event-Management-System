@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { database } from "../../../backend/firebaseConfig";
-import { ref, get, update } from "firebase/database";
+import { ref, get, update} from "firebase/database";
 import Event from "../../../backend/Event";
 import Guest from "../../../backend/Guest";
 import User from "../../../backend/User";
@@ -23,39 +23,65 @@ const IndividualEventPage = () => {
 
   // Fetch event details from the Firebase Realtime Database when the component mounts
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchEventAndUserData = async () => {
       try {
+        // Fetch event data
         const eventRef = ref(database, `events/${id}`);
         const snapshot = await get(eventRef);
         if (snapshot.exists()) {
-          setEvent(snapshot.val());
+          const eventData = snapshot.val();
+          setEvent(eventData);
+          setEventName(eventData.name);
+  
+          // Ensure that guest lists are defined
+          const maleGuestList = eventData.maleGuestList || [];
+          const femaleGuestList = eventData.femaleGuestList || [];
+          const maleWaitList = eventData.maleWaitList ? [...eventData.maleWaitList] : [];
+          const femaleWaitList = eventData.femaleWaitList ? [...eventData.femaleWaitList] : [];
+  
+          // Fetch user names for all guests
+          const guestListUserIDs = [
+            ...new Set([
+              ...maleGuestList.map((g: Guest) => g.addedBy),
+              ...femaleGuestList.map((g: Guest) => g.addedBy),
+              ...maleWaitList.map((g: Guest) => g.addedBy),
+              ...femaleWaitList.map((g: Guest) => g.addedBy),
+            ]),
+          ];
+  
+          const userNamesTemp: { [key: string]: string } = {};
+          for (const userId of guestListUserIDs) {
+            const userRef = ref(database, `users/${userId}`);
+            const userSnapshot = await get(userRef);
+            if (userSnapshot.exists()) {
+              userNamesTemp[userId] = userSnapshot.val().displayName;
+            } else {
+              userNamesTemp[userId] = "Unknown User";
+            }
+          }
+  
+          setUserNames(userNamesTemp);
         } else {
           setError("Event not found.");
         }
-      } catch (fetchError) {
-        console.error("Error fetching event data:", fetchError);
-        setError("Failed to load event data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchAdminStatus = async () => {
-      try {
+  
+        // Fetch admin status for the current user
         if (user) {
           const userRef = ref(database, `users/${user.uid}`);
-          const snapshot = await get(userRef);
-          if (snapshot.exists() && snapshot.val().status === "Admin") {
+          const userSnapshot = await get(userRef);
+          if (userSnapshot.exists() && userSnapshot.val().status === "Admin") {
             setIsAdmin(true);
           }
         }
       } catch (fetchError) {
-        console.error("Error fetching user data:", fetchError);
+        console.error("Error fetching data:", fetchError);
+        setError("Failed to load event or user data.");
+      } finally {
+        setLoading(false);
       }
     };
-
-    fetchEvent();
-    fetchAdminStatus();
+  
+    fetchEventAndUserData();
   }, [id, user]);
 
   // Guarded render
@@ -76,104 +102,131 @@ const IndividualEventPage = () => {
     return guestList.filter(guest => guest.addedBy === userId).length;
   };
 
-  // Function to handle adding a guest (either male or female) to the event
+  // Function to count the number of guests added by a specific user
   const handleAddGuest = async (gender: 'male' | 'female') => {
-    if (!event || !user) return; // Ensure event and user are available
-
+    if (!event || !user) {
+      console.error("Event or user not available. Event:", event, "User:", user);
+      return;
+    }
+  
     const userId = user.uid;
-    // Count the number of male and female guests added by the current user
+    const newGuestName = gender === 'male' ? maleGuestName : femaleGuestName;
+  
+    // Ensure guest name is provided
+    if (!newGuestName) {
+      setError(`Guest name cannot be empty.`);
+      console.warn("Guest name was empty.");
+      return;
+    }
+  
+    // Flatten the newGuest object to ensure Firebase compatibility
+    const newGuestData = { name: newGuestName, addedBy: userId };
     const userAddedMales = countUserGuests(event.maleGuestList || [], userId);
     const userAddedFemales = countUserGuests(event.femaleGuestList || [], userId);
     const totalUserGuests = userAddedMales + userAddedFemales;
-
-    // Maximum limits for male, female, and total guests
+  
     const maxMales = event.maxMales;
     const maxFemales = event.maxFemales;
     const maxGuests = event.maxGuests;
-
-    // Determine the new guest's name based on gender
-    const newGuestName = gender === 'male' ? maleGuestName : femaleGuestName;
-    if (!newGuestName) {
-      setError(`Guest name cannot be empty.`);
-      return;
-    }
-
-    // Check if the user can add more guests
-    if (isAdmin || totalUserGuests < maxGuests) {
-      if (gender === 'male' && (isAdmin || userAddedMales < maxMales)) {
-        const newGuest = new Guest(newGuestName, userId, false);
-        const updatedMaleGuestList = [...(event.maleGuestList || []), newGuest].filter(Boolean);
-
-        try {
+  
+    try {
+      if (isAdmin || totalUserGuests < maxGuests) {
+        if (gender === 'male' && (isAdmin || userAddedMales < maxMales)) {
+          console.log("Adding male guest to guest list:", newGuestData);
+          const updatedMaleGuestList = [...(event.maleGuestList || []), newGuestData];
           const eventRef = ref(database, `events/${id}`);
+  
           await update(eventRef, { maleGuestList: updatedMaleGuestList });
-          setEvent(prevEvent => ({
+          console.log("Successfully updated male guest list in Firebase.");
+  
+          // Update state with new guest list
+          setEvent((prevEvent) => ({
             ...prevEvent!,
             maleGuestList: updatedMaleGuestList,
           }));
-          setMaleGuestName("");
-          setError("");
-        } catch (error) {
-          console.error("Error updating male guest list: ", error);
-        }
-      } else if (gender === 'female' && (isAdmin || userAddedFemales < maxFemales)) {
-        const newGuest = new Guest(newGuestName, userId, false);
-        const updatedFemaleGuestList = [...(event.femaleGuestList || []), newGuest].filter(Boolean);
-
-        try {
+  
+          setMaleGuestName('');
+          setError('');
+        } else if (gender === 'female' && (isAdmin || userAddedFemales < maxFemales)) {
+          console.log("Adding female guest to guest list:", newGuestData);
+          const updatedFemaleGuestList = [...(event.femaleGuestList || []), newGuestData];
           const eventRef = ref(database, `events/${id}`);
+  
           await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
-          setEvent(prevEvent => ({
+          console.log("Successfully updated female guest list in Firebase.");
+  
+          // Update state with new guest list
+          setEvent((prevEvent) => ({
             ...prevEvent!,
             femaleGuestList: updatedFemaleGuestList,
           }));
-          setFemaleGuestName("");
-          setError("");
-        } catch (error) {
-          console.error("Error updating female guest list: ", error);
+  
+          setFemaleGuestName('');
+          setError('');
+        } else {
+          setError(`Invite limit for ${gender} guests reached.`);
+          console.warn(`Invite limit for ${gender} guests reached.`);
         }
       } else {
-        setError(`Invite limit for ${gender} guests reached.`);
+        // Add to waitlist if the user has reached their max invites
+        console.log("Adding guest to waitlist due to max invite limit.");
+        await handleAddToWaitlist(gender, newGuestData);
       }
-    } else {
-      const newGuest = new Guest(newGuestName, userId, false);
-      if (gender === 'male') {
-        const updatedMaleWaitList = [...(event.maleWaitList || []), newGuest].filter(Boolean);
-
-        try {
-          const eventRef = ref(database, `events/${id}`);
-          await update(eventRef, { maleWaitList: updatedMaleWaitList });
-          setEvent(prevEvent => ({
-            ...prevEvent!,
-            maleWaitList: updatedMaleWaitList,
-          }));
-        } catch (error) {
-          console.error("Error updating male waitlist: ", error);
-        }
-      } else {
-        const updatedFemaleWaitList = [...(event.femaleWaitList || []), newGuest].filter(Boolean);
-
-        try {
-          const eventRef = ref(database, `events/${id}`);
-          await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
-          setEvent(prevEvent => ({
-            ...prevEvent!,
-            femaleWaitList: updatedFemaleWaitList,
-          }));
-        } catch (error) {
-          console.error("Error updating female waitlist: ", error);
-        }
-      }
-
-      setError("Added to waitlist due to " + `${gender}` + " invite limit.");
-      if (gender === 'male') {
-        setMaleGuestName("");
-      } else {
-        setFemaleGuestName("");
-      }
+    } catch (error) {
+      console.error(`Error adding ${gender} guest: `, error);
+      setError(`Failed to add ${gender} guest. Please try again.`);
     }
   };
-
+  
+  // Function to handle adding a guest to the waitlist
+  const handleAddToWaitlist = async (gender: 'male' | 'female', newGuestData: { name: string, addedBy: string }) => {
+    console.log("handleAddToWaitlist called with gender:", gender, "New guest data:", newGuestData);
+  
+    if (!event) {
+      console.error("Event not available when trying to add to waitlist.");
+      return;
+    }
+  
+    try {
+      const eventRef = ref(database, `events/${id}`);
+  
+      if (gender === 'male') {
+        const updatedMaleWaitList = [...(event.maleWaitList || []), newGuestData];
+  
+        console.log("Updating male waitlist in Firebase:", updatedMaleWaitList);
+        await update(eventRef, { maleWaitList: updatedMaleWaitList });
+        console.log("Successfully updated male waitlist in Firebase.");
+  
+        // Update the state to reflect the new waitlist
+        setEvent((prevEvent) => ({
+          ...prevEvent!,
+          maleWaitList: updatedMaleWaitList,
+        }));
+        setMaleGuestName('');
+        setError(`Added to waitlist due to male invite limit.`);
+      } else {
+        const updatedFemaleWaitList = [...(event.femaleWaitList || []), newGuestData];
+  
+        console.log("Updating female waitlist in Firebase:", updatedFemaleWaitList);
+        await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
+        console.log("Successfully updated female waitlist in Firebase.");
+  
+        // Update the state to reflect the new waitlist
+        setEvent((prevEvent) => ({
+          ...prevEvent!,
+          femaleWaitList: updatedFemaleWaitList,
+        }));
+        setFemaleGuestName('');
+        setError(`Added to waitlist due to female invite limit.`);
+      }
+    } catch (error) {
+      console.error(`Error updating ${gender} waitlist: `, error);
+      setError(`Failed to add guest to ${gender} waitlist. Please try again.`);
+    }
+  };
+  
+  
+  
   // Function to get a user's name from their ID
   const getNameFromID = async (userID: string) => {
     try {
@@ -214,7 +267,7 @@ const IndividualEventPage = () => {
     try {
       if (gender === 'male') {
         if (listType === 'guestList') {
-          const updatedMaleGuestList = event.maleGuestList.filter((_, i) => i !== index).filter(Boolean);
+          const updatedMaleGuestList = event.maleGuestList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { maleGuestList: updatedMaleGuestList });
           setEvent((prevEvent) => ({
@@ -222,7 +275,7 @@ const IndividualEventPage = () => {
             maleGuestList: updatedMaleGuestList,
           }));
         } else if (listType === 'waitList') {
-          const updatedMaleWaitList = event.maleWaitList.filter((_, i) => i !== index).filter(Boolean);
+          const updatedMaleWaitList = event.maleWaitList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { maleWaitList: updatedMaleWaitList });
           setEvent((prevEvent) => ({
@@ -232,7 +285,7 @@ const IndividualEventPage = () => {
         }
       } else if (gender === 'female') {
         if (listType === 'guestList') {
-          const updatedFemaleGuestList = event.femaleGuestList.filter((_, i) => i !== index).filter(Boolean);
+          const updatedFemaleGuestList = event.femaleGuestList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
           setEvent((prevEvent) => ({
@@ -240,7 +293,7 @@ const IndividualEventPage = () => {
             femaleGuestList: updatedFemaleGuestList,
           }));
         } else if (listType === 'waitList') {
-          const updatedFemaleWaitList = event.femaleWaitList.filter((_, i) => i !== index).filter(Boolean);
+          const updatedFemaleWaitList = event.femaleWaitList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
           setEvent((prevEvent) => ({
