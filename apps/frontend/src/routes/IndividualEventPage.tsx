@@ -15,6 +15,7 @@ const IndividualEventPage = () => {
   const [maleGuestName, setMaleGuestName] = useState("");
   const [femaleGuestName, setFemaleGuestName] = useState("");
   const [error, setError] = useState("");
+  const [notification, setNotification] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   const [eventName, setEventName] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -147,6 +148,7 @@ const IndividualEventPage = () => {
   
           setMaleGuestName('');
           setError('');
+          setNotification("Male guest added successfully")
         } else if (gender === 'female' && (isAdmin || userAddedFemales < maxFemales)) {
           console.log("Adding female guest to guest list:", newGuestData);
           const updatedFemaleGuestList = [...(event.femaleGuestList || []), newGuestData];
@@ -163,8 +165,9 @@ const IndividualEventPage = () => {
   
           setFemaleGuestName('');
           setError('');
+          setNotification("Female guest added successfully")
         } else {
-          setError(`Invite limit for ${gender} guests reached.`);
+          setNotification(`Invite limit for ${gender} guests reached.`);
           console.warn(`Invite limit for ${gender} guests reached.`);
         }
       } else {
@@ -203,7 +206,7 @@ const IndividualEventPage = () => {
           maleWaitList: updatedMaleWaitList,
         }));
         setMaleGuestName('');
-        setError(`Added to waitlist due to male invite limit.`);
+        setNotification(`Added to waitlist due to male invite limit.`);
       } else {
         const updatedFemaleWaitList = [...(event.femaleWaitList || []), newGuestData];
   
@@ -217,7 +220,7 @@ const IndividualEventPage = () => {
           femaleWaitList: updatedFemaleWaitList,
         }));
         setFemaleGuestName('');
-        setError(`Added to waitlist due to female invite limit.`);
+        setNotification(`Added to waitlist due to female invite limit.`);
       }
     } catch (error) {
       console.error(`Error updating ${gender} waitlist: `, error);
@@ -313,12 +316,14 @@ const IndividualEventPage = () => {
   const maleWaitListed = event.maleWaitList || [];
   const femaleWaitListed = event.femaleWaitList || [];
 
-  return (
-    <div className="w-screen h-screen grid flex-col grid-cols-2 items-start bg-white shadow overflow-auto">
+return (
+<div className="w-screen h-screen grid flex-col grid-cols-2 items-start bg-white shadow overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
-        {/* Error message */}
-        {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
+       {/* Error message */}
+       {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
+        {/* Notification message */}
+        {notification && <p className="text-green-500 text-center font-medium mb-2">{notification}</p>}
       </div>
       {/* Male Guests Section */}
       <>
