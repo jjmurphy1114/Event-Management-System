@@ -12,8 +12,7 @@ const IndividualEventPage = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
-  const [maleGuestName, setMaleGuestName] = useState("");
-  const [femaleGuestName, setFemaleGuestName] = useState("");
+  const [guestName, setGuestName] = useState("");
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
@@ -117,7 +116,7 @@ const IndividualEventPage = () => {
     }
   
     const userId = user.uid;
-    const newGuestName = gender === 'male' ? maleGuestName : femaleGuestName;
+    const newGuestName = gender === 'male' ? guestName : guestName;
   
     // Ensure guest name is provided
     if (!newGuestName) {
@@ -152,7 +151,7 @@ const IndividualEventPage = () => {
             maleGuestList: updatedMaleGuestList,
           }));
   
-          setMaleGuestName('');
+          setGuestName('');
           setError('');
           setNotification("Male guest added successfully")
         } else if (gender === 'female' && (isAdmin || userAddedFemales < maxFemales)) {
@@ -169,7 +168,7 @@ const IndividualEventPage = () => {
             femaleGuestList: updatedFemaleGuestList,
           }));
   
-          setFemaleGuestName('');
+          setGuestName('');
           setError('');
           setNotification("Female guest added successfully")
         } else {
@@ -211,7 +210,7 @@ const IndividualEventPage = () => {
           ...prevEvent!,
           maleWaitList: updatedMaleWaitList,
         }));
-        setMaleGuestName('');
+        setGuestName('');
         setNotification(`Added to waitlist due to male invite limit.`);
       } else {
         const updatedFemaleWaitList = [...(event.femaleWaitList || []), newGuestData];
@@ -225,7 +224,7 @@ const IndividualEventPage = () => {
           ...prevEvent!,
           femaleWaitList: updatedFemaleWaitList,
         }));
-        setFemaleGuestName('');
+        setGuestName('');
         setNotification(`Added to waitlist due to female invite limit.`);
       }
     } catch (error) {
@@ -331,27 +330,38 @@ return (
         {/* Notification message */}
         {notification && <p className="text-green-500 text-center font-medium mb-2">{notification}</p>}
       </div>
+      {/* Search Bar and Input Section */}
+      <div className="flex flex-col items-center col-span-full mb-5 w-full">
+          <input
+            type="text"
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            placeholder="Enter guest name"
+            className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <div className="flex space m-2 ">
+            <button
+              onClick={() => handleAddGuest('male')}
+              className="bg-blue-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
+            >
+              Add Male
+            </button>
+            <button
+                onClick={() => handleAddGuest('female')}
+                className="bg-pink-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
+              >
+                Add Female
+            </button>
+          </div>
+      </div>
+      {/* Guest Section */}
+      <div className="flex flex-col md:grid md:grid-cols-2 sm:grid-cols lg:col-span-full gap-4 w-full">
       {/* Male Guests Section */}
       <>
       <div id="Male Section">
-      <div className="flex-1 m-10">
+      <div className="flex-1 m-10 md:col-span-full md:w-auto">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
         <div>
-          <div className="flex space-x-4 mb-5">
-            <input
-              type="text"
-              value={maleGuestName}
-              onChange={(e) => setMaleGuestName(e.target.value)}
-              placeholder="Enter male guest name"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <button
-              onClick={() => handleAddGuest('male')}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-600"
-            >
-              Add
-            </button>
-          </div>
         </div>
         <div className="mb-8 space-y-4">
           {maleGuests.length > 0 ? (
@@ -412,21 +422,6 @@ return (
       <div className="flex-1 m-10">
         <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
         <div>
-          <div className="flex space-x-4 mb-5">
-            <input
-              type="text"
-              value={femaleGuestName}
-              onChange={(e) => setFemaleGuestName(e.target.value)}
-              placeholder="Enter female guest name"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
-            />
-            <button
-              onClick={() => handleAddGuest('female')}
-              className="bg-pink-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-pink-600"
-            >
-              Add
-            </button>
-          </div>
         </div>
         <div className="mb-8 space-y-4">
         {femaleGuests.length > 0 ? (
@@ -482,6 +477,7 @@ return (
       </div>
       </div>
       </>
+      </div>
     </div>
   );
 };
