@@ -335,9 +335,13 @@ return (
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
        {/* Error message */}
-       {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
+       <div className="min-h-[2rem]">
+       {error && <p className="text-red-500 text-center font-medium mb-2 min-h-[2rem]">{error}</p>}
+       </div>
         {/* Notification message */}
-        {notification && <p className="text-green-500 text-center font-medium mb-2">{notification}</p>}
+        <div className="min-h-[2rem]">
+        {notification && <p className="text-green-500 text-center font-medium mb-2 min-h-[2rem]">{notification}</p>}
+        </div>
       </div>
       {/* Search Bar and Input Section */}
       <div className="flex flex-col items-center col-span-full mb-5 w-full">
@@ -372,7 +376,7 @@ return (
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
         <div>
         </div>
-        <div className="mb-8 space-y-4">
+        <div className="mb-8 space-y-4 min-h-[20rem]">
           {filteredMaleGuests.length > 0 ? (
             filteredMaleGuests.map((guest, index) => (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
@@ -401,7 +405,7 @@ return (
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Waitlist</h2>
         <div>
         </div>
-        <div className="mb-8 space-y-4">
+        <div className="mb-8 space-y-4 min-h-[20rem]">
           {filteredMaleWaitListed.length > 0 ? (
             filteredMaleWaitListed.map((guest, index) => (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
@@ -432,7 +436,7 @@ return (
         <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
         <div>
         </div>
-        <div className="mb-8 space-y-4">
+        <div className="mb-8 space-y-4 min-h-[20rem]">
         {filteredFemaleGuests.length > 0 ? (
               filteredFemaleGuests.map((guest, index) => (
                 <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
@@ -461,7 +465,7 @@ return (
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
         <div>
         </div>
-        <div className="mb-8 space-y-4">
+        <div className="mb-8 space-y-4 min-h-[20rem]">
         {filteredFemaleWaitListed.length > 0 ? (
               filteredFemaleWaitListed.map((guest, index) => (
                 <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
