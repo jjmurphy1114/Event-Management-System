@@ -316,10 +316,19 @@ const IndividualEventPage = () => {
   };
 
   // Extract male and female guests from the event object
-  const maleGuests = event.maleGuestList || [];
-  const femaleGuests = event.femaleGuestList || [];
-  const maleWaitListed = event.maleWaitList || [];
-  const femaleWaitListed = event.femaleWaitList || [];
+  // Filtered guest lists based on search input
+  const filteredMaleGuests = event?.maleGuestList?.filter((guest: Guest) =>
+    guest.name.toLowerCase().includes(guestName.toLowerCase())
+  ) || [];
+  const filteredFemaleGuests = event?.femaleGuestList?.filter((guest: Guest) =>
+    guest.name.toLowerCase().includes(guestName.toLowerCase())
+  ) || [];
+  const filteredMaleWaitListed = event?.maleWaitList?.filter((guest: Guest) =>
+    guest.name.toLowerCase().includes(guestName.toLowerCase())
+  ) || [];
+  const filteredFemaleWaitListed = event?.femaleWaitList?.filter((guest: Guest) =>
+    guest.name.toLowerCase().includes(guestName.toLowerCase())
+  ) || [];
 
 return (
 <div className="w-screen h-screen grid flex-col grid-cols-2 items-start bg-white shadow overflow-auto">
@@ -364,8 +373,8 @@ return (
         <div>
         </div>
         <div className="mb-8 space-y-4">
-          {maleGuests.length > 0 ? (
-            maleGuests.map((guest, index) => (
+          {filteredMaleGuests.length > 0 ? (
+            filteredMaleGuests.map((guest, index) => (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
                 <div className="grid-rows-2">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
@@ -393,8 +402,8 @@ return (
         <div>
         </div>
         <div className="mb-8 space-y-4">
-          {maleWaitListed.length > 0 ? (
-            maleWaitListed.map((guest, index) => (
+          {filteredMaleWaitListed.length > 0 ? (
+            filteredMaleWaitListed.map((guest, index) => (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
                 <div className="grid-rows-2">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
@@ -424,8 +433,8 @@ return (
         <div>
         </div>
         <div className="mb-8 space-y-4">
-        {femaleGuests.length > 0 ? (
-              femaleGuests.map((guest, index) => (
+        {filteredFemaleGuests.length > 0 ? (
+              filteredFemaleGuests.map((guest, index) => (
                 <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
                   <div className="grid-rows-2">
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
@@ -453,8 +462,8 @@ return (
         <div>
         </div>
         <div className="mb-8 space-y-4">
-        {femaleWaitListed.length > 0 ? (
-              femaleWaitListed.map((guest, index) => (
+        {filteredFemaleWaitListed.length > 0 ? (
+              filteredFemaleWaitListed.map((guest, index) => (
                 <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
                   <div className="grid-rows-2">
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
