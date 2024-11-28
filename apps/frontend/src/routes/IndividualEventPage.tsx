@@ -17,7 +17,7 @@ const IndividualEventPage = () => {
   const [notification, setNotification] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   const [eventName, setEventName] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userStatus, setUserStatus] = useState("");
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -71,12 +71,12 @@ const IndividualEventPage = () => {
           setError("Event not found.");
         }
 
-        // Fetch admin status for the current user
+        // Fetch status for the current user
         if (user) {
           const userRef = ref(database, `users/${user.uid}`);
           const userSnapshot = await get(userRef);
-          if (userSnapshot.exists() && userSnapshot.val().status === "Admin") {
-            setIsAdmin(true);
+          if (userSnapshot.exists()) {
+            setUserStatus(userSnapshot.val().status);
           }
         }
       } catch (fetchError) {
@@ -136,8 +136,8 @@ const IndividualEventPage = () => {
     const maxGuests = event.maxGuests;
   
     try {
-      if (isAdmin || totalUserGuests < maxGuests) {
-        if (gender === 'male' && (isAdmin || userAddedMales < maxMales)) {
+      if (userStatus === "Admin" || totalUserGuests < maxGuests) {
+        if (gender === 'male' && (userStatus  === "Admin" || userAddedMales < maxMales)) {
           console.log("Adding male guest to guest list:", newGuestData);
           const updatedMaleGuestList = [...(event.maleGuestList || []), newGuestData];
           const eventRef = ref(database, `events/${id}`);
@@ -154,7 +154,7 @@ const IndividualEventPage = () => {
           setGuestName('');
           setError('');
           setNotification("Male guest added successfully")
-        } else if (gender === 'female' && (isAdmin || userAddedFemales < maxFemales)) {
+        } else if (gender === 'female' && (userStatus === "Admin" || userAddedFemales < maxFemales)) {
           console.log("Adding female guest to guest list:", newGuestData);
           const updatedFemaleGuestList = [...(event.femaleGuestList || []), newGuestData];
           const eventRef = ref(database, `events/${id}`);
@@ -315,6 +315,50 @@ const IndividualEventPage = () => {
     }
   };
 
+  // Function to handle approving a guest from the waitlist
+  const handleApproveGuest = async (gender: 'male' | 'female', index: number) => {
+    if (!event) {
+      console.error("Event not available when trying to approve guest.");
+      return;
+    }
+  
+    try {
+      const eventRef = ref(database, `events/${id}`);
+      if (gender === 'male') {
+        const guestToApprove = event.maleWaitList[index];
+        const updatedMaleGuestList = [...(event.maleGuestList || []), guestToApprove];
+        const updatedMaleWaitList = event.maleWaitList.filter((_, i) => i !== index);
+  
+        await update(eventRef, { maleGuestList: updatedMaleGuestList, maleWaitList: updatedMaleWaitList });
+        console.log("Successfully moved male guest from waitlist to guest list in Firebase.");
+        setNotification("Approved male from waitlist")
+  
+        setEvent((prevEvent) => ({
+          ...prevEvent!,
+          maleGuestList: updatedMaleGuestList,
+          maleWaitList: updatedMaleWaitList,
+        }));
+      } else {
+        const guestToApprove = event.femaleWaitList[index];
+        const updatedFemaleGuestList = [...(event.femaleGuestList || []), guestToApprove];
+        const updatedFemaleWaitList = event.femaleWaitList.filter((_, i) => i !== index);
+  
+        await update(eventRef, { femaleGuestList: updatedFemaleGuestList, femaleWaitList: updatedFemaleWaitList });
+        console.log("Successfully moved female guest from waitlist to guest list in Firebase.");
+        setNotification("Approved female from waitlist");
+  
+        setEvent((prevEvent) => ({
+          ...prevEvent!,
+          femaleGuestList: updatedFemaleGuestList,
+          femaleWaitList: updatedFemaleWaitList,
+        }));
+      }
+    } catch (error) {
+      console.error(`Error approving ${gender} guest: `, error);
+      setError(`Failed to approve ${gender} guest. Please try again.`);
+    }
+  };
+
   // Extract male and female guests from the event object
   // Filtered guest lists based on search input
   const filteredMaleGuests = event?.maleGuestList?.filter((guest: Guest) =>
@@ -334,14 +378,14 @@ return (
 <div className="w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-white shadow overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
-       {/* Error message */}
-       <div className="min-h-[2rem]">
-       {error && <p className="text-red-500 text-center font-medium mb-2 min-h-[2rem]">{error}</p>}
+      {/* Error or Notification message */}
+      <div className="min-h-[2rem]">
+       {(error || notification) && (
+         <p className={`${error ? 'text-red-500' : 'text-green-500'} text-center font-medium mb-2 min-h-[2rem]`}>
+           {error || notification}
+         </p>
+       )}
        </div>
-        {/* Notification message */}
-        <div className="min-h-[2rem]">
-        {notification && <p className="text-green-500 text-center font-medium mb-2 min-h-[2rem]">{notification}</p>}
-        </div>
       </div>
       {/* Search Bar and Input Section */}
       <div className="flex flex-col items-center col-span-full mb-5 w-full">
@@ -384,7 +428,7 @@ return (
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                   <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                 </div>
-                {(user?.uid === guest.addedBy || isAdmin) && (
+                {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
                       onClick={() => handleDeleteGuest('male', index, 'guestList')}
                       className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
@@ -413,14 +457,22 @@ return (
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                   <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                 </div>
-                {(user?.uid === guest.addedBy || isAdmin) && (
+                {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
                       onClick={() => handleDeleteGuest('male', index, 'waitList')}
-                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                      className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
                     </button>
                   )}
+                {(userStatus === "Admin" || userStatus === "Social") && (
+                  <button
+                    onClick={() => handleApproveGuest('male', index)}
+                    className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
+                  >
+                    Approve
+                  </button>
+                )}
               </div>
             ))
           ) : (
@@ -444,7 +496,7 @@ return (
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                     <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                   </div>
-                  {(user?.uid === guest.addedBy || isAdmin) && (
+                  {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
                       onClick={() => handleDeleteGuest('female', index, 'guestList')}
                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
@@ -468,19 +520,27 @@ return (
         <div className="mb-8 space-y-4 min-h-[20rem]">
         {filteredFemaleWaitListed.length > 0 ? (
               filteredFemaleWaitListed.map((guest, index) => (
-                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
-                  <div className="grid-rows-2">
+                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                  <div className="grid-rows-2 w-full">
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                     <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                   </div>
-                  {(user?.uid === guest.addedBy || isAdmin) && (
+                  {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
                       onClick={() => handleDeleteGuest('female', index, 'waitList')}
-                      className="ml-auto bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                      className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
                     </button>
                   )}
+                  {(userStatus === "Admin" || userStatus === "Social") && (
+                  <button
+                    onClick={() => handleApproveGuest('female', index)}
+                    className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
+                  >
+                    Approve
+                  </button>
+                )}
                 </div>
               ))
             ) : (
