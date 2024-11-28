@@ -331,7 +331,7 @@ const IndividualEventPage = () => {
   ) || [];
 
 return (
-<div className="w-screen h-screen grid flex-col grid-cols-2 items-start bg-white shadow overflow-auto">
+<div className="w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-white shadow overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
        {/* Error message */}
@@ -368,7 +368,7 @@ return (
           </div>
       </div>
       {/* Guest Section */}
-      <div className="flex flex-col md:grid md:grid-cols-2 sm:grid-cols lg:col-span-full gap-4 w-full">
+      <div className="flex flex-col md:grid md:grid-cols-2 sm:grid-cols-1 lg:col-span-full gap-4 w-full">
       {/* Male Guests Section */}
       <>
       <div id="Male Section">
@@ -379,15 +379,15 @@ return (
         <div className="mb-8 space-y-4 min-h-[20rem]">
           {filteredMaleGuests.length > 0 ? (
             filteredMaleGuests.map((guest, index) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
-                <div className="grid-rows-2">
+              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                <div className="grid-rows-2 w-full">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                   <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                 </div>
                 {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
                       onClick={() => handleDeleteGuest('male', index, 'guestList')}
-                      className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 justify-end"
+                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
                     </button>
@@ -408,15 +408,15 @@ return (
         <div className="mb-8 space-y-4 min-h-[20rem]">
           {filteredMaleWaitListed.length > 0 ? (
             filteredMaleWaitListed.map((guest, index) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex justify-between items-center">
-                <div className="grid-rows-2">
+              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                  <div className="grid-rows-2 w-full">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                   <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                 </div>
                 {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
                       onClick={() => handleDeleteGuest('male', index, 'waitList')}
-                      className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600 justify-end"
+                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
                     </button>
@@ -432,22 +432,22 @@ return (
 
       {/* Female Guests Section */}
       <div id="Female Section">
-      <div className="flex-1 m-10">
+      <div className="flex-1 m-10 md:col-span-full md:w-auto">
         <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
         <div>
         </div>
         <div className="mb-8 space-y-4 min-h-[20rem]">
         {filteredFemaleGuests.length > 0 ? (
               filteredFemaleGuests.map((guest, index) => (
-                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex justify-between items-center">
-                  <div className="grid-rows-2">
+                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                  <div className="grid-rows-2 w-full">
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                     <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
                   </div>
                   {(user?.uid === guest.addedBy || isAdmin) && (
                     <button
                       onClick={() => handleDeleteGuest('female', index, 'guestList')}
-                      className="ml-auto bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                     className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
                     </button>
