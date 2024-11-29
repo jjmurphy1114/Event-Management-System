@@ -375,7 +375,7 @@ const IndividualEventPage = () => {
   ) || [];
 
 return (
-<div className="w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-white shadow overflow-auto">
+<div className="w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
       {/* Error or Notification message */}
@@ -386,6 +386,18 @@ return (
          </p>
        )}
        </div>
+      </div>
+       {/* Information Section */}
+       <div className="text-center col-span-full mb-5 w-full">
+        <p className="text-lg font-semibold text-gray-700">
+          There are {event?.femaleGuestList?.length || 0} females and {event?.maleGuestList?.length || 0} males on the list for a total of {(event?.femaleGuestList?.length || 0) + (event?.maleGuestList?.length || 0)} guests.
+        </p>
+        <p className="text-lg font-semibold text-gray-700">
+          You have added {countUserGuests(event?.femaleGuestList || [], user?.uid || '')} females and {countUserGuests(event?.maleGuestList || [], user?.uid || '')} males for a total of {countUserGuests(event?.femaleGuestList || [], user?.uid || '') + countUserGuests(event?.maleGuestList || [], user?.uid || '')}/{event.maxGuests} added.
+        </p>
+        <p className="text-lg font-semibold text-gray-700">
+          If everyone from the approval list was added, there would be {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0)} females and {(event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} males on the list. For a total of {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0) + (event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} guests.
+        </p>
       </div>
       {/* Search Bar and Input Section */}
       <div className="flex flex-col items-center col-span-full mb-5 w-full">
