@@ -18,6 +18,7 @@ const IndividualEventPage = () => {
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   const [eventName, setEventName] = useState("");
   const [userStatus, setUserStatus] = useState("");
+  const [hasPrivileges, setPrivileges] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -71,12 +72,14 @@ const IndividualEventPage = () => {
           setError("Event not found.");
         }
 
-        // Fetch status for the current user
+        // Fetch status and social privileges for the current user
         if (user) {
           const userRef = ref(database, `users/${user.uid}`);
           const userSnapshot = await get(userRef);
           if (userSnapshot.exists()) {
             setUserStatus(userSnapshot.val().status);
+            setPrivileges(userSnapshot.val().privileges);
+            console.log("Privileges: ", userSnapshot.val().privileges);
           }
         }
       } catch (fetchError) {
@@ -88,7 +91,7 @@ const IndividualEventPage = () => {
     };
   
     fetchEventAndUserData();
-  }, [id, user]);
+  }, [id, user, hasPrivileges]);
 
   // Guarded render
   if (loading) {
@@ -112,21 +115,25 @@ const IndividualEventPage = () => {
     }
 
     if (!event.open) {
+      setError("The event is closed and no guests can be added");
+      return;
+    }
+
+    if (!hasPrivileges) {
+      setError("You don't have social privileges and can't add guests");
       return;
     }
   
     const userId = user.uid;
-    const newGuestName = gender === 'male' ? guestName : guestName;
   
     // Ensure guest name is provided
-    if (!newGuestName) {
-      setError(`Guest name cannot be empty.`);
-      console.warn("Guest name was empty.");
+    if (!guestName) {
+      setError("Guest name cannot be empty.");
       return;
     }
   
-    // Flatten the newGuest object to ensure Firebase compatibility
-    const newGuestData = { name: newGuestName, addedBy: userId };
+    // Create new guest data
+    const newGuestData = { name: guestName, addedBy: userId };
     const userAddedMales = countUserGuests(event.maleGuestList || [], userId);
     const userAddedFemales = countUserGuests(event.femaleGuestList || [], userId);
     const totalUserGuests = userAddedMales + userAddedFemales;
@@ -137,47 +144,14 @@ const IndividualEventPage = () => {
   
     try {
       if (userStatus === "Admin" || totalUserGuests < maxGuests) {
-        if (gender === 'male' && (userStatus  === "Admin" || userAddedMales < maxMales)) {
-          console.log("Adding male guest to guest list:", newGuestData);
-          const updatedMaleGuestList = [...(event.maleGuestList || []), newGuestData];
-          const eventRef = ref(database, `events/${id}`);
-  
-          await update(eventRef, { maleGuestList: updatedMaleGuestList });
-          console.log("Successfully updated male guest list in Firebase.");
-  
-          // Update state with new guest list
-          setEvent((prevEvent) => ({
-            ...prevEvent!,
-            maleGuestList: updatedMaleGuestList,
-          }));
-  
-          setGuestName('');
-          setError('');
-          setNotification("Male guest added successfully")
-        } else if (gender === 'female' && (userStatus === "Admin" || userAddedFemales < maxFemales)) {
-          console.log("Adding female guest to guest list:", newGuestData);
-          const updatedFemaleGuestList = [...(event.femaleGuestList || []), newGuestData];
-          const eventRef = ref(database, `events/${id}`);
-  
-          await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
-          console.log("Successfully updated female guest list in Firebase.");
-  
-          // Update state with new guest list
-          setEvent((prevEvent) => ({
-            ...prevEvent!,
-            femaleGuestList: updatedFemaleGuestList,
-          }));
-  
-          setGuestName('');
-          setError('');
-          setNotification("Female guest added successfully")
+        if (gender === "male" && (userStatus === "Admin" || userAddedMales < maxMales)) {
+          await addGuestToMainList("maleGuestList", newGuestData);
+        } else if (gender === "female" && (userStatus === "Admin" || userAddedFemales < maxFemales)) {
+          await addGuestToMainList("femaleGuestList", newGuestData);
         } else {
-          setNotification(`Invite limit for ${gender} guests reached.`);
-          console.warn(`Invite limit for ${gender} guests reached.`);
+          await handleAddToWaitlist(gender, newGuestData);
         }
       } else {
-        // Add to waitlist if the user has reached their max invites
-        console.log("Adding guest to waitlist due to max invite limit.");
         await handleAddToWaitlist(gender, newGuestData);
       }
     } catch (error) {
@@ -185,48 +159,44 @@ const IndividualEventPage = () => {
       setError(`Failed to add ${gender} guest. Please try again.`);
     }
   };
-  
-  // Function to handle adding a guest to the waitlist
-  const handleAddToWaitlist = async (gender: 'male' | 'female', newGuestData: { name: string, addedBy: string }) => {
-    console.log("handleAddToWaitlist called with gender:", gender, "New guest data:", newGuestData);
-  
-    if (!event) {
-      console.error("Event not available when trying to add to waitlist.");
-      return;
-    }
-  
+
+  // Function to add a guest to the main list
+  const addGuestToMainList = async (listName: string, guestData: Guest) => {
     try {
+      const updatedGuestList = [...(event![listName] || []), guestData];
       const eventRef = ref(database, `events/${id}`);
-  
-      if (gender === 'male') {
-        const updatedMaleWaitList = [...(event.maleWaitList || []), newGuestData];
-  
-        console.log("Updating male waitlist in Firebase:", updatedMaleWaitList);
-        await update(eventRef, { maleWaitList: updatedMaleWaitList });
-        console.log("Successfully updated male waitlist in Firebase.");
-  
-        // Update the state to reflect the new waitlist
-        setEvent((prevEvent) => ({
-          ...prevEvent!,
-          maleWaitList: updatedMaleWaitList,
-        }));
-        setGuestName('');
-        setNotification(`Added to waitlist due to male invite limit.`);
-      } else {
-        const updatedFemaleWaitList = [...(event.femaleWaitList || []), newGuestData];
-  
-        console.log("Updating female waitlist in Firebase:", updatedFemaleWaitList);
-        await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
-        console.log("Successfully updated female waitlist in Firebase.");
-  
-        // Update the state to reflect the new waitlist
-        setEvent((prevEvent) => ({
-          ...prevEvent!,
-          femaleWaitList: updatedFemaleWaitList,
-        }));
-        setGuestName('');
-        setNotification(`Added to waitlist due to female invite limit.`);
-      }
+      await update(eventRef, { [listName]: updatedGuestList });
+
+      // Update state with new guest list
+      setEvent(prevEvent => ({
+        ...prevEvent!,
+        [listName]: updatedGuestList,
+      }));
+
+      setGuestName("");
+      setError("");
+      setNotification("Guest added successfully");
+    } catch (error) {
+      console.error(`Error updating ${listName}: `, error);
+      setError(`Failed to add guest. Please try again.`);
+    }
+  };
+
+  // Function to handle adding a guest to the waitlist
+  const handleAddToWaitlist = async (gender: 'male' | 'female', newGuestData: Guest) => {
+    const listName = gender === 'male' ? 'maleWaitList' : 'femaleWaitList';
+    try {
+      const updatedWaitList = [...(event![listName] || []), newGuestData];
+      const eventRef = ref(database, `events/${id}`);
+      await update(eventRef, { [listName]: updatedWaitList });
+
+      // Update the state to reflect the new waitlist
+      setEvent((prevEvent) => ({
+        ...prevEvent!,
+        [listName]: updatedWaitList,
+      }));
+      setGuestName('');
+      setNotification(`Added to ${gender} waitlist successfully.`);
     } catch (error) {
       console.error(`Error updating ${gender} waitlist: `, error);
       setError(`Failed to add guest to ${gender} waitlist. Please try again.`);
