@@ -19,6 +19,7 @@ const IndividualEventPage = () => {
   const [eventName, setEventName] = useState("");
   const [userStatus, setUserStatus] = useState("");
   const [hasPrivileges, setPrivileges] = useState(false);
+  const [frontDoorMode, setFrontDoorMode] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -33,6 +34,7 @@ const IndividualEventPage = () => {
           const eventData = snapshot.val();
           setEvent(eventData);
           setEventName(eventData.name);
+          setFrontDoorMode(eventData.frontDoorMode || false);
   
           // Ensure that guest lists are defined
           const maleGuestList = eventData.maleGuestList || [];
@@ -133,7 +135,7 @@ const IndividualEventPage = () => {
     }
   
     // Create new guest data
-    const newGuestData = { name: guestName, addedBy: userId };
+    const newGuestData = { name: guestName, addedBy: userId, checkedIn: -1 };
     const userAddedMales = countUserGuests(event.maleGuestList || [], userId);
     const userAddedFemales = countUserGuests(event.femaleGuestList || [], userId);
     const totalUserGuests = userAddedMales + userAddedFemales;
@@ -203,7 +205,45 @@ const IndividualEventPage = () => {
     }
   };
   
-  
+  // Function to handle toggling front door mode
+  const handleToggleFrontDoorMode = async () => {
+    if (!event.open){
+      try {
+        const eventRef = ref(database, `events/${id}`);
+        await update(eventRef, { frontDoorMode: !frontDoorMode });
+        setFrontDoorMode(!frontDoorMode);
+      } catch (error) {
+        console.error("Error toggling front door mode: ", error);
+        setError("Failed to toggle front door mode.");
+      }
+    } else {
+      setError("List must be closed to use front door mode");
+    }
+    
+  };
+
+  // Function to handle checking in a guest
+  const handleCheckInGuest = async (gender: 'male' | 'female', index: number) => {
+    if (!event) return;
+
+    try {
+      const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
+      const guestListName = gender === 'male' ? 'maleGuestList' : 'femaleGuestList';
+      const updatedGuestList = [...event[guestListName]];
+      updatedGuestList[index] = { ...updatedGuestList[index], checkedIn: checkedIn };
+
+      const eventRef = ref(database, `events/${id}`);
+      await update(eventRef, { [guestListName]: updatedGuestList });
+
+      setEvent((prevEvent) => ({
+        ...prevEvent!,
+        [guestListName]: updatedGuestList,
+      }));
+    } catch (error) {
+      console.error("Error checking in guest: ", error);
+      setError("Failed to check in guest.");
+    }
+  };
   
   // Function to get a user's name from their ID
   const getNameFromID = async (userID: string) => {
@@ -347,6 +387,19 @@ const IndividualEventPage = () => {
 return (
 <div className="w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
+      {userStatus === "Admin" && (
+        <div className="text-center col-span-full mb-4">
+          <label className="inline-flex items-center mt-3">
+            <input
+              type="checkbox"
+              checked={frontDoorMode}
+              onChange={handleToggleFrontDoorMode}
+              className="form-checkbox h-5 w-5 text-blue-600"
+            />
+            <span className="ml-2 text-gray-700">Front Door Mode</span>
+          </label>
+        </div>
+      )}
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
       {/* Error or Notification message */}
       <div className="min-h-[2rem]">
@@ -418,6 +471,15 @@ return (
                       Delete
                     </button>
                   )}
+                   {frontDoorMode && (
+                        <button
+                          onClick={() => handleCheckInGuest('male', index)}
+                          className="mt-2 ml-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-600"
+                          disabled={guest.checkedIn !== -1}
+                        >
+                          {guest.checkedIn === -1 ? 'Check In' : `${guest.checkedIn}`}
+                        </button>
+                   )}
               </div>
             ))
           ) : (
@@ -486,7 +548,16 @@ return (
                       Delete
                     </button>
                   )}
-                </div>
+                   {frontDoorMode && (
+                        <button
+                          onClick={() => handleCheckInGuest('female', index)}
+                          className="mt-2 ml-2 sm:mt-0 bg-pink-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-pink-600"
+                          disabled={guest.checkedIn !== -1}
+                        >
+                          {guest.checkedIn === -1 ? 'Check In' : `${guest.checkedIn}`}
+                        </button>
+                   )}
+              </div>
               ))
             ) : (
               <p className="text-gray-500">No female guests added yet.</p>
