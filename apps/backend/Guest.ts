@@ -2,12 +2,12 @@
 export default class Guest {
     name: string;
     addedBy: string;
-    checkedIn: boolean;
+    checkedIn: number;
   
     constructor(name: string, addedBy: string) {
       this.name = name;
       this.addedBy = addedBy;
-      this.checkedIn = false;
+      this.checkedIn = -1;
     }
   }
   
