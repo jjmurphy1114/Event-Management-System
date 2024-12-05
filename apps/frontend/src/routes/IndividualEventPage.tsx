@@ -396,7 +396,7 @@ const IndividualEventPage = () => {
       }
   
       // Create new guest data
-      const newGuestData = { name: vouchGuestName, addedBy: user.uid, checkedIn: -1 };
+      const newGuestData = { name: vouchGuestName, addedBy: user.uid, checkedIn: new Date().toLocaleString("en-US", { timeZone: "America/New_York" })};
   
       try {
         if (!event.open) { // Vouching is allowed even if the event is closed
@@ -438,7 +438,7 @@ return (
       {userStatus === "Admin" && (
         <div className="col-span-full mb-4 flex justify-center">
         <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">
-          <div className="relative">
+          <div className="relative my-1">
             <input
               type="checkbox"
               id="front-door-toggle"
@@ -459,10 +459,10 @@ return (
       )}
       {/* Vouch for Guest Section (President Only) */}
       {userStatus === "Admin" && frontDoorMode && (
-        <div className="flex justify-center items-center col-span-full mb-5 w-full">
+        <div className="flex justify-center items-center col-span-full mb-2 w-full">
           <button
             onClick={() => setIsVouching(true)}
-            className="bg-purple-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-purple-600 p-2"
+            className="bg-purple-500 text-white mx-4 my-1 rounded-md font-semibold hover:bg-purple-600 p-2"
           >
             Vouch (President Only)
           </button>
@@ -471,7 +471,7 @@ return (
       {isVouching && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-2xl font-bold mb-4">Vouch for Guest</h2>
+            <h2 className="text-2xl font-bold mb-4 text-black text-center">Vouch for Guest</h2>
             <input
               type="text"
               value={vouchGuestName}
@@ -486,7 +486,7 @@ return (
               placeholder="Enter password"
               className="w-full border border-gray-300 rounded-md px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-            <div className="flex justify-end">
+            <div className="flex justify-center items-center">
               <button
                 onClick={() => setIsVouching(false)}
                 className="bg-gray-500 text-white mx-2 rounded-md font-semibold hover:bg-gray-600 p-2"
@@ -495,16 +495,16 @@ return (
               </button>
               <button
                 onClick={() => handleVouchGuest('male')}
-                className="bg-blue-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
-             >
-              Vouch Male
-            </button>
-            <button
-              onClick={() => handleVouchGuest('female')}
-              className="bg-pink-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
-            >
-              Vouch Female
-            </button>
+                className="bg-blue-500 text-white mx-2 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
+              >
+                Vouch Male
+              </button>
+              <button
+                onClick={() => handleVouchGuest('female')}
+                className="bg-pink-500 text-white mx-2 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
+              >
+                Vouch Female
+              </button>
           </div>
         </div>
         </div>
