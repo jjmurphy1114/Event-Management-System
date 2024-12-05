@@ -20,6 +20,8 @@ const IndividualEventPage = () => {
   const [userStatus, setUserStatus] = useState("");
   const [hasPrivileges, setPrivileges] = useState(false);
   const [frontDoorMode, setFrontDoorMode] = useState(false);
+  const [vouchGuestName, setVouchGuestName] = useState("");
+  const [vouchPassword, setVouchPassword] = useState("");
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -221,29 +223,6 @@ const IndividualEventPage = () => {
     }
     
   };
-
-  // Function to handle checking in a guest
-  const handleCheckInGuest = async (gender: 'male' | 'female', index: number) => {
-    if (!event) return;
-
-    try {
-      const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-      const guestListName = gender === 'male' ? 'maleGuestList' : 'femaleGuestList';
-      const updatedGuestList = [...event[guestListName]];
-      updatedGuestList[index] = { ...updatedGuestList[index], checkedIn: checkedIn };
-
-      const eventRef = ref(database, `events/${id}`);
-      await update(eventRef, { [guestListName]: updatedGuestList });
-
-      setEvent((prevEvent) => ({
-        ...prevEvent!,
-        [guestListName]: updatedGuestList,
-      }));
-    } catch (error) {
-      console.error("Error checking in guest: ", error);
-      setError("Failed to check in guest.");
-    }
-  };
   
   // Function to get a user's name from their ID
   const getNameFromID = async (userID: string) => {
@@ -388,17 +367,26 @@ return (
 <div className="w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       {userStatus === "Admin" && (
-        <div className="text-center col-span-full mb-4">
-          <label className="inline-flex items-center mt-3">
+        <div className="col-span-full mb-4 flex justify-center">
+        <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">
+          <div className="relative">
             <input
               type="checkbox"
+              id="front-door-toggle"
               checked={frontDoorMode}
               onChange={handleToggleFrontDoorMode}
-              className="form-checkbox h-5 w-5 text-blue-600"
+              className="sr-only"
             />
-            <span className="ml-2 text-gray-700">Front Door Mode</span>
-          </label>
-        </div>
+            <div className={`block w-14 h-8 rounded-full transition ${frontDoorMode ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+            <div
+              className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
+                frontDoorMode ? 'transform translate-x-full' : ''
+              }`}
+            ></div>
+          </div>
+          <span className="ml-3 text-gray-700">Front Door Mode</span>
+        </label>
+      </div>
       )}
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
       {/* Error or Notification message */}
@@ -446,6 +434,39 @@ return (
             </button>
           </div>
       </div>
+       {/* Vouch for Guest Section (President Only)
+       {userStatus === "Admin" && (
+        <div className="flex flex-col items-center col-span-full mb-5 w-full">
+          <input
+            type="text"
+            value={vouchGuestName}
+            onChange={(e) => setVouchGuestName(e.target.value)}
+            placeholder="Enter guest name to vouch for"
+            className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <input
+            type="password"
+            value={vouchPassword}
+            onChange={(e) => setVouchPassword(e.target.value)}
+            placeholder="Enter password"
+            className="w-2/3 border border-gray-300 rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <div className="flex space m-2">
+            <button
+              onClick={() => handleVouchGuest('male')}
+              className="bg-blue-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
+            >
+              Vouch Male
+            </button>
+            <button
+              onClick={() => handleVouchGuest('female')}
+              className="bg-pink-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
+            >
+              Vouch Female
+            </button>
+          </div>
+        </div>
+      )} */}
       {/* Guest Section */}
       <div className="flex flex-col md:grid md:grid-cols-2 sm:grid-cols-1 lg:col-span-full gap-4 w-full">
       {/* Male Guests Section */}
