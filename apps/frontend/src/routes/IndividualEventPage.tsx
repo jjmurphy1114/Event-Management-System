@@ -22,6 +22,7 @@ const IndividualEventPage = () => {
   const [frontDoorMode, setFrontDoorMode] = useState(false);
   const [vouchGuestName, setVouchGuestName] = useState("");
   const [vouchPassword, setVouchPassword] = useState("");
+  const [isVouching, setIsVouching] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -253,6 +254,29 @@ const IndividualEventPage = () => {
     }
   }
 
+   // Function to handle checking in a guest
+   const handleCheckInGuest = async (gender: 'male' | 'female', index: number) => {
+    if (!event) return;
+
+    try {
+      const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
+      const guestListName = gender === 'male' ? 'maleGuestList' : 'femaleGuestList';
+      const updatedGuestList = [...event[guestListName]];
+      updatedGuestList[index] = { ...updatedGuestList[index], checkedIn: checkedIn };
+
+      const eventRef = ref(database, `events/${id}`);
+      await update(eventRef, { [guestListName]: updatedGuestList });
+
+      setEvent((prevEvent) => ({
+        ...prevEvent!,
+        [guestListName]: updatedGuestList,
+      }));
+    } catch (error) {
+      console.error("Error checking in guest: ", error);
+      setError("Failed to check in guest.");
+    }
+  };
+
   // Function to handle deleting guests from the list and on firebase
   const handleDeleteGuest = async (
     gender: 'male' | 'female',
@@ -348,6 +372,51 @@ const IndividualEventPage = () => {
     }
   };
 
+    // Function to handle vouching for a guest (President Only)
+    const handleVouchGuest = async (gender: 'male' | 'female') => {
+      if (!event || !user) {
+        console.error("Event or user not available. Event:", event, "User:", user);
+        return;
+      }
+  
+      if (userStatus !== "Admin") {
+        setError("Only Admins can vouch for guests.");
+        return;
+      }
+  
+      if (vouchPassword !== "ZetaMu1959!") { 
+        setError("Incorrect password. Please try again.");
+        return;
+      }
+  
+      // Ensure guest name is provided
+      if (!vouchGuestName) {
+        setError("Guest name cannot be empty.");
+        return;
+      }
+  
+      // Create new guest data
+      const newGuestData = { name: vouchGuestName, addedBy: user.uid, checkedIn: -1 };
+  
+      try {
+        if (!event.open) { // Vouching is allowed even if the event is closed
+          if (gender === "male") {
+            await addGuestToMainList("maleGuestList", newGuestData);
+          } else if (gender === "female") {
+            await addGuestToMainList("femaleGuestList", newGuestData);
+          }
+          setVouchGuestName("");
+          setVouchPassword("");
+          setIsVouching(false);
+        } else {
+          setError("Vouching can only be done when the event list is closed.");
+        }
+      } catch (error) {
+        console.error(`Error vouching for ${gender} guest: `, error);
+        setError(`Failed to vouch for ${gender} guest. Please try again.`);
+      }
+    };
+
   // Extract male and female guests from the event object
   // Filtered guest lists based on search input
   const filteredMaleGuests = event?.maleGuestList?.filter((guest: Guest) =>
@@ -387,6 +456,58 @@ return (
           <span className="ml-3 text-gray-700">Front Door Mode</span>
         </label>
       </div>
+      )}
+      {/* Vouch for Guest Section (President Only) */}
+      {userStatus === "Admin" && frontDoorMode && (
+        <div className="flex justify-center items-center col-span-full mb-5 w-full">
+          <button
+            onClick={() => setIsVouching(true)}
+            className="bg-purple-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-purple-600 p-2"
+          >
+            Vouch (President Only)
+          </button>
+        </div>
+      )}
+      {isVouching && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
+            <h2 className="text-2xl font-bold mb-4">Vouch for Guest</h2>
+            <input
+              type="text"
+              value={vouchGuestName}
+              onChange={(e) => setVouchGuestName(e.target.value)}
+              placeholder="Enter guest name"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="password"
+              value={vouchPassword}
+              onChange={(e) => setVouchPassword(e.target.value)}
+              placeholder="Enter password"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsVouching(false)}
+                className="bg-gray-500 text-white mx-2 rounded-md font-semibold hover:bg-gray-600 p-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleVouchGuest('male')}
+                className="bg-blue-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
+             >
+              Vouch Male
+            </button>
+            <button
+              onClick={() => handleVouchGuest('female')}
+              className="bg-pink-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
+            >
+              Vouch Female
+            </button>
+          </div>
+        </div>
+        </div>
       )}
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
       {/* Error or Notification message */}
@@ -434,39 +555,6 @@ return (
             </button>
           </div>
       </div>
-       {/* Vouch for Guest Section (President Only)
-       {userStatus === "Admin" && (
-        <div className="flex flex-col items-center col-span-full mb-5 w-full">
-          <input
-            type="text"
-            value={vouchGuestName}
-            onChange={(e) => setVouchGuestName(e.target.value)}
-            placeholder="Enter guest name to vouch for"
-            className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <input
-            type="password"
-            value={vouchPassword}
-            onChange={(e) => setVouchPassword(e.target.value)}
-            placeholder="Enter password"
-            className="w-2/3 border border-gray-300 rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <div className="flex space m-2">
-            <button
-              onClick={() => handleVouchGuest('male')}
-              className="bg-blue-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
-            >
-              Vouch Male
-            </button>
-            <button
-              onClick={() => handleVouchGuest('female')}
-              className="bg-pink-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
-            >
-              Vouch Female
-            </button>
-          </div>
-        </div>
-      )} */}
       {/* Guest Section */}
       <div className="flex flex-col md:grid md:grid-cols-2 sm:grid-cols-1 lg:col-span-full gap-4 w-full">
       {/* Male Guests Section */}
