@@ -85,8 +85,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       setError("Can't have a party without guests");
     } else {
       setError("");
-      addEventToDatabase(name, date, type, parseInt(maxMales), parseInt(maxFemales), parseInt(maxGuests), open);
-      setNewEvent({ name: '', date: '', type: '', maxMales: 0, maxFemales: 0, maxGuests: 0, open: true, maleGuestList: [], femaleGuestList: [], maleWaitList: [], femaleWaitList: [] }); // Clear form
+      addEventToDatabase(name, date, type, parseInt(maxMales), parseInt(maxFemales), parseInt(maxGuests), false);
+      setNewEvent({ name: '', date: '', type: '', maxMales: 0, maxFemales: 0, maxGuests: 0, open: false, maleGuestList: [], femaleGuestList: [], maleWaitList: [], femaleWaitList: [] }); // Clear form
     }
   };
 
@@ -135,14 +135,6 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const deleteEvent = (id: string) => {
     const eventRef = ref(database, `events/${id}`);
     remove(eventRef);
-  };
-
-   // Handle switch toggle for open/close event
-   const toggleEventOpen = (id: string, currentStatus: boolean) => {
-    const eventRef = ref(database, `events/${id}`);
-    update(eventRef, { open: !currentStatus })
-      .then(() => console.log("Event open status updated"))
-      .catch((error) => console.error("Error updating event:", error));
   };
 
   return (
@@ -217,17 +209,6 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               value={newEvent.maxGuests}
               onChange={(e) => setNewEvent({ ...newEvent, maxGuests: e.target.value })}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-          <div>
-            <label htmlFor="open" className="block text-sm font-medium text-gray-700">Open List?</label>
-            <input
-              id="open"
-              type="checkbox"
-              checked={newEvent.open}
-              onChange={(e) => setNewEvent({ ...newEvent, open: e.target.checked })}
-              className="border border-gray-300 rounded-md px-4 py-2 mt-2 focus:outline-none"
-              style={{ transform: 'scale(2)'}}
             />
           </div>
             <button
@@ -322,16 +303,6 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 <p className="text-gray-600">Max Male Guests Per: {event.maxMales}</p>
                 <p className="text-gray-600">Max Female Guests Per: {event.maxFemales}</p>
                 <p className="text-gray-600">Max Invites Per: {event.maxGuests}</p>
-                {/* Toggle Switch for Open/Closed */}
-                <p className="text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={event.open}
-                      onChange={() => toggleEventOpen(event.id, event.open)}
-                      className="mr-2"
-                    />
-                    {event.open ? "List Open" : "List Closed"}
-                  </p>
                 <button
                   onClick={() => handleEditEvent(event.id)}
                   className="mt-4 mr-2 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600"
