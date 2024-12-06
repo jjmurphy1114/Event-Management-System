@@ -417,6 +417,32 @@ const IndividualEventPage = () => {
       }
     };
 
+  // Function to export the entire guest list as CSV
+  const exportGuestListAsCSV = () => {
+    if (!event) return;
+
+    const headers = ["Guest Name", "Added By", "Gender", "Checked In"];
+    const rows = [];
+
+    // Add male guests
+    event.maleGuestList?.forEach((guest: Guest) => {
+      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Male", guest.checkedIn !== -1 ? guest.checkedIn : "Not Checked In"]);
+    });
+
+    // Add female guests
+    event.femaleGuestList?.forEach((guest: Guest) => {
+      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Female", guest.checkedIn !== -1 ? guest.checkedIn : "Not Checked In"]);
+    });
+
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${eventName}_guest_list.csv`);
+    link.click();
+  };  
+
   // Extract male and female guests from the event object
   // Filtered guest lists based on search input
   const filteredMaleGuests = event?.maleGuestList?.filter((guest: Guest) =>
@@ -712,6 +738,14 @@ return (
       </div>
       </div>
       </>
+      <div className="flex items-start">
+      <button
+            onClick={exportGuestListAsCSV}
+            className="bg-purple-500 text-white mx-4 mb-5 rounded-md font-semibold hover:bg-purple-600 p-2"
+          >
+            Download CSV
+          </button>
+      </div>
       </div>
     </div>
   );
