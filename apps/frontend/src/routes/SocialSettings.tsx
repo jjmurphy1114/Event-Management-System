@@ -98,8 +98,9 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
 
   return (
     <div className="h-screen w-screen bg-gradient-to-b from-blue-50 to-gray-100 p-10 pt-20">
+      <h1 className="text-4xl font-bold text-center col-span-full my-2 text-gray-800 w-100 h-10">Manage Users</h1>
       <div className="container mx-auto bg-white p-6 shadow-md rounded-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-700">Manage Users</h1>
+        
         <table className="min-w-full bg-white text-gray-700 items-center text-center">
           <thead>
             <tr>

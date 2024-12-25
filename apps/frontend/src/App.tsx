@@ -19,6 +19,7 @@ import SocialSettings from "./routes/SocialSettings";
 import User from "../../backend/User";
 import Banner from "./elements/Banner";
 import IndividualEventPage from "./routes/IndividualEventPage.tsx";
+import BlacklistPage from "./routes/BlacklistPage.tsx";
 
 
 const auth = getAuth();
@@ -164,6 +165,10 @@ const router = createBrowserRouter([
       {
         path: "/events/:id",
         element: <ProtectedRoute element={<IndividualEventPage/>} />
+      },
+      {
+        path: "/blacklist",
+        element: <RoleProtectedRoute allowedStatuses={["Admin"]} element={<BlacklistPage/>}/>
       },
 
 
