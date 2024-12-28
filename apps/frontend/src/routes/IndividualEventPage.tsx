@@ -38,8 +38,13 @@ const IndividualEventPage = () => {
           const eventData = snapshot.val();
           setEvent(eventData);
           setEventName(eventData.name);
-          setFrontDoorMode(eventData.frontDoorMode || false);
-  
+
+          if (!eventData.open){
+            setFrontDoorMode(eventData.frontDoorMode || false);
+          } else {
+            setFrontDoorMode(false);
+          }
+         
           // Ensure that guest lists are defined
           const maleGuestList = eventData.maleGuestList || [];
           const femaleGuestList = eventData.femaleGuestList || [];
@@ -51,7 +56,8 @@ const IndividualEventPage = () => {
             setError("The event list is currently closed and no guests can be added");
           }
 
-  
+
+
           // Fetch user names for all guests
           const guestListUserIDs = [
             ...new Set([
@@ -142,8 +148,12 @@ const IndividualEventPage = () => {
     }
 
     if (!event.open) {
-      setError("The event is closed and no guests can be added");
-      return;
+      if (userStatus === "Admin" && !frontDoorMode){
+        setNotification("The list is closed but u good");
+      } else {
+        setError("The event is closed and no guests can be added");
+        return;
+      }
     }
 
     if (!hasPrivileges) {
@@ -254,6 +264,7 @@ const IndividualEventPage = () => {
         setError("Failed to toggle front door mode.");
       }
     } else {
+      setFrontDoorMode(false);
       setError("List must be closed to use front door mode");
     }
     
@@ -291,6 +302,10 @@ const IndividualEventPage = () => {
    // Function to handle checking in a guest
    const handleCheckInGuest = async (gender: 'male' | 'female', index: number) => {
     if (!event) return;
+
+    if( !(userStatus === "Admin")){
+      return;
+    }
 
     try {
       const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
@@ -640,7 +655,7 @@ return (
                       Delete
                     </button>
                   )}
-                   {frontDoorMode && (
+                   {frontDoorMode &&  (
                         <button
                           onClick={() => handleCheckInGuest('male', index)}
                           className="mt-2 ml-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-600"
@@ -717,7 +732,7 @@ return (
                       Delete
                     </button>
                   )}
-                   {frontDoorMode && (
+                   {frontDoorMode && userStatus === "Admin" && (
                         <button
                           onClick={() => handleCheckInGuest('female', index)}
                           className="mt-2 ml-2 sm:mt-0 bg-pink-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-pink-600"
