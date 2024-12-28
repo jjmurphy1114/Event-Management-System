@@ -646,25 +646,25 @@ return (
                 <div className="grid-rows-2 w-full">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                   <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
-                </div>
-                {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+        </div>
+        {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
                       onClick={() => handleDeleteGuest('male', index, 'guestList')}
-                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                     className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
                     </button>
                   )}
-                   {frontDoorMode &&  (
-                        <button
-                          onClick={() => handleCheckInGuest('male', index)}
-                          className="mt-2 ml-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-600"
-                          disabled={guest.checkedIn !== -1}
-                        >
-                          {guest.checkedIn === -1 ? 'Check In' : `${guest.checkedIn}`}
-                        </button>
-                   )}
-              </div>
+          {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+            <button
+              onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
+              className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600`}
+              disabled={guest.checkedIn !== -1}
+            >
+              {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+            </button>
+          )}
+        </div>
             ))
           ) : (
             <p className="text-gray-500">No male guests added yet.</p>
@@ -732,16 +732,16 @@ return (
                       Delete
                     </button>
                   )}
-                   {frontDoorMode && userStatus === "Admin" && (
-                        <button
-                          onClick={() => handleCheckInGuest('female', index)}
-                          className="mt-2 ml-2 sm:mt-0 bg-pink-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-pink-600"
-                          disabled={guest.checkedIn !== -1}
-                        >
-                          {guest.checkedIn === -1 ? 'Check In' : `${guest.checkedIn}`}
-                        </button>
+                   {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+                      <button
+                        onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
+                        className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-pink-500 text-white hover:bg-pink-600`}
+                        disabled={guest.checkedIn !== -1}
+                      >
+                        {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+                      </button>
                    )}
-              </div>
+            </div>
               ))
             ) : (
               <p className="text-gray-500">No female guests added yet.</p>
