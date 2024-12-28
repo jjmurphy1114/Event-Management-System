@@ -23,6 +23,7 @@ const IndividualEventPage = () => {
   const [vouchGuestName, setVouchGuestName] = useState("");
   const [vouchPassword, setVouchPassword] = useState("");
   const [isVouching, setIsVouching] = useState(false);
+  const [blacklist, setBlacklist] = useState<string[]>([]);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -94,8 +95,29 @@ const IndividualEventPage = () => {
         setLoading(false);
       }
     };
-  
+
+    const fetchBlacklist = async (): Promise<string[]> => {
+      try {
+        const blacklistRef = ref(database, "blacklist");
+        const snapshot = await get(blacklistRef);
+        if (snapshot.exists()) {
+          return Object.keys(snapshot.val());
+        } else {
+          return [];
+        }
+      } catch (err) {
+        console.error("Error fetching blacklist:", err);
+        return [];
+      }
+    };
+
+    const loadBlacklist = async () => {
+      const blacklistData = await fetchBlacklist();
+      setBlacklist(blacklistData);
+    };
+
     fetchEventAndUserData();
+    loadBlacklist();
   }, [id, user, hasPrivileges]);
 
   // Guarded render
@@ -167,6 +189,12 @@ const IndividualEventPage = () => {
 
   // Function to add a guest to the main list
   const addGuestToMainList = async (listName: string, guestData: Guest) => {
+    
+    if (blacklist.includes(guestData.name.trim())) {
+      setError("This guest is blacklisted and cannot be added.");
+      return;
+    }
+    
     try {
       const updatedGuestList = [...(event![listName] || []), guestData];
       const eventRef = ref(database, `events/${id}`);
@@ -190,6 +218,12 @@ const IndividualEventPage = () => {
   // Function to handle adding a guest to the waitlist
   const handleAddToWaitlist = async (gender: 'male' | 'female', newGuestData: Guest) => {
     const listName = gender === 'male' ? 'maleWaitList' : 'femaleWaitList';
+    
+    if (blacklist.includes(newGuestData.name.trim())) {
+      setError("This guest is blacklisted and cannot be added.");
+      return;
+    }
+    
     try {
       const updatedWaitList = [...(event![listName] || []), newGuestData];
       const eventRef = ref(database, `events/${id}`);
