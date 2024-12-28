@@ -93,11 +93,15 @@ const BlacklistPage = () => {
     return <div className="text-center mt-20 text-red-500 text-xl">{error}</div>;
   }
 
+  const filteredBlacklist = blacklist.filter((name: String) => 
+        name.toLowerCase().includes(guestName.toLowerCase())
+    ) || [];
+
   return (
     <div className="h-screen w-screen overflow-auto bg-gradient-to-b from-blue-50 to-gray-100 py-10 px-5 md:px-20">
       <h1 className="text-4xl font-bold text-center col-span-full mt-10 text-gray-800 w-100 h-10">Blacklist Management</h1>
       <div className="bg-white shadow-md rounded-lg p-6 mt-5">
-        <div className="mb-6 justify-center">
+        <div className="mb-6">
           <input
             type="text"
             value={guestName}
@@ -105,22 +109,25 @@ const BlacklistPage = () => {
             placeholder="Enter Guest Name"
             className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
-          <button
-            onClick={handleAddToBlacklist}
-            className="mt-4 w-50 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-          >
-            Add to Blacklist
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={handleAddToBlacklist}
+              className="mt-4 w-50 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+            >
+              Add to Blacklist
+            </button>
+          </div>
+          
         </div>
 
         {notification && (
           <p className="text-green-500 text-center font-medium mt-4">{notification}</p>
         )}
 
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Blacklisted Guests</h2>
-        {blacklist.length > 0 ? (
-          <ul className="space-y-4">
-            {blacklist.map((name, idx) => (
+        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">Blacklisted Guests</h2>
+        {filteredBlacklist.length > 0 ? (
+          <ul className="space-y-2">
+            {filteredBlacklist.map((name, idx) => (
               <li
                 key={idx}
                 className="p-4 border border-gray-200 rounded-lg flex justify-between items-center"
