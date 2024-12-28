@@ -85,6 +85,10 @@ const changeStatus = async (userId: string, newStatus: string) => {
   const userSnapshot = await get(userRef);
   const user = userSnapshot.val();
 
+  if (userStatus != "Admin"){
+    return;
+  }
+
   // Only update if approved is true
   if (user && user.approved === true) {
     update(userRef, { status: newStatus });
@@ -141,6 +145,7 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
                     value={user.status}
                     onChange={(e) => changeStatus(user.id, e.target.value)}
                     className="border p-2 text-white"
+                    disabled={userStatus != "Admin"}
                   >
                     <option value="Default">Default</option>
                     <option value="Social">Social</option>
