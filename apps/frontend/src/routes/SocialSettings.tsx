@@ -8,7 +8,10 @@ import { getAuth } from 'firebase/auth';
 
 export default function SocialSettings() {
   const [users, setUsers] = useState<User[]>([]);
+  const [userStatus, setUserStatus] = useState("");
   const navigate = useNavigate();
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   // Fetch users from Firebase when the component loads
   useEffect(() => {
@@ -18,6 +21,19 @@ export default function SocialSettings() {
       const loadedUsers = data ? Object.keys(data).map((key) => ({ id: key, ...data[key] })) : [];
       setUsers(loadedUsers);
     });
+
+    const getUserData = async () => {
+      // Fetch status and social privileges for the current user
+      if (user) {
+        const userRef = ref(database, `users/${user.uid}`);
+        const userSnapshot = await get(userRef);
+        if (userSnapshot.exists()) {
+          setUserStatus(userSnapshot.val().status);
+        }
+      }
+    }
+    
+    getUserData();
   }, []);
 
   // Approve a user by updating their "approved" status in Firebase
@@ -91,14 +107,19 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
   }
 };
 
-  const handleRedirect = () => {
-    navigate('/');
+  const handleRedirectBlacklist = () => {
+    if (userStatus === "Admin"){
+      navigate('/blacklist');
+    }
   }
 
 
   return (
     <div className="h-screen w-screen bg-gradient-to-b from-blue-50 to-gray-100 p-10 pt-20">
       <h1 className="text-4xl font-bold text-center col-span-full my-2 text-gray-800 w-100 h-10">Manage Users</h1>
+      <button className='bg-red-500 mb-2' onClick={handleRedirectBlacklist}>
+        Manage Blacklist (Admin)
+      </button>
       <div className="container mx-auto bg-white p-6 shadow-md rounded-lg">
         
         <table className="min-w-full bg-white text-gray-700 items-center text-center">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ref, get, update, remove } from "firebase/database";
+import { ref, get, update, remove, set } from "firebase/database";
 import { database } from "../../../backend/firebaseConfig";
 import { getAuth } from "firebase/auth";
 
@@ -18,7 +18,7 @@ const BlacklistPage = () => {
         const blacklistRef = ref(database, "blacklist");
         const snapshot = await get(blacklistRef);
         if (snapshot.exists()) {
-          setBlacklist(Object.values(snapshot.val()));
+          setBlacklist(Object.keys(snapshot.val()));
         } else {
           setBlacklist([]);
         }
@@ -48,21 +48,15 @@ const BlacklistPage = () => {
   }, [user]);
 
   const handleAddToBlacklist = async () => {
-    if (!guestName) {
+    if (!guestName.trim()) {
       setError("Guest name is required.");
       return;
     }
 
-    if (blacklist.includes(guestName)) {
-      setError("This guest is already on the blacklist.");
-      return;
-    }
-
     try {
-      const blacklistRef = ref(database, "blacklist");
-      const updatedBlacklist = [...blacklist, guestName];
-      await update(blacklistRef, updatedBlacklist.reduce((obj, name, idx) => ({ ...obj, [idx]: name }), {}));
-      setBlacklist(updatedBlacklist);
+      const blacklistRef = ref(database, `blacklist/${guestName}`);
+      await set(blacklistRef, true); // Store a truthy value (e.g., true) to represent the name in the blacklist
+      setBlacklist((prev) => [...prev, guestName]);
       setGuestName("");
       setError("");
       setNotification("Guest added to the blacklist.");
@@ -74,10 +68,9 @@ const BlacklistPage = () => {
 
   const handleRemoveFromBlacklist = async (name: string) => {
     try {
-      const blacklistRef = ref(database, "blacklist");
-      const updatedBlacklist = blacklist.filter((guest) => guest !== name);
-      await update(blacklistRef, updatedBlacklist.reduce((obj, name, idx) => ({ ...obj, [idx]: name }), {}));
-      setBlacklist(updatedBlacklist);
+      const blacklistRef = ref(database, `blacklist/${name}`);
+      await remove(blacklistRef);
+      setBlacklist((prev) => prev.filter((guest) => guest !== name));
       setNotification("Guest removed from the blacklist.");
     } catch (err) {
       console.error("Error removing from blacklist:", err);
@@ -95,7 +88,7 @@ const BlacklistPage = () => {
 
   const filteredBlacklist = blacklist.filter((name: String) => 
         name.toLowerCase().includes(guestName.toLowerCase())
-    ) || [];
+  );
 
   return (
     <div className="h-screen w-screen overflow-auto bg-gradient-to-b from-blue-50 to-gray-100 py-10 px-5 md:px-20">
