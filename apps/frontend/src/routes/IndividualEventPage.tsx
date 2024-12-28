@@ -23,6 +23,7 @@ const IndividualEventPage = () => {
   const [vouchGuestName, setVouchGuestName] = useState("");
   const [vouchPassword, setVouchPassword] = useState("");
   const [isVouching, setIsVouching] = useState(false);
+  const [blacklist, setBlacklist] = useState<string[]>([]);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -37,8 +38,13 @@ const IndividualEventPage = () => {
           const eventData = snapshot.val();
           setEvent(eventData);
           setEventName(eventData.name);
-          setFrontDoorMode(eventData.frontDoorMode || false);
-  
+
+          if (!eventData.open){
+            setFrontDoorMode(eventData.frontDoorMode || false);
+          } else {
+            setFrontDoorMode(false);
+          }
+         
           // Ensure that guest lists are defined
           const maleGuestList = eventData.maleGuestList || [];
           const femaleGuestList = eventData.femaleGuestList || [];
@@ -50,7 +56,8 @@ const IndividualEventPage = () => {
             setError("The event list is currently closed and no guests can be added");
           }
 
-  
+
+
           // Fetch user names for all guests
           const guestListUserIDs = [
             ...new Set([
@@ -94,8 +101,29 @@ const IndividualEventPage = () => {
         setLoading(false);
       }
     };
-  
+
+    const fetchBlacklist = async (): Promise<string[]> => {
+      try {
+        const blacklistRef = ref(database, "blacklist");
+        const snapshot = await get(blacklistRef);
+        if (snapshot.exists()) {
+          return Object.keys(snapshot.val());
+        } else {
+          return [];
+        }
+      } catch (err) {
+        console.error("Error fetching blacklist:", err);
+        return [];
+      }
+    };
+
+    const loadBlacklist = async () => {
+      const blacklistData = await fetchBlacklist();
+      setBlacklist(blacklistData);
+    };
+
     fetchEventAndUserData();
+    loadBlacklist();
   }, [id, user, hasPrivileges]);
 
   // Guarded render
@@ -120,8 +148,12 @@ const IndividualEventPage = () => {
     }
 
     if (!event.open) {
-      setError("The event is closed and no guests can be added");
-      return;
+      if (userStatus === "Admin" && !frontDoorMode){
+        setNotification("The list is closed but u good");
+      } else {
+        setError("The event is closed and no guests can be added");
+        return;
+      }
     }
 
     if (!hasPrivileges) {
@@ -167,6 +199,12 @@ const IndividualEventPage = () => {
 
   // Function to add a guest to the main list
   const addGuestToMainList = async (listName: string, guestData: Guest) => {
+    
+    if (blacklist.includes(guestData.name.trim())) {
+      setError("This guest is blacklisted and cannot be added.");
+      return;
+    }
+    
     try {
       const updatedGuestList = [...(event![listName] || []), guestData];
       const eventRef = ref(database, `events/${id}`);
@@ -190,6 +228,12 @@ const IndividualEventPage = () => {
   // Function to handle adding a guest to the waitlist
   const handleAddToWaitlist = async (gender: 'male' | 'female', newGuestData: Guest) => {
     const listName = gender === 'male' ? 'maleWaitList' : 'femaleWaitList';
+    
+    if (blacklist.includes(newGuestData.name.trim())) {
+      setError("This guest is blacklisted and cannot be added.");
+      return;
+    }
+    
     try {
       const updatedWaitList = [...(event![listName] || []), newGuestData];
       const eventRef = ref(database, `events/${id}`);
@@ -220,6 +264,7 @@ const IndividualEventPage = () => {
         setError("Failed to toggle front door mode.");
       }
     } else {
+      setFrontDoorMode(false);
       setError("List must be closed to use front door mode");
     }
     
@@ -257,6 +302,10 @@ const IndividualEventPage = () => {
    // Function to handle checking in a guest
    const handleCheckInGuest = async (gender: 'male' | 'female', index: number) => {
     if (!event) return;
+
+    if( !(userStatus === "Admin")){
+      return;
+    }
 
     try {
       const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
@@ -417,6 +466,32 @@ const IndividualEventPage = () => {
       }
     };
 
+  // Function to export the entire guest list as CSV
+  const exportGuestListAsCSV = () => {
+    if (!event) return;
+
+    const headers = ["Guest Name", "Added By", "Gender", "Checked In"];
+    const rows = [];
+
+    // Add male guests
+    event.maleGuestList?.forEach((guest: Guest) => {
+      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Male", guest.checkedIn !== -1 ? guest.checkedIn : "Not Checked In"]);
+    });
+
+    // Add female guests
+    event.femaleGuestList?.forEach((guest: Guest) => {
+      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Female", guest.checkedIn !== -1 ? guest.checkedIn : "Not Checked In"]);
+    });
+
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${eventName}_guest_list.csv`);
+    link.click();
+  };  
+
   // Extract male and female guests from the event object
   // Filtered guest lists based on search input
   const filteredMaleGuests = event?.maleGuestList?.filter((guest: Guest) =>
@@ -571,25 +646,25 @@ return (
                 <div className="grid-rows-2 w-full">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                   <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
-                </div>
-                {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+        </div>
+        {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
                       onClick={() => handleDeleteGuest('male', index, 'guestList')}
-                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                     className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                     >
                       Delete
                     </button>
                   )}
-                   {frontDoorMode && (
-                        <button
-                          onClick={() => handleCheckInGuest('male', index)}
-                          className="mt-2 ml-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-600"
-                          disabled={guest.checkedIn !== -1}
-                        >
-                          {guest.checkedIn === -1 ? 'Check In' : `${guest.checkedIn}`}
-                        </button>
-                   )}
-              </div>
+          {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+            <button
+              onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
+              className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600`}
+              disabled={guest.checkedIn !== -1}
+            >
+              {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+            </button>
+          )}
+        </div>
             ))
           ) : (
             <p className="text-gray-500">No male guests added yet.</p>
@@ -657,16 +732,16 @@ return (
                       Delete
                     </button>
                   )}
-                   {frontDoorMode && (
-                        <button
-                          onClick={() => handleCheckInGuest('female', index)}
-                          className="mt-2 ml-2 sm:mt-0 bg-pink-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-pink-600"
-                          disabled={guest.checkedIn !== -1}
-                        >
-                          {guest.checkedIn === -1 ? 'Check In' : `${guest.checkedIn}`}
-                        </button>
+                   {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+                      <button
+                        onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
+                        className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-pink-500 text-white hover:bg-pink-600`}
+                        disabled={guest.checkedIn !== -1}
+                      >
+                        {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+                      </button>
                    )}
-              </div>
+            </div>
               ))
             ) : (
               <p className="text-gray-500">No female guests added yet.</p>
@@ -712,6 +787,14 @@ return (
       </div>
       </div>
       </>
+      <div className="flex items-start">
+      <button
+            onClick={exportGuestListAsCSV}
+            className="bg-purple-500 text-white mx-4 mb-5 rounded-md font-semibold hover:bg-purple-600 p-2"
+          >
+            Download CSV
+          </button>
+      </div>
       </div>
     </div>
   );

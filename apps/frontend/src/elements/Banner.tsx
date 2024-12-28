@@ -2,11 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
+import { database } from "../../../backend/firebaseConfig";
+import { ref, get } from "firebase/database";
 import bannerImage from '../assets/ZM Parties.png';
 
 function Banner() {
   const auth = getAuth();
   const [user, setUser] = useState<any>(null);
+  const [userStatus, setUserStatus] = useState("");
   const [loading, setLoading] = useState(true); // Loading state for auth
 
   useEffect(() => {
@@ -15,8 +18,21 @@ function Banner() {
       setUser(currentUser);
       setLoading(false); // Stop loading once auth state is determined
     });
+
+    // Fetch status for the current user
+    const fetchUserStatus = async () => {
+      if (user) {
+        const userRef = ref(database, `users/${user.uid}`);
+        const userSnapshot = await get(userRef);
+        if (userSnapshot.exists()) {
+          setUserStatus(userSnapshot.val().status);
+        }
+      }
+    }
+    
+  fetchUserStatus();
     return () => unsubscribe();
-  }, [auth]);
+  }, [auth, user]);
 
   const handleSignOut = () => {
     signOut(auth).catch((error) => console.error("Error signing out:", error));
@@ -40,15 +56,16 @@ function Banner() {
 
           {/* Nav Links */}
           <div className="hidden md:flex space-x-4">
-            <Link to="/" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-              Home
-            </Link>
-            <Link to="/events" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-              Events
-            </Link>
-            <Link to="/social-settings" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-              Social Settings
-            </Link>
+            {(userStatus === "Admin" || userStatus === "Social") && (
+               <>
+               <Link to="/events" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                Events
+              </Link>
+             <Link to="/social-settings" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+               Social Settings
+             </Link>
+             </>
+            )}
           </div>
 
           {/* User Profile / Login */}
