@@ -14,7 +14,7 @@ dist-ssr
 .turbo
 
 # Firebase config
-apps/backend/zm-parties-service-account-key.json
+**/zm-parties-service-account-key.json
 
 # Editor directories and files
 .vscode/*

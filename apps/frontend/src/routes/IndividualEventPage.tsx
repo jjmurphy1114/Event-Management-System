@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { database } from "../../../backend/firebaseConfig";
+import { database } from "backend/src/firebaseConfig";
 import { ref, get, update} from "firebase/database";
-import Event from "../../../backend/Event";
-import Guest from "../../../backend/Guest";
-import User from "../../../backend/User";
+import Event from "backend/src/Event";
+import Guest from "backend/src/Guest";
 import { getAuth } from "firebase/auth";
 
 const IndividualEventPage = () => {

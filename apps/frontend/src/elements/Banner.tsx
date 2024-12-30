@@ -1,20 +1,19 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { useState, useEffect } from "react";
-import { database } from "../../../backend/firebaseConfig";
+import { database } from "backend/src/firebaseConfig";
 import { ref, get } from "firebase/database";
 import bannerImage from '../assets/ZM Parties.png';
 
 function Banner() {
   const auth = getAuth();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userStatus, setUserStatus] = useState("");
   const [loading, setLoading] = useState(true); // Loading state for auth
 
   useEffect(() => {
     // Track auth state changes to ensure user info is loaded on first render
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser: User | null) => {
       setUser(currentUser);
       setLoading(false); // Stop loading once auth state is determined
     });

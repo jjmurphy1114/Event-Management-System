@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, set } from 'firebase/database'; // Or use Firestore for more flexibility
-import { database } from '../../../backend/firebaseConfig'; // Your Firebase config
+import { database } from 'backend/src/firebaseConfig'; // Your Firebase config
 import { useNavigate } from 'react-router-dom';
-import User from '../../../backend/User';
+import User from 'backend/src/User';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState<string>('');

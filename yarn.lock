@@ -2658,7 +2658,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:^22.10.2"
     nodemon: "npm:^3.1.7"
-    ts-node: "npm:^10.9.2"
     tsx: "npm:^4.19.2"
     typescript: "npm:^5.6.3"
   languageName: unknown

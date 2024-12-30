@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { ref, get, update, remove, set } from "firebase/database";
-import { database } from "../../../backend/firebaseConfig";
+import { useEffect, useState } from "react";
+import { ref, get, remove, set } from "firebase/database";
+import { database } from "backend/src/firebaseConfig";
 import { getAuth } from "firebase/auth";
 
 const BlacklistPage = () => {
@@ -86,7 +86,7 @@ const BlacklistPage = () => {
     return <div className="text-center mt-20 text-red-500 text-xl">{error}</div>;
   }
 
-  const filteredBlacklist = blacklist.filter((name: String) => 
+  const filteredBlacklist = blacklist.filter((name: string) =>
         name.toLowerCase().includes(guestName.toLowerCase())
   );
 

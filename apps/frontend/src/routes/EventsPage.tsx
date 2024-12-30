@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ref, push, onValue, set, update, remove, Database } from "firebase/database";
-import Event from '../../../backend/Event'
-import Guest from '../../../backend/Guest';
+import Event from 'backend/src/Event'
+import Guest from 'backend/src/Guest';
 import { useNavigate } from 'react-router-dom';
 
 interface EventsPageProps {

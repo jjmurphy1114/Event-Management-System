@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 import { ref, get, child } from "firebase/database";
-import { database } from '../../../backend/firebaseConfig';
+import { database } from 'backend/src/firebaseConfig';
 
 export default function LoginPage() { 
   const [email, setEmail] = useState<string>('');
@@ -30,12 +30,12 @@ export default function LoginPage() {
       }
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        setError(`Login failed: ${errorMessage}`);
+        setError(`Login failed! Code: ${error.code} | Message: ${error.message}`);
       });
   };
 
+  // @ts-expect-error Handler is unused at the moment
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleLogout = () => {
     signOut(auth)
       .then(() => {

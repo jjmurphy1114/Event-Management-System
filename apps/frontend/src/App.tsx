@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import './App.css';
 import { useEffect, useState } from "react";
-import { database } from 'backend/firebaseConfig.ts';
+import { database } from 'backend/src/firebaseConfig.ts';
 import { ref, get } from "firebase/database";
 import { onAuthStateChanged, getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import EventsPage from './routes/EventsPage';

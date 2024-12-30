@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon",
-    "deploy": "ts-node --transpile-only server.ts"
+    "build": "tsc",
+    "deploy": "tsx ./src/server.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }

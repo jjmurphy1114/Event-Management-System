@@ -1,13 +1,16 @@
 import express from 'express';
 import admin from 'firebase-admin';
 import cors from 'cors';
-import serviceAccount from './zm-parties-service-account-key.json' assert { type: 'json' };
-
+import serviceAccountJSON from 'backend/lib/zm-parties-service-account-key.json';
 
 // Initialize Firebase Admin SDK (once)
 if (admin.apps.length === 0) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert({
+      projectId: serviceAccountJSON.project_id,
+      clientEmail: serviceAccountJSON.client_email,
+      privateKey: serviceAccountJSON.private_key,
+    }),
     databaseURL: 'https://zm-parties-2-default-rtdb.firebaseio.com/',
   });
 }

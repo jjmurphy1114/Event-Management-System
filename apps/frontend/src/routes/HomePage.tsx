@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ref, onValue, update } from 'firebase/database';
-import { database } from '../../../backend/firebaseConfig';
+import { database } from 'backend/src/firebaseConfig';
 import { Link } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
-import Event from '../../../backend/Event';
+import Event from 'backend/src/Event';
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([]);

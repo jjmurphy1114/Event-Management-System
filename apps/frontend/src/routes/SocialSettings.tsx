@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ref, onValue, update, remove, get } from 'firebase/database';
-import { database } from '../../../backend/firebaseConfig'; // Firebase config
-import User from '../../../backend/User';
+import { database } from 'backend/src/firebaseConfig'; // Firebase config
+import User from 'backend/src/User';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';

@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import * as serviceAccount from "./zm-parties-service-account-key.json";  // Replace with your actual service account file
+import * as serviceAccount from "backend/lib/zm-parties-service-account-key.json";  // Replace with your actual service account file
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
