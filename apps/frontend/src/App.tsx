@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 import './App.css';
 import { useEffect, useState } from "react";
-import { database } from '../../backend/firebaseConfig';
-import { ref, get, child } from "firebase/database";
+import { database } from 'backend/firebaseConfig.ts';
+import { ref, get } from "firebase/database";
 import { onAuthStateChanged, getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import EventsPage from './routes/EventsPage';
 import HomePage from './routes/HomePage';
@@ -16,7 +16,6 @@ import LoginPage from "./routes/LoginPage";
 import SignUpPage from "./routes/SignUpPage";
 import WaitingApproval from "./routes/WaitingApproval";
 import SocialSettings from "./routes/SocialSettings";
-import User from "../../backend/User";
 import Banner from "./elements/Banner";
 import IndividualEventPage from "./routes/IndividualEventPage.tsx";
 import BlacklistPage from "./routes/BlacklistPage.tsx";
