@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.turbo
 
 # Firebase config
 apps/backend/zm-parties-service-account-key.json
