@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 .turbo
+build
 
 # Firebase config
 **/zm-parties-service-account-key.json

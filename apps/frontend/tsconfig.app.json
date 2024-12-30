@@ -7,8 +7,6 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    "types": ["firebase/compat"],
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
