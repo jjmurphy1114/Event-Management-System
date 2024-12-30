@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "deploy": "ts-node --transpile-only server.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

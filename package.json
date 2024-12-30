@@ -8,10 +8,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"yarn workspace frontend dev\" \"yarn workspace backend dev\"",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "eslint ."
   },
   "dependencies": {
     "axios": "^1.7.7",
