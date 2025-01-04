@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ref, push, onValue, set, update, remove, Database } from "firebase/database";
-import Event from 'backend/src/Event'
-import Guest from 'backend/src/Guest';
+import Event, {emptyEvent, EventType, validateAndReturnEvent} from 'backend/src/Event';
 import { useNavigate } from 'react-router-dom';
 
 interface EventsPageProps {
@@ -10,19 +9,7 @@ interface EventsPageProps {
 
 const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [newEvent, setNewEvent] = useState({
-    name: '',
-    date: '',
-    type: '',
-    maxMales: 0,
-    maxFemales: 0,
-    maxGuests: 0,
-    open: true,
-    maleGuestList: [] as Guest[],
-    femaleGuestList: [] as Guest[],
-    maleWaitList: [] as Guest[],
-    femaleWaitList: [] as Guest[],
-  });
+  const [newEvent, setNewEvent] = useState(emptyEvent);
   const eventsRef = ref(database, 'events');
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -39,7 +26,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       const data = snapshot.val();
       const eventList: Event[] = [];
       for (const id in data) {
-        eventList.push({ id, ...data[id] });
+        const eventData: EventType | undefined = validateAndReturnEvent(data[id]);
+        if(eventData) {
+          eventList.push(new Event(eventData));
+        }
       }
       setEvents(eventList);
     });
@@ -48,28 +38,18 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
  
   // Function to add an event to Firebase
   function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number, maxGuests: number, open: boolean) {
-    const event = new Event(name, date, type, maxMales, maxFemales, maxGuests, open);
+    const event = new Event({id: '', name: name, date: date, type: type, maxMales: maxMales, maxFemales: maxFemales, maxGuests: maxGuests, open: open});
     const newEventRef = push(eventsRef); // Creates a unique ID
-    set(newEventRef, {
-      name: event.name,
-      date: event.date,
-      type: event.type,
-      maxMales: event.maxMales,
-      maxFemales: event.maxFemales,
-      maxGuests: event.maxGuests,
-      open: event.open,
-      maleGuestList: event.maleGuestList,
-      femaleGuestList: event.femaleGuestList,
-      maleWaitList: event.maleWaitList,
-      femaleWaitList: event.femaleWaitList,
-    })
+    if(newEventRef.key) event.id = newEventRef.key;
+    console.log(event.toJSON());
+    set(newEventRef, event.toJSON())
       .then(() => console.log("Event added to Firebase"))
       .catch((error) => console.error("Error adding event:", error));
   }
 
   // Handler for form submission
   const handleAddEvent = () => {
-    const { name, date, type, maxMales, maxFemales, maxGuests, open } = newEvent;
+    const { name, date, type, maxMales, maxFemales, maxGuests } = newEvent;
     // Make sure none of the fields are empty
     if (name == ""){
       setError("Name is required");
@@ -85,8 +65,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       setError("Can't have a party without guests");
     } else {
       setError("");
-      addEventToDatabase(name, date, type, parseInt(maxMales), parseInt(maxFemales), parseInt(maxGuests), false);
-      setNewEvent({ name: '', date: '', type: '', maxMales: 0, maxFemales: 0, maxGuests: 0, open: false, maleGuestList: [], femaleGuestList: [], maleWaitList: [], femaleWaitList: [] }); // Clear form
+      addEventToDatabase(name, date, type, maxMales as number, maxFemales as number, maxGuests as number, false);
+      setNewEvent(emptyEvent); // Clear form
     }
   };
 
@@ -97,7 +77,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
   const handleSaveEdit = (id: string) => {
+    console.log(`EventID: ${id}`);
     const updatedEvent = events.find((event) => event.id === id);
+
+    if(updatedEvent) console.log(updatedEvent);
     if (updatedEvent) {
       if (updatedEvent.name == ""){
         setEditError("Name is required");
@@ -157,7 +140,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               id="name"
               type="text"
               value={newEvent.name}
-              onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, name: e.target.value }))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
@@ -167,7 +150,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               id="date"
               type="date"
               value={newEvent.date}
-              onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, date: e.target.value }))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
@@ -177,7 +160,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               id="type"
               type="text"
               value={newEvent.type}
-              onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, type: e.target.value }))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
@@ -187,7 +170,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               id="males"
               type="number"
               value={newEvent.maxMales}
-              onChange={(e) => setNewEvent({ ...newEvent, maxMales: e.target.value })}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxMales: parseInt(e.target.value)}))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
@@ -197,7 +180,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               id="females"
               type="number"
               value={newEvent.maxFemales}
-              onChange={(e) => setNewEvent({ ...newEvent, maxFemales: e.target.value })}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxFemales: parseInt(e.target.value) }))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
@@ -207,7 +190,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               id="maxGuests"
               type="number"
               value={newEvent.maxGuests}
-              onChange={(e) => setNewEvent({ ...newEvent, maxGuests: e.target.value })}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxGuests: parseInt(e.target.value) }))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
@@ -234,7 +217,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   id="editName"
                   type="text"
                   value={event.name}
-                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, name: e.target.value } : ev)))}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, name: e.target.value }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
               </div>
@@ -244,7 +227,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   id="editDate"
                   type="date"
                   value={event.date}
-                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, date: e.target.value } : ev)))}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, date: e.target.value }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
               </div>
@@ -254,7 +237,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   id="editType"
                   type="text"
                   value={event.type}
-                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, type: e.target.value } : ev)))}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, type: e.target.value }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
               </div>
@@ -264,7 +247,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   id="editMales"
                   type="number"
                   value={event.maxMales}
-                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, maxMales: e.target.value } : ev)))}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxMales: parseInt(e.target.value) }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
               </div>
@@ -274,7 +257,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   id="editFemales"
                   type="number"
                   value={event.maxFemales}
-                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, maxFemales: e.target.value } : ev)))}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxFemales: parseInt(e.target.value) }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
               </div>
@@ -284,7 +267,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   id="editMaxGuests"
                   type="number"
                   value={event.maxGuests}
-                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? { ...ev, maxGuests: e.target.value } : ev)))}
+                  onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxGuests: parseInt(e.target.value) }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
               </div>

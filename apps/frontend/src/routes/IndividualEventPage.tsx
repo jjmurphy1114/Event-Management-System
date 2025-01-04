@@ -205,12 +205,12 @@ const IndividualEventPage = () => {
     }
     
     try {
-      const updatedGuestList = [...(event![listName] || []), guestData];
+      const updatedGuestList = [...(event!.getListFromName(listName) || []), guestData];
       const eventRef = ref(database, `events/${id}`);
       await update(eventRef, { [listName]: updatedGuestList });
 
       // Update state with new guest list
-      setEvent(prevEvent => ({
+      setEvent(prevEvent => new Event({
         ...prevEvent!,
         [listName]: updatedGuestList,
       }));
@@ -234,12 +234,12 @@ const IndividualEventPage = () => {
     }
     
     try {
-      const updatedWaitList = [...(event![listName] || []), newGuestData];
+      const updatedWaitList = [...(event!.getListFromName(listName) || []), newGuestData];
       const eventRef = ref(database, `events/${id}`);
       await update(eventRef, { [listName]: updatedWaitList });
 
       // Update the state to reflect the new waitlist
-      setEvent((prevEvent) => ({
+      setEvent((prevEvent) => new Event({
         ...prevEvent!,
         [listName]: updatedWaitList,
       }));
@@ -315,7 +315,7 @@ const IndividualEventPage = () => {
       const eventRef = ref(database, `events/${id}`);
       await update(eventRef, { [guestListName]: updatedGuestList });
 
-      setEvent((prevEvent) => ({
+      setEvent((prevEvent) => new Event({
         ...prevEvent!,
         [guestListName]: updatedGuestList,
       }));
@@ -339,7 +339,7 @@ const IndividualEventPage = () => {
           const updatedMaleGuestList = event.maleGuestList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { maleGuestList: updatedMaleGuestList });
-          setEvent((prevEvent) => ({
+          setEvent((prevEvent) => new Event({
             ...prevEvent!,
             maleGuestList: updatedMaleGuestList,
           }));
@@ -347,7 +347,7 @@ const IndividualEventPage = () => {
           const updatedMaleWaitList = event.maleWaitList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { maleWaitList: updatedMaleWaitList });
-          setEvent((prevEvent) => ({
+          setEvent((prevEvent) => new Event({
             ...prevEvent!,
             maleWaitList: updatedMaleWaitList,
           }));
@@ -357,7 +357,7 @@ const IndividualEventPage = () => {
           const updatedFemaleGuestList = event.femaleGuestList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
-          setEvent((prevEvent) => ({
+          setEvent((prevEvent) => new Event({
             ...prevEvent!,
             femaleGuestList: updatedFemaleGuestList,
           }));
@@ -365,7 +365,7 @@ const IndividualEventPage = () => {
           const updatedFemaleWaitList = event.femaleWaitList.filter((_, i) => i !== index);
           const eventRef = ref(database, `events/${id}`);
           await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
-          setEvent((prevEvent) => ({
+          setEvent((prevEvent) => new Event({
             ...prevEvent!,
             femaleWaitList: updatedFemaleWaitList,
           }));
@@ -394,7 +394,7 @@ const IndividualEventPage = () => {
         console.log("Successfully moved male guest from waitlist to guest list in Firebase.");
         setNotification("Approved male from waitlist")
   
-        setEvent((prevEvent) => ({
+        setEvent((prevEvent) => new Event({
           ...prevEvent!,
           maleGuestList: updatedMaleGuestList,
           maleWaitList: updatedMaleWaitList,
@@ -408,7 +408,7 @@ const IndividualEventPage = () => {
         console.log("Successfully moved female guest from waitlist to guest list in Firebase.");
         setNotification("Approved female from waitlist");
   
-        setEvent((prevEvent) => ({
+        setEvent((prevEvent) => new Event({
           ...prevEvent!,
           femaleGuestList: updatedFemaleGuestList,
           femaleWaitList: updatedFemaleWaitList,
@@ -470,17 +470,19 @@ const IndividualEventPage = () => {
     if (!event) return;
 
     const headers = ["Guest Name", "Added By", "Gender", "Checked In"];
-    const rows = [];
+    const rows: string[][] = [];
 
     // Add male guests
     event.maleGuestList?.forEach((guest: Guest) => {
-      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Male", guest.checkedIn !== -1 ? guest.checkedIn : "Not Checked In"]);
+      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Male", guest.checkedIn !== -1 ? guest.checkedIn as string : "Not Checked In"]);
     });
 
     // Add female guests
     event.femaleGuestList?.forEach((guest: Guest) => {
-      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Female", guest.checkedIn !== -1 ? guest.checkedIn : "Not Checked In"]);
+      rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Female", guest.checkedIn !== -1 ? guest.checkedIn as string : "Not Checked In"]);
     });
+
+    console.log(rows);
 
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
