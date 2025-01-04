@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { database } from "backend/src/firebaseConfig";
 import { ref, get, update} from "firebase/database";
-import Event from "backend/src/Event";
+import Event, {EventType, validateAndReturnEvent} from "backend/src/Event";
 import Guest from "backend/src/Guest";
 import { getAuth } from "firebase/auth";
 
@@ -35,8 +35,12 @@ const IndividualEventPage = () => {
         const snapshot = await get(eventRef);
         if (snapshot.exists()) {
           const eventData = snapshot.val();
-          setEvent(eventData);
-          setEventName(eventData.name);
+          const validatedEventData: EventType | undefined = validateAndReturnEvent(eventData);
+
+          if(validatedEventData) {
+            setEvent(new Event(validatedEventData));
+            setEventName(validatedEventData.name);
+          }
 
           if (!eventData.open){
             setFrontDoorMode(eventData.frontDoorMode || false);
