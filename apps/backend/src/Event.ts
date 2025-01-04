@@ -17,6 +17,13 @@ export type EventType = {
     femaleWaitList?: Guest[]
 }
 
+export enum GuestList {
+    MaleGuestList = "maleGuestList",
+    FemaleGuestList = "femaleGuestList",
+    MaleWaitList = "maleWaitList",
+    FemaleWaitList = "femaleWaitList",
+}
+
 const eventSchema = z.object({
     id: z.string(),
     name: z.string(),

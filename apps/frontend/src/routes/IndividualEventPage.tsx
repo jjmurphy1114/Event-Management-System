@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { database } from "backend/src/firebaseConfig";
-import { ref, get, update} from "firebase/database";
-import Event, {EventType, validateAndReturnEvent} from "backend/src/Event";
+import {useEffect, useState} from "react";
+import {useParams} from "react-router-dom";
+import {database} from "backend/src/firebaseConfig";
+import {get, ref, update} from "firebase/database";
+import Event, {EventType, GuestList, validateAndReturnEvent} from "backend/src/Event";
 import Guest from "backend/src/Guest";
-import { getAuth } from "firebase/auth";
+import {getAuth} from "firebase/auth";
 
 const IndividualEventPage = () => {
   
@@ -185,9 +185,9 @@ const IndividualEventPage = () => {
     try {
       if (userStatus === "Admin" || totalUserGuests < maxGuests) {
         if (gender === "male" && (userStatus === "Admin" || userAddedMales < maxMales)) {
-          await addGuestToMainList("maleGuestList", newGuestData);
+          await addGuestToMainList(GuestList.MaleGuestList, newGuestData);
         } else if (gender === "female" && (userStatus === "Admin" || userAddedFemales < maxFemales)) {
-          await addGuestToMainList("femaleGuestList", newGuestData);
+          await addGuestToMainList(GuestList.FemaleGuestList, newGuestData);
         } else {
           await handleAddToWaitlist(gender, newGuestData);
         }
@@ -201,7 +201,7 @@ const IndividualEventPage = () => {
   };
 
   // Function to add a guest to the main list
-  const addGuestToMainList = async (listName: string, guestData: Guest) => {
+  const addGuestToMainList = async (listName: GuestList, guestData: Guest) => {
     
     if (blacklist.includes(guestData.name.trim())) {
       setError("This guest is blacklisted and cannot be added.");
@@ -209,7 +209,7 @@ const IndividualEventPage = () => {
     }
     
     try {
-      const updatedGuestList = [...(event!.getListFromName(listName) || []), guestData];
+      const updatedGuestList = [...(event![listName] || []), guestData];
       const eventRef = ref(database, `events/${id}`);
       await update(eventRef, { [listName]: updatedGuestList });
 
@@ -230,7 +230,7 @@ const IndividualEventPage = () => {
 
   // Function to handle adding a guest to the waitlist
   const handleAddToWaitlist = async (gender: 'male' | 'female', newGuestData: Guest) => {
-    const listName = gender === 'male' ? 'maleWaitList' : 'femaleWaitList';
+    const listName: GuestList = gender === 'male' ? GuestList.MaleWaitList : GuestList.FemaleWaitList;
     
     if (blacklist.includes(newGuestData.name.trim())) {
       setError("This guest is blacklisted and cannot be added.");
@@ -238,7 +238,7 @@ const IndividualEventPage = () => {
     }
     
     try {
-      const updatedWaitList = [...(event!.getListFromName(listName) || []), newGuestData];
+      const updatedWaitList = [...(event![listName] || []), newGuestData];
       const eventRef = ref(database, `events/${id}`);
       await update(eventRef, { [listName]: updatedWaitList });
 
@@ -453,9 +453,9 @@ const IndividualEventPage = () => {
       try {
         if (!event.open) { // Vouching is allowed even if the event is closed
           if (gender === "male") {
-            await addGuestToMainList("maleGuestList", newGuestData);
+            await addGuestToMainList(GuestList.MaleGuestList, newGuestData);
           } else if (gender === "female") {
-            await addGuestToMainList("femaleGuestList", newGuestData);
+            await addGuestToMainList(GuestList.FemaleGuestList, newGuestData);
           }
           setVouchGuestName("");
           setVouchPassword("");
