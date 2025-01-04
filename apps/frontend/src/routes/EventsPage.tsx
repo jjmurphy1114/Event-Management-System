@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { ref, push, onValue, set, update, remove, Database } from "firebase/database";
 import Event, {emptyEvent, EventType, validateAndReturnEvent} from 'backend/src/Event';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ interface EventsPageProps {
 const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [newEvent, setNewEvent] = useState(emptyEvent);
-  const eventsRef = ref(database, 'events');
+  const eventsRef = useRef(ref(database, 'events')).current;
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [editError, setEditError] = useState('');
@@ -33,7 +33,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       }
       setEvents(eventList);
     });
-  }, [database]);
+  }, [database, eventsRef]);
 
  
   // Function to add an event to Firebase
@@ -63,6 +63,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       setError("Sausage party!! Fix this asap");
     } else if (maxGuests <= 0){
       setError("Can't have a party without guests");
+    } else if (Number.isNaN(maxMales) || Number.isNaN(maxFemales) || Number.isNaN(maxGuests)) {
+      setError("You gotta enter a number you numnut");
+    } else if (maxMales + maxFemales > maxGuests) {
+      setError("Put the blocks down and focus you business major, set max invites to number of males and females. Or more I don't care");
     } else {
       setError("");
       addEventToDatabase(name, date, type, maxMales as number, maxFemales as number, maxGuests as number, false);
@@ -93,7 +97,11 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       } else if (updatedEvent.maxFemales <= 0){
         setEditError("WHY WOULD YOU REMOVE THEM BRUH");
       }  else if (updatedEvent.maxGuests <= 0){
-        setError("Can't have a party without guests");
+        setEditError("Can't have a party without guests");
+      } else if (Number.isNaN(updatedEvent.maxMales) || Number.isNaN(updatedEvent.maxFemales) || Number.isNaN(updatedEvent.maxGuests)) {
+        setEditError("You gotta enter a number you numnut");
+      } else if (updatedEvent.maxMales + updatedEvent.maxFemales > updatedEvent.maxGuests) {
+        setEditError("Put the blocks down and focus you business major, set max invites to number of males and females. Or more I don't care");
       } else {
         setEditError('');
         const eventRef = ref(database, `events/${id}`);
@@ -169,7 +177,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
             <input
               id="males"
               type="number"
-              value={newEvent.maxMales}
+              value={Number.isNaN(newEvent.maxMales) ? "" : newEvent.maxMales}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, maxMales: parseInt(e.target.value)}))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -179,7 +187,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
             <input
               id="females"
               type="number"
-              value={newEvent.maxFemales}
+              value={Number.isNaN(newEvent.maxFemales) ? "" : newEvent.maxFemales}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, maxFemales: parseInt(e.target.value) }))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -189,7 +197,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
             <input
               id="maxGuests"
               type="number"
-              value={newEvent.maxGuests}
+              value={Number.isNaN(newEvent.maxGuests) ? "" : newEvent.maxGuests}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, maxGuests: parseInt(e.target.value) }))}
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -246,7 +254,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 <input
                   id="editMales"
                   type="number"
-                  value={event.maxMales}
+                  value={Number.isNaN(event.maxMales) ? "" : event.maxMales}
                   onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxMales: parseInt(e.target.value) }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
@@ -256,7 +264,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 <input
                   id="editFemales"
                   type="number"
-                  value={event.maxFemales}
+                  value={Number.isNaN(event.maxFemales) ? "" : event.maxFemales}
                   onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxFemales: parseInt(e.target.value) }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
@@ -266,7 +274,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 <input
                   id="editMaxGuests"
                   type="number"
-                  value={event.maxGuests}
+                  value={Number.isNaN(event.maxGuests) ? "" : event.maxGuests}
                   onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxGuests: parseInt(e.target.value) }) : ev)))}
                   className="border p-2 w-full mb-2"
                 />
