@@ -3,12 +3,12 @@ import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase
 import { ref, set } from 'firebase/database'; // Or use Firestore for more flexibility
 import { database } from 'backend/src/firebaseConfig'; // Your Firebase config
 import { useNavigate } from 'react-router-dom';
-import User from 'backend/src/User';
+import User, {defaultUserType} from 'backend/src/User';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [newUser, setNewUser] = useState<User>({displayName: '', email: '', approved: false, status: 'Default', privileges: false});
+  const [newUser, setNewUser] = useState<User>(new User(defaultUserType));
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
   const auth = getAuth();
@@ -17,6 +17,7 @@ export default function SignUpPage() {
   const handleSignUp = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
+          console.log("Account created in firebase authentication");
         const user = userCredential.user;
 
         // Set display name for the user
@@ -24,13 +25,16 @@ export default function SignUpPage() {
           displayName: name, // Set display name here
         })
         .then(() => {
+            console.log("Display name updated");
           // Save user info in the database, including the display name
           const userRef = ref(database, `users/${user.uid}`);
-          set(userRef, {...newUser});
-
-          console.log('Sign-up successful with display name:', user.displayName);
-          setError('');
-          navigate('/waiting-approval'); // Navigate to approval page after sign-up
+          set(userRef, {...newUser.params}).then(() => {
+              console.log('Sign-up successful with display name:', user.displayName);
+              setError('');
+              navigate('/waiting-approval'); // Navigate to approval page after sign-up
+          }).catch((err) => {
+              console.error(`Account creation in database failed: ${err}`);
+          });
         })
         .catch((error) => {
           setError(`Failed to set display name: ${error.message}`);
@@ -43,12 +47,12 @@ export default function SignUpPage() {
 
   const handleNameInput = (name: string) => {
     setName(name);
-    setNewUser({...newUser, displayName: name});
+    setNewUser(new User({...newUser.params, displayName: name}));
   }
 
   const handleEmailInput = (email: string) => {
     setEmail(email);
-    setNewUser({...newUser, email: email});
+    setNewUser(new User({...newUser.params, email: email}));
   }
 
   return (

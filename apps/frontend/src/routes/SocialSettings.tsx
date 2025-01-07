@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ref, onValue, update, remove, get } from 'firebase/database';
 import { database } from 'backend/src/firebaseConfig'; // Firebase config
-import User from 'backend/src/User';
+import User, {UserType, validateAndReturnUser} from 'backend/src/User';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
@@ -18,7 +18,15 @@ export default function SocialSettings() {
     const usersRef = ref(database, 'users');
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
-      const loadedUsers = data ? Object.keys(data).map((key) => ({ id: key, ...data[key] })) : [];
+
+      const loadedUsers: User[] = [];
+
+      for(const id in data) {
+        const userData: UserType | undefined = validateAndReturnUser({id, ...data[id]});
+
+        if(userData) loadedUsers.push(new User(userData));
+      }
+
       setUsers(loadedUsers);
     });
 
@@ -33,13 +41,17 @@ export default function SocialSettings() {
       }
     }
     
-    getUserData();
-  }, []);
+    getUserData().then(() => {
+      console.log("Fetched user data");
+    });
+  }, [user]);
 
   // Approve a user by updating their "approved" status in Firebase
   const approveUser = (userId: string) => {
     const userRef = ref(database, `users/${userId}`);
-    update(userRef, { approved: true });
+    update(userRef, { approved: true }).then(() => {
+      console.log("Updated user data");
+    });
   };
 
   const deleteUser = async (id: string) => {
@@ -91,7 +103,9 @@ const changeStatus = async (userId: string, newStatus: string) => {
 
   // Only update if approved is true
   if (user && user.approved === true) {
-    update(userRef, { status: newStatus });
+    update(userRef, { status: newStatus }).then(() => {
+      console.log("User status updated");
+    });
   } else {
     console.error("User must be approved to change status.");
   }
@@ -105,7 +119,9 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
 
   // Only update if approved is true
   if (user && user.approved === true) {
-    update(userRef, { privileges: newPrivileges });
+    update(userRef, { privileges: newPrivileges }).then(() => {
+      console.log("User social privileges updated");
+    });
   } else {
     console.error("User must be approved to change privileges.");
   }
