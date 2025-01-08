@@ -589,7 +589,7 @@ return (
         </div>
         </div>
       )}
-      <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
+      <div className="text-xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
       {/* Error or Notification message */}
       <div className="min-h-[2rem]">
        {(error || notification) && (
