@@ -41,9 +41,7 @@ export default function SocialSettings() {
       }
     }
     
-    getUserData().then(() => {
-      console.log("Fetched user data");
-    });
+    getUserData().then();
   }, [user]);
 
   // Approve a user by updating their "approved" status in Firebase
@@ -149,7 +147,7 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
               <th className="py-2">Email</th>
               <th className="py-2">Status</th>
               <th className="py-2">Actions</th>
-              <th className='py-2'>Has Social Priviliges?</th>
+              <th className='py-2'>Has Social Privileges?</th>
               <th className='py-2'>Delete User</th>
             </tr>
           </thead>

@@ -61,7 +61,7 @@ const IndividualEventPage = () => {
 
 
 
-          // Fetch user names for all guests
+          // Fetch usernames for all guests
           const guestListUserIDs = [
             ...new Set([
               ...maleGuestList.map((g: Guest) => g.addedBy),
@@ -125,8 +125,8 @@ const IndividualEventPage = () => {
       setBlacklist(blacklistData);
     };
 
-    fetchEventAndUserData();
-    loadBlacklist();
+    fetchEventAndUserData().then();
+    loadBlacklist().then();
   }, [id, user, hasPrivileges]);
 
   // Guarded render
@@ -650,7 +650,7 @@ return (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
                 <div className="grid-rows-2 w-full">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
         </div>
         {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
@@ -688,7 +688,7 @@ return (
               <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
                   <div className="grid-rows-2 w-full">
                   <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
                 </div>
                 {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
@@ -727,7 +727,7 @@ return (
                 <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
                   <div className="grid-rows-2 w-full">
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
                   </div>
                   {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button
@@ -765,7 +765,7 @@ return (
                 <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
                   <div className="grid-rows-2 w-full">
                     <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy); return 'Loading...'; })()}</p>
+                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
                   </div>
                   {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                     <button

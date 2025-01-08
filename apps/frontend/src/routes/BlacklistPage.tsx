@@ -30,7 +30,7 @@ const BlacklistPage = () => {
       }
     };
 
-    fetchBlacklist();
+    fetchBlacklist().then();
   }, []);
 
   // Ensure only admins can access this page
@@ -44,7 +44,7 @@ const BlacklistPage = () => {
         }
       }
     };
-    checkAdminStatus();
+    checkAdminStatus().then();
   }, [user]);
 
   const handleAddToBlacklist = async () => {

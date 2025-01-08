@@ -1,5 +1,5 @@
 import React, {useRef, useState} from 'react';
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 import { ref, get, child } from "firebase/database";
 import { database } from 'backend/src/firebaseConfig';
@@ -31,8 +31,8 @@ export default function LoginPage() {
         navigate('/waiting-approval'); // Redirect to approval page if not approved
       }
       })
-      .catch((error) => {
-        setError(`Login failed! Code: ${error.code} | Message: ${error.message}`);
+      .catch(() => {
+        setError(`Login failed! Incorrect email/password.`);
       });
   };
 
@@ -42,19 +42,6 @@ export default function LoginPage() {
       else if(passwordRef.current) passwordRef.current.focus();
     }
   }
-
-  // @ts-expect-error Handler is unused at the moment
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        console.log('Sign-out successful');
-        navigate('/login'); // Navigate back to login page after logout
-      })
-      .catch((error) => {
-        setError(`Logout failed: ${error.message}`);
-      });
-  };
 
   const handleRedirect = () => {
     navigate('/signup');

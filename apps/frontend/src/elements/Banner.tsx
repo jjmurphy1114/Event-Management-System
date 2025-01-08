@@ -32,7 +32,7 @@ function Banner() {
       }
     }
     
-  fetchUserStatus();
+    fetchUserStatus().then();
     return () => unsubscribe();
   }, [auth, user]);
 
@@ -53,7 +53,7 @@ function Banner() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-          <img src={bannerImage} className="w-10 h-10 mr-3"/>
+          <img src={bannerImage} className="w-10 h-10 mr-3" alt={"TKE Banner Image"}/>
             <Link to="/" className="text-white text-2xl font-bold">
               ZM PARTIES
             </Link>
@@ -98,6 +98,6 @@ function Banner() {
       </div>
     </nav>
   );
-};
+}
 
 export default Banner;

@@ -117,6 +117,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
           femaleGuestList: updatedEvent.femaleGuestList ?? [],
           maleWaitList: updatedEvent.maleWaitList ?? [],
           femaleWaitList: updatedEvent.femaleWaitList ?? [],
+        }).catch((e) => {
+          console.error(`Error updating event: ${e}`);
         });
         setEditingEventId(null);
       }
@@ -125,7 +127,9 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
   const deleteEvent = (id: string) => {
     const eventRef = ref(database, `events/${id}`);
-    remove(eventRef);
+    remove(eventRef).catch((e) => {
+      console.error(`Error deleting event: ${e}`);
+    });
   };
 
   return (

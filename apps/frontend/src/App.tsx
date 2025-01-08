@@ -6,10 +6,10 @@ import {
   useLocation
 } from "react-router-dom";
 import './App.css';
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { database } from 'backend/src/firebaseConfig.ts';
 import { ref, get } from "firebase/database";
-import { onAuthStateChanged, getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
+import {onAuthStateChanged, getAuth, setPersistence, browserLocalPersistence, User} from "firebase/auth";
 import EventsPage from './routes/EventsPage';
 import HomePage from './routes/HomePage';
 import LoginPage from "./routes/LoginPage";
@@ -28,13 +28,12 @@ setPersistence(auth, browserLocalPersistence).catch((error) => {
 });
 
 const useUserStatus = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [approved, setApproved] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Establishing User");
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
