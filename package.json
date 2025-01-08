@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "firebase:emulate": "firebase use default && firebase emulators:start",
-    "firebase:deploy": "firebase deploy --only hosting"
+    "firebase:deploy:hosting": "firebase deploy --only hosting",
+    "firebase:deploy:database": "firebase deploy --only database"
   },
   "dependencies": {
     "cors": "^2.8.5",
