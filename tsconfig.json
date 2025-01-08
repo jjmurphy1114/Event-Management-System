@@ -3,5 +3,9 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "include": [
+    "node_modules/@types"
+  ],
+  "exclude": ["**/node_modules", "**/.turbo", "**/build", "**/coverage", "**/.yarn"]
 }

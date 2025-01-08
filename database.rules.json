@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "blacklist": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('status').val() === 'Admin'",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('status').val() === 'Admin'"
+    },
+    "users": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('approved').val() === true",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('status').val() === 'Admin'",
+        "$uid": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        }
+    },
+    "events": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('approved').val() === true",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('status').val() === 'Admin'"
+    },
+    ".read": "auth != null && root.child('users').child(auth.uid).child('approved').val() === true", 
+    ".write": "auth != null && root.child('users').child(auth.uid).child('approved').val() === true"
+  }
+}
