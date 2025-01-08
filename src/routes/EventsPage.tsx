@@ -37,8 +37,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
  
   // Function to add an event to Firebase
-  function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number, maxGuests: number, open: boolean) {
-    const event = new Event({id: '', name: name, date: date, type: type, maxMales: maxMales, maxFemales: maxFemales, maxGuests: maxGuests, open: open});
+  function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number, maxGuests: number, open: boolean, jobsURL: string) {
+    const event = new Event({id: '', name: name, date: date, type: type, maxMales: maxMales, maxFemales: maxFemales, maxGuests: maxGuests, open: open, jobsURL: jobsURL});
     const newEventRef = push(eventsRef); // Creates a unique ID
     if(newEventRef.key) event.id = newEventRef.key;
     console.log(event.toJSON());
@@ -49,7 +49,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
   // Handler for form submission
   const handleAddEvent = () => {
-    const { name, date, type, maxMales, maxFemales, maxGuests } = newEvent;
+    const { name, date, type, maxMales, maxFemales, maxGuests, jobsURL } = newEvent;
     // Make sure none of the fields are empty
     if (name == ""){
       setError("Name is required");
@@ -69,7 +69,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       setError("Put the blocks down and focus you business major, set max invites to number of males and females. Or more I don't care");
     } else {
       setError("");
-      addEventToDatabase(name, date, type, maxMales as number, maxFemales as number, maxGuests as number, false);
+      addEventToDatabase(name, date, type, maxMales as number, maxFemales as number, maxGuests as number, false, jobsURL);
       setNewEvent(emptyEvent); // Clear form
     }
   };
@@ -113,6 +113,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
           maxFemales: updatedEvent.maxFemales,
           maxGuests: updatedEvent.maxGuests,
           open: updatedEvent.open,
+          jobsURL: updatedEvent.jobsURL,
           maleGuestList: updatedEvent.maleGuestList ?? [],
           femaleGuestList: updatedEvent.femaleGuestList ?? [],
           maleWaitList: updatedEvent.maleWaitList ?? [],
@@ -149,82 +150,98 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Event Name</label>
             <input
-              id="name"
-              type="text"
-              value={newEvent.name}
-              onChange={(e) => setNewEvent(new Event({ ...newEvent, name: e.target.value }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                id="name"
+                type="text"
+                value={newEvent.name}
+                onChange={(e) => setNewEvent(new Event({...newEvent, name: e.target.value}))}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div>
             <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
             <input
-              id="date"
-              type="date"
-              value={newEvent.date}
-              onChange={(e) => setNewEvent(new Event({ ...newEvent, date: e.target.value }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                id="date"
+                type="date"
+                value={newEvent.date}
+                onChange={(e) => setNewEvent(new Event({...newEvent, date: e.target.value}))}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700">Event Type</label>
             <input
-              id="type"
-              type="text"
-              value={newEvent.type}
-              onChange={(e) => setNewEvent(new Event({ ...newEvent, type: e.target.value }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                id="type"
+                type="text"
+                value={newEvent.type}
+                onChange={(e) => setNewEvent(new Event({...newEvent, type: e.target.value}))}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div>
             <label htmlFor="males" className="block text-sm font-medium text-gray-700">Male Invites Per Brother</label>
             <input
-              id="males"
-              type="number"
-              value={Number.isNaN(newEvent.maxMales) ? "" : newEvent.maxMales}
-              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxMales: parseInt(e.target.value)}))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                id="males"
+                type="number"
+                value={Number.isNaN(newEvent.maxMales) ? "" : newEvent.maxMales}
+                onChange={(e) => setNewEvent(new Event({...newEvent, maxMales: parseInt(e.target.value)}))}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div>
-            <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per Brother</label>
+            <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per
+              Brother</label>
             <input
-              id="females"
-              type="number"
-              value={Number.isNaN(newEvent.maxFemales) ? "" : newEvent.maxFemales}
-              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxFemales: parseInt(e.target.value) }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                id="females"
+                type="number"
+                value={Number.isNaN(newEvent.maxFemales) ? "" : newEvent.maxFemales}
+                onChange={(e) => setNewEvent(new Event({...newEvent, maxFemales: parseInt(e.target.value)}))}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div>
-            <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
+            <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per
+              Brother</label>
             <input
-              id="maxGuests"
-              type="number"
-              value={Number.isNaN(newEvent.maxGuests) ? "" : newEvent.maxGuests}
-              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxGuests: parseInt(e.target.value) }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                id="maxGuests"
+                type="number"
+                value={Number.isNaN(newEvent.maxGuests) ? "" : newEvent.maxGuests}
+                onChange={(e) => setNewEvent(new Event({...newEvent, maxGuests: parseInt(e.target.value)}))}
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-            <button
+          <div
+            className="col-span-2"
+          >
+            <label htmlFor="jobsURL" className="block text-sm font-medium text-gray-700">Party Jobs URL</label>
+            <input
+                id="jobsURL"
+                type="string"
+                value={newEvent.jobsURL}
+                width="100%"
+                onChange={(e) => setNewEvent(new Event({...newEvent, jobsURL: e.target.value}))}
+                className="w-full border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <button
               onClick={handleAddEvent}
               className="col-span-2 bg-blue-500 text-white px-6 py-3 rounded-md font-semibold mt-4 hover:bg-blue-600 transition duration-200"
-            >
-              Add Event
-            </button>
+          >
+            Add Event
+          </button>
         </div>
       </div>
 
       {/* Event List */}
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {events.map((event) => (
-          <li key={event.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg text-center transition duration-200">
-            {editingEventId === event.id ? (
-              <div>
-                {/* Error message */}
-                {editError && <p className="text-red-500 font-medium mb-2">{editError}</p>}
-              <div>
-                <label htmlFor="editName" className="block text-sm text-center font-medium text-gray-700">Event Name</label>
+            <li key={event.id}
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg text-center transition duration-200">
+              {editingEventId === event.id ? (
+                  <div>
+                    {/* Error message */}
+                    {editError && <p className="text-red-500 font-medium mb-2">{editError}</p>}
+                    <div>
+                      <label htmlFor="editName" className="block text-sm text-center font-medium text-gray-700">Event Name</label>
                 <input
                   id="editName"
                   type="text"
@@ -283,21 +300,35 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   className="border p-2 w-full mb-2"
                 />
               </div>
-                <button
-                  onClick={() => handleSaveEdit(event.id)}
-                  className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <div>
-                <h2 className="text-xl font-bold text-gray-800 mb-2">{event.name}</h2>
-                <p className="text-gray-600">Date: {event.date}</p>
-                <p className="text-gray-600">Type: {event.type}</p>
+                    <div>
+                      <label htmlFor="editJobsURL" className="block text-sm font-medium text-gray-700">Jobs URL</label>
+                      <input
+                          id="editJobsURL"
+                          type="string"
+                          value={event.jobsURL}
+                          onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({
+                            ...ev,
+                            jobsURL: e.target.value
+                          }) : ev)))}
+                          className="border p-2 w-full mb-2"
+                      />
+                    </div>
+                    <button
+                        onClick={() => handleSaveEdit(event.id)}
+                        className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                    >
+                      Save
+                    </button>
+                  </div>
+              ) : (
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">{event.name}</h2>
+                    <p className="text-gray-600">Date: {event.date}</p>
+                    <p className="text-gray-600">Type: {event.type}</p>
                 <p className="text-gray-600">Max Male Guests Per: {event.maxMales}</p>
                 <p className="text-gray-600">Max Female Guests Per: {event.maxFemales}</p>
                 <p className="text-gray-600">Max Invites Per: {event.maxGuests}</p>
+                <p className="text-gray-600">Jobs URL: {event.jobsURL === "" ? "No URL specified": <a href={event.jobsURL} target="_blank">Jobs URL</a>}</p>
                 <button
                   onClick={() => handleEditEvent(event.id)}
                   className="mt-4 mr-2 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600"
