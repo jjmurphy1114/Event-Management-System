@@ -1,16 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "dependencies": {
-      "inputs": [],
-      "outputs": []
-    },
     "build": {
-      "dependsOn": ["^dependencies", "^build", "^check-types"],
-      "outputs": ["build/**"]
-    },
-    "check-types": {
-      "dependsOn": ["^dependencies", "^check-types"]
+      "dependsOn": ["^check-types"],
+      "outputs": ["build/**"],
+      "cache": false
     },
     "dev": {
       "cache": false,
