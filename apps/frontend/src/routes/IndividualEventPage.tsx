@@ -312,9 +312,9 @@ const IndividualEventPage = () => {
 
     try {
       const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-      const guestListName = gender === 'male' ? 'maleGuestList' : 'femaleGuestList';
+      const guestListName = gender === 'male' ? GuestList.MaleGuestList : GuestList.FemaleGuestList;
       const updatedGuestList = [...event[guestListName]];
-      updatedGuestList[index] = { ...updatedGuestList[index], checkedIn: checkedIn };
+      updatedGuestList[index].checkedIn = checkedIn;
 
       const eventRef = ref(database, `events/${id}`);
       await update(eventRef, { [guestListName]: updatedGuestList });
@@ -739,7 +739,7 @@ return (
                   )}
                    {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
                       <button
-                        onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
+                        onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('female', index) : undefined}
                         className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-pink-500 text-white hover:bg-pink-600`}
                         disabled={guest.checkedIn !== -1}
                       >
