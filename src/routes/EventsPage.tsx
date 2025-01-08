@@ -145,8 +145,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       {/* Event Input Form */}
       <div className="bg-white shadow-lg rounded-lg p-6 mb-10 mx-auto max-w-xl">
         <h2 className="text-2xl font-semibold text-center text-gray-700 mb-4">Add New Event</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Event Name</label>
             <input
               id="name"
@@ -156,7 +156,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
             <input
               id="date"
@@ -166,7 +166,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700">Event Type</label>
             <input
               id="type"
@@ -176,7 +176,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="males" className="block text-sm font-medium text-gray-700">Male Invites Per Brother</label>
             <input
               id="males"
@@ -186,7 +186,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per Brother</label>
             <input
               id="females"
@@ -196,7 +196,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
             <input
               id="maxGuests"
