@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { database } from "backend/src/firebaseConfig";
@@ -10,6 +10,9 @@ function Banner() {
   const [user, setUser] = useState<User | null>(null);
   const [userStatus, setUserStatus] = useState("");
   const [loading, setLoading] = useState(true); // Loading state for auth
+
+  const onWaitingScreen: boolean = useLocation().pathname === "/waiting-approval";
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Track auth state changes to ensure user info is loaded on first render
@@ -34,7 +37,10 @@ function Banner() {
   }, [auth, user]);
 
   const handleSignOut = () => {
-    signOut(auth).catch((error) => console.error("Error signing out:", error));
+
+    signOut(auth).then(() => {
+      if(onWaitingScreen) navigate("/");
+    }).catch((error) => console.error("Error signing out:", error));
   };
 
   if (loading) {

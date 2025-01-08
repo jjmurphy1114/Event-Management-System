@@ -34,6 +34,7 @@ const useUserStatus = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("Establishing User");
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -120,7 +121,7 @@ function Root() {
   const location = useLocation();
 
   // Define routes where the Banner should not be shown
-  const hideBannerRoutes = ["/login", "/signup", "/waiting-approval",];
+  const hideBannerRoutes = ["/login", "/signup"];
   const showBanner = !hideBannerRoutes.includes(location.pathname);
 
   return (

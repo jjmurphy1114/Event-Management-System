@@ -22,7 +22,7 @@ export default function SocialSettings() {
       const loadedUsers: User[] = [];
 
       for(const id in data) {
-        const userData: UserType | undefined = validateAndReturnUser({id, ...data[id]});
+        const userData: UserType | undefined = validateAndReturnUser(data[id]);
 
         if(userData) loadedUsers.push(new User(userData));
       }
@@ -48,6 +48,7 @@ export default function SocialSettings() {
 
   // Approve a user by updating their "approved" status in Firebase
   const approveUser = (userId: string) => {
+    console.log(`userId: ${userId}`);
     const userRef = ref(database, `users/${userId}`);
     update(userRef, { approved: true }).then(() => {
       console.log("Updated user data");

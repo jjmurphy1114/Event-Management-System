@@ -20,6 +20,8 @@ export default function SignUpPage() {
           console.log("Account created in firebase authentication");
         const user = userCredential.user;
 
+        newUser.id = user.uid;
+
         // Set display name for the user
         updateProfile(user, {
           displayName: name, // Set display name here

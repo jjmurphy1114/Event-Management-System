@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 import { ref, get, child } from "firebase/database";
@@ -10,6 +10,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
   const auth = getAuth();
+
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
@@ -33,6 +35,13 @@ export default function LoginPage() {
         setError(`Login failed! Code: ${error.code} | Message: ${error.message}`);
       });
   };
+
+  const handleKeyDown = (event: React.KeyboardEvent, onPassword: boolean) => {
+    if(event.key === 'Enter') {
+      if(onPassword) handleLogin();
+      else if(passwordRef.current) passwordRef.current.focus();
+    }
+  }
 
   // @ts-expect-error Handler is unused at the moment
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -65,6 +74,7 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(event) => handleKeyDown(event, false)}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Enter your email"
           />
@@ -78,8 +88,10 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(event: React.KeyboardEvent) => handleKeyDown(event, true)}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Enter your password"
+            ref={passwordRef}
           />
         </div>
         <div className="flex items-center justify-between">
