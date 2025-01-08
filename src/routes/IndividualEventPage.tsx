@@ -512,30 +512,30 @@ const IndividualEventPage = () => {
     guest.name.toLowerCase().includes(guestName.toLowerCase())
   ) || [];
 
-return (
-<div className="w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto">
+  return (
+    <div className="top-16 relative w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       {userStatus === "Admin" && (
-        <div className="col-span-full mb-4 flex justify-center">
-        <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">
-          <div className="relative my-1">
-            <input
-              type="checkbox"
-              id="front-door-toggle"
-              checked={frontDoorMode}
-              onChange={handleToggleFrontDoorMode}
-              className="sr-only"
-            />
-            <div className={`block w-14 h-8 rounded-full transition ${frontDoorMode ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-            <div
-              className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
-                frontDoorMode ? 'transform translate-x-full' : ''
-              }`}
-            ></div>
-          </div>
-          <span className="ml-3 text-gray-700">Front Door Mode</span>
-        </label>
-      </div>
+        <div className="col-span-full mt-4 flex justify-center">
+          <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">
+            <div className="relative my-1">
+              <input
+                type="checkbox"
+                id="front-door-toggle"
+                checked={frontDoorMode}
+                onChange={handleToggleFrontDoorMode}
+                className="sr-only"
+              />
+              <div className={`block w-14 h-8 rounded-full transition ${frontDoorMode ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+              <div
+                className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
+                  frontDoorMode ? 'transform translate-x-full' : ''
+                }`}
+              ></div>
+            </div>
+            <span className="ml-3 text-gray-700">Front Door Mode</span>
+          </label>
+        </div>
       )}
       {/* Vouch for Guest Section (President Only) */}
       {userStatus === "Admin" && frontDoorMode && (
@@ -552,55 +552,55 @@ return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
             <h2 className="text-2xl font-bold mb-4 text-black text-center">Vouch for Guest</h2>
-            <input
-              type="text"
-              value={vouchGuestName}
-              onChange={(e) => setVouchGuestName(e.target.value)}
-              placeholder="Enter guest name"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <input
-              type="password"
-              value={vouchPassword}
-              onChange={(e) => setVouchPassword(e.target.value)}
-              placeholder="Enter password"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <div className="flex justify-center items-center">
-              <button
-                onClick={() => setIsVouching(false)}
-                className="bg-gray-500 text-white mx-2 rounded-md font-semibold hover:bg-gray-600 p-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleVouchGuest('male')}
-                className="bg-blue-500 text-white mx-2 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
-              >
-                Vouch Male
-              </button>
-              <button
-                onClick={() => handleVouchGuest('female')}
-                className="bg-pink-500 text-white mx-2 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
-              >
-                Vouch Female
-              </button>
+              <input
+                type="text"
+                value={vouchGuestName}
+                onChange={(e) => setVouchGuestName(e.target.value)}
+                placeholder="Enter guest name"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <input
+                type="password"
+                value={vouchPassword}
+                onChange={(e) => setVouchPassword(e.target.value)}
+                placeholder="Enter password"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <div className="flex justify-center items-center">
+                <button
+                  onClick={() => setIsVouching(false)}
+                  className="bg-gray-500 text-white mx-2 rounded-md font-semibold hover:bg-gray-600 p-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleVouchGuest('male')}
+                  className="bg-blue-500 text-white mx-2 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
+                >
+                  Vouch Male
+                </button>
+                <button
+                  onClick={() => handleVouchGuest('female')}
+                  className="bg-pink-500 text-white mx-2 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
+                >
+                  Vouch Female
+                </button>
+            </div>
           </div>
-        </div>
         </div>
       )}
       <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
       {/* Error or Notification message */}
-      <div className="min-h-[2rem]">
-       {(error || notification) && (
-         <p className={`${error ? 'text-red-500' : 'text-green-500'} text-center font-medium mb-2 min-h-[2rem]`}>
-           {error || notification}
-         </p>
-       )}
-       </div>
+        <div className="min-h-[2rem]">
+           {(error || notification) && (
+             <p className={`${error ? 'text-red-500' : 'text-green-500'} text-center font-medium mb-2 min-h-[2rem]`}>
+               {error || notification}
+             </p>
+           )}
+         </div>
       </div>
-       {/* Information Section */}
-       <div className="text-center col-span-full mb-5 w-full">
+      {/* Information Section */}
+      <div className="text-center col-span-full mb-5 w-full">
         <p className="text-lg font-semibold text-gray-700">
           There are {event?.femaleGuestList?.length || 0} females and {event?.maleGuestList?.length || 0} males on the list for a total of {(event?.femaleGuestList?.length || 0) + (event?.maleGuestList?.length || 0)} guests.
         </p>
@@ -610,196 +610,205 @@ return (
         <p className="text-lg font-semibold text-gray-700">
           If everyone from the approval list was added, there would be {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0)} females and {(event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} males on the list. For a total of {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0) + (event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} guests.
         </p>
+        <button
+          className={`mt-3 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:hover:border-transparent`}
+          onClick={() => {
+            if(event?.jobsURL !== "") window.open(event?.jobsURL, "_blank");
+          }}
+          disabled={event?.jobsURL === ""}
+        >
+          {event.jobsURL === "" ? "No Party Job URL" : "Party Jobs"}
+        </button>
       </div>
       {/* Search Bar and Input Section */}
       <div className="flex flex-col items-center col-span-full mb-5 w-full">
-          <input
-            type="text"
-            value={guestName}
-            onChange={(e) => setGuestName(e.target.value)}
-            placeholder="Enter guest name"
-            className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <div className="flex space m-2 ">
-            <button
-              onClick={() => handleAddGuest('male')}
-              className="bg-blue-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
+        <input
+          type="text"
+          value={guestName}
+          onChange={(e) => setGuestName(e.target.value)}
+          placeholder="Enter guest name"
+          className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <div className="flex space m-2 ">
+          <button
+            onClick={() => handleAddGuest('male')}
+            className="bg-blue-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-blue-600 p-2"
+          >
+            Add Male
+          </button>
+          <button
+              onClick={() => handleAddGuest('female')}
+              className="bg-pink-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
             >
-              Add Male
-            </button>
-            <button
-                onClick={() => handleAddGuest('female')}
-                className="bg-pink-500 text-white mx-4 my-2 rounded-md font-semibold hover:bg-pink-600 p-2"
-              >
-                Add Female
-            </button>
-          </div>
+              Add Female
+          </button>
+        </div>
       </div>
       {/* Guest Section */}
       <div className="flex flex-col md:grid md:grid-cols-2 sm:grid-cols-1 lg:col-span-full gap-4 w-full">
-      {/* Male Guests Section */}
-      <>
-      <div id="Male Section">
-      <div className="flex-1 m-10 md:col-span-full md:w-auto">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
-        <div>
-        </div>
-        <div className="mb-8 space-y-4 min-h-[20rem]">
-          {filteredMaleGuests.length > 0 ? (
-            filteredMaleGuests.map((guest, index) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                <div className="grid-rows-2 w-full">
-                  <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-        </div>
-        {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                    <button
-                      onClick={() => handleDeleteGuest('male', index, 'guestList')}
-                     className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  )}
-          {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
-            <button
-              onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
-              className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600`}
-              disabled={guest.checkedIn !== -1}
-            >
-              {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
-            </button>
-          )}
-        </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No male guests added yet.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Male Waitlist Section */}
-      <div className="flex-1 m-10">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Waitlist</h2>
-        <div>
-        </div>
-        <div className="mb-8 space-y-4 min-h-[20rem]">
-          {filteredMaleWaitListed.length > 0 ? (
-            filteredMaleWaitListed.map((guest, index) => (
-              <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                  <div className="grid-rows-2 w-full">
-                  <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                  <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                </div>
-                {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                    <button
-                      onClick={() => handleDeleteGuest('male', index, 'waitList')}
-                      className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  )}
-                {(userStatus === "Admin" || userStatus === "Social") && (
-                  <button
-                    onClick={() => handleApproveGuest('male', index)}
-                    className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
-                  >
-                    Approve
-                  </button>
+        {/* Male Guests Section */}
+        <>
+          <div id="Male Section">
+            <div className="flex-1 m-10 md:col-span-full md:w-auto">
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
+              <div>
+              </div>
+              <div className="mb-8 space-y-4 min-h-[20rem]">
+                {filteredMaleGuests.length > 0 ? (
+                  filteredMaleGuests.map((guest, index) => (
+                    <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                      <div className="grid-rows-2 w-full">
+                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
+                      </div>
+                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+                        <button
+                          onClick={() => handleDeleteGuest('male', index, 'guestList')}
+                         className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      )}
+                      {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+                        <button
+                          onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
+                          className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600`}
+                          disabled={guest.checkedIn !== -1}
+                        >
+                          {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No male guests added yet.</p>
                 )}
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500">No male guests on the waitlist yet.</p>
-          )}
-        </div>
-      </div>
-      </div>
-
-      {/* Female Guests Section */}
-      <div id="Female Section">
-      <div className="flex-1 m-10 md:col-span-full md:w-auto">
-        <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
-        <div>
-        </div>
-        <div className="mb-8 space-y-4 min-h-[20rem]">
-        {filteredFemaleGuests.length > 0 ? (
-              filteredFemaleGuests.map((guest, index) => (
-                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                  <div className="grid-rows-2 w-full">
-                    <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                  </div>
-                  {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                    <button
-                      onClick={() => handleDeleteGuest('female', index, 'guestList')}
-                     className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  )}
-                   {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
-                      <button
-                        onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('female', index) : undefined}
-                        className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-pink-500 text-white hover:bg-pink-600`}
-                        disabled={guest.checkedIn !== -1}
-                      >
-                        {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
-                      </button>
-                   )}
             </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No female guests added yet.</p>
-            )}
-        </div>
-      </div>
 
-      {/* Female Waitlist Section */}
-      <div className="flex-1 m-10">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
-        <div>
-        </div>
-        <div className="mb-8 space-y-4 min-h-[20rem]">
-        {filteredFemaleWaitListed.length > 0 ? (
-              filteredFemaleWaitListed.map((guest, index) => (
-                <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                  <div className="grid-rows-2 w-full">
-                    <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                  </div>
-                  {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                    <button
-                      onClick={() => handleDeleteGuest('female', index, 'waitList')}
-                      className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  )}
-                  {(userStatus === "Admin" || userStatus === "Social") && (
-                  <button
-                    onClick={() => handleApproveGuest('female', index)}
-                    className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
-                  >
-                    Approve
-                  </button>
+            {/* Male Waitlist Section */}
+            <div className="flex-1 m-10">
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Waitlist</h2>
+              <div>
+              </div>
+              <div className="mb-8 space-y-4 min-h-[20rem]">
+                {filteredMaleWaitListed.length > 0 ? (
+                  filteredMaleWaitListed.map((guest, index) => (
+                    <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                        <div className="grid-rows-2 w-full">
+                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
+                      </div>
+                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+                          <button
+                            onClick={() => handleDeleteGuest('male', index, 'waitList')}
+                            className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      {(userStatus === "Admin" || userStatus === "Social") && (
+                        <button
+                          onClick={() => handleApproveGuest('male', index)}
+                          className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
+                        >
+                          Approve
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No male guests on the waitlist yet.</p>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* Female Guests Section */}
+          <div id="Female Section">
+            <div className="flex-1 m-10 md:col-span-full md:w-auto">
+              <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
+              <div>
+              </div>
+              <div className="mb-8 space-y-4 min-h-[20rem]">
+                {filteredFemaleGuests.length > 0 ? (
+                  filteredFemaleGuests.map((guest, index) => (
+                    <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                      <div className="grid-rows-2 w-full">
+                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
+                      </div>
+                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+                        <button
+                          onClick={() => handleDeleteGuest('female', index, 'guestList')}
+                         className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      )}
+                      {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+                        <button
+                          onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('female', index) : undefined}
+                          className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-pink-500 text-white hover:bg-pink-600`}
+                          disabled={guest.checkedIn !== -1}
+                        >
+                          {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+                        </button>
+                      )}
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No female guests added to waitlist</p>
-            )}
-        </div>
-      </div>
-      </div>
-      </>
-      <div className="flex items-start">
-      <button
+                  ))
+                ) : (
+                  <p className="text-gray-500">No female guests added yet.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Female Waitlist Section */}
+            <div className="flex-1 m-10">
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
+              <div>
+              </div>
+              <div className="mb-8 space-y-4 min-h-[20rem]">
+                {filteredFemaleWaitListed.length > 0 ? (
+                  filteredFemaleWaitListed.map((guest, index) => (
+                    <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                      <div className="grid-rows-2 w-full">
+                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
+                      </div>
+                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+                        <button
+                          onClick={() => handleDeleteGuest('female', index, 'waitList')}
+                          className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      )}
+                      {(userStatus === "Admin" || userStatus === "Social") && (
+                      <button
+                        onClick={() => handleApproveGuest('female', index)}
+                        className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
+                      >
+                        Approve
+                      </button>
+                    )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No female guests added to waitlist</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+        <div className="flex items-start">
+          <button
             onClick={exportGuestListAsCSV}
             className="bg-purple-500 text-white mx-4 mb-5 rounded-md font-semibold hover:bg-purple-600 p-2"
           >
             Download CSV
           </button>
-      </div>
+        </div>
       </div>
     </div>
   );
