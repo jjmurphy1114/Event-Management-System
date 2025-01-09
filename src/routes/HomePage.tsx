@@ -39,11 +39,10 @@ export default function HomePage() {
   };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-b flex justify-center items-top from-blue-50 to-gray-100 py-10 px-5 md:px-80 pt-20">
-      <div className="w-full mx-auto">
-        <h1 className="text-4xl font-bold text-center text-indigo-600 mb-10">ZM PARTIES</h1>
-        
-        <div className="bg-white shadow-md item-center rounded-lg p-6">
+    <div className="h-screen w-screen bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 py-10 px-5 md:px-80 pt-20 overflow-auto">
+      <h1 className="text-4xl font-bold text-center w-full align-top text-indigo-600 mb-10">ZM PARTIES</h1>
+      <div className="flex w-full justify-center mx-auto bg-gradient-to-b from-blue-50 to-gray-100">        
+        <div className="bg-white shadow-md w-full item-center rounded-lg p-6">
           {events.length > 0 ? (
             <ul className="space-y-4">
               {events.map((event) => (
