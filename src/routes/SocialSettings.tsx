@@ -132,66 +132,74 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
 
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-b from-blue-50 to-gray-100 p-10 pt-20">
-      <h1 className="text-4xl font-bold text-center col-span-full my-2 text-gray-800 w-100 h-10">Manage Users</h1>
-      <button className='bg-red-500 mb-2' onClick={handleRedirectBlacklist}>
+  <div className="h-screen w-screen bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 py-10 px-5 md:px-80 pt-20 overflow-auto">
+    <h1 className="text-4xl md:text-4xl font-bold text-center align-top my-4 mt-6 text-gray-800">Manage Users</h1>
+
+    <div className="flex justify-center mb-4">
+      <button
+        className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded"
+        onClick={handleRedirectBlacklist}
+      >
         Manage Blacklist (Admin)
       </button>
-      <div className="container mx-auto bg-white p-6 shadow-md rounded-lg">
-        
-        <table className="min-w-full bg-white text-gray-700 items-center text-center">
+    </div>
+
+    <div className="container mx-auto bg-white p-4 md:p-6 shadow-md rounded-lg">
+      {/* Table Container */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white text-gray-700 text-center border-collapse">
           <thead>
-            <tr>
-              <th className="py-2">Email</th>
-              <th className="py-2">Status</th>
-              <th className="py-2">Actions</th>
-              <th className='py-2'>Has Social Privileges?</th>
-              <th className='py-2'>Delete User</th>
+            <tr className="bg-gray-100">
+              <th className="py-2 px-4 border">Email</th>
+              <th className="py-2 px-4 border">Status</th>
+              <th className="py-2 px-4 border">Actions</th>
+              <th className="py-2 px-4 border">Social Privileges</th>
+              <th className="py-2 px-4 border">Delete User</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id}>
-                <td className="border px-4 py-2 items-center text-center">{user.email}</td>
-                <td className="border px-4 py-2 items-center text-center">
+              <tr key={user.id} className="hover:bg-gray-50">
+                <td className="border px-4 py-2">{user.email}</td>
+                <td className="border px-4 py-2">
                   <select
                     value={user.status}
                     onChange={(e) => changeStatus(user.id, e.target.value)}
-                    className="border p-2 text-white"
-                    disabled={userStatus != "Admin"}
+                    className="border border-gray-300 text-white rounded-md px-2 py-1"
+                    disabled={userStatus !== "Admin"}
                   >
                     <option value="Default">Default</option>
                     <option value="Social">Social</option>
                     <option value="Admin">Admin</option>
                   </select>
                 </td>
-                <td className="border px-4 py-2 items-center text-center">
+                <td className="border px-4 py-2">
                   {user.approved ? (
                     <span className="text-green-500 font-bold">Approved</span>
                   ) : (
                     <button
                       onClick={() => approveUser(user.id)}
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                      className="bg-green-500 hover:bg-green-700 text-white font-medium py-1 px-3 rounded"
                     >
                       Approve
                     </button>
                   )}
                 </td>
-                <td className='border px-4 py-2 items-center text-center'>
-                    <input type='checkbox' 
-                           checked={user.privileges} 
-                           onChange={(e) => changeSocialPrivileges(user.id, e.target.checked)}
-                           className="border border-gray-300 rounded-md px-4 py-2 mt-2 focus:outline-none"
-                           style={{ transform: 'scale(2)'}}
-                           />
+                <td className="border px-4 py-2">
+                  <input
+                    type="checkbox"
+                    checked={user.privileges}
+                    onChange={(e) => changeSocialPrivileges(user.id, e.target.checked)}
+                    className="transform scale-125"
+                  />
                 </td>
-                <td className='border px-4 py-2 items-center text-center'>
-                    <button
-                        onClick={() => deleteUser(user.id)}
-                        className='bg-red-700 hover:bg-red-700 rounded-md px-4 py-2 mt-2 focus:outline-none text-white'
-                    >
-                        Delete
-                    </button>
+                <td className="border px-4 py-2">
+                  <button
+                    onClick={() => deleteUser(user.id)}
+                    className="bg-red-700 hover:bg-red-800 text-white py-1 px-3 rounded"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -199,5 +207,6 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
         </table>
       </div>
     </div>
+  </div>
   );
 }
