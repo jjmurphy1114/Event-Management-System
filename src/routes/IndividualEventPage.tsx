@@ -512,11 +512,11 @@ const IndividualEventPage = () => {
     guest.name.toLowerCase().includes(guestName.toLowerCase())
   ) || [];
 
-  return (
-    <div className="top-16 relative w-screen h-screen grid flex-col grid-cols-1 md:grid-cols-2 items-start bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto">
+return (
+<div className="w-screen h-screen grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto">
       <h1 className="text-4xl font-bold text-center col-span-full mt-20 text-gray-800 w-100 h-10">{eventName}</h1>
       {userStatus === "Admin" && (
-        <div className="col-span-full mt-4 flex justify-center">
+        <div className="col-span-full mb-4 flex justify-center">
           <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">
             <div className="relative my-1">
               <input
@@ -589,7 +589,7 @@ const IndividualEventPage = () => {
           </div>
         </div>
       )}
-      <div className="text-2xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
+      <div className="text-xl font-bold text-center col-span-full mt-3 text-red-600 w-100 h-10">
       {/* Error or Notification message */}
         <div className="min-h-[2rem]">
            {(error || notification) && (
@@ -599,8 +599,8 @@ const IndividualEventPage = () => {
            )}
          </div>
       </div>
-      {/* Information Section */}
-      <div className="text-center col-span-full mb-5 w-full">
+        {/* Information Section */}
+        <div className="text-center col-span-full mt-5 mb-5 w-full">
         <p className="text-lg font-semibold text-gray-700">
           There are {event?.femaleGuestList?.length || 0} females and {event?.maleGuestList?.length || 0} males on the list for a total of {(event?.femaleGuestList?.length || 0) + (event?.maleGuestList?.length || 0)} guests.
         </p>
@@ -644,109 +644,65 @@ const IndividualEventPage = () => {
           </button>
         </div>
       </div>
+
       {/* Guest Section */}
-      <div className="flex flex-col md:grid md:grid-cols-2 sm:grid-cols-1 lg:col-span-full gap-4 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-full">
         {/* Male Guests Section */}
-        <>
-          <div id="Male Section">
-            <div className="flex-1 m-10 md:col-span-full md:w-auto">
-              <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
-              <div>
-              </div>
-              <div className="mb-8 space-y-4 min-h-[20rem]">
-                {filteredMaleGuests.length > 0 ? (
-                  filteredMaleGuests.map((guest, index) => (
-                    <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                      <div className="grid-rows-2 w-full">
-                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                      </div>
-                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                        <button
-                          onClick={() => handleDeleteGuest('male', index, 'guestList')}
-                         className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      )}
-                      {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
-                        <button
-                          onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
-                          className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600`}
-                          disabled={guest.checkedIn !== -1}
-                        >
-                          {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
-                        </button>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No male guests added yet.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Male Waitlist Section */}
-            <div className="flex-1 m-10">
-              <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Waitlist</h2>
-              <div>
-              </div>
-              <div className="mb-8 space-y-4 min-h-[20rem]">
-                {filteredMaleWaitListed.length > 0 ? (
-                  filteredMaleWaitListed.map((guest, index) => (
-                    <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                        <div className="grid-rows-2 w-full">
-                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                      </div>
-                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                          <button
-                            onClick={() => handleDeleteGuest('male', index, 'waitList')}
-                            className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      {(userStatus === "Admin" || userStatus === "Social") && (
-                        <button
-                          onClick={() => handleApproveGuest('male', index)}
-                          className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
-                        >
-                          Approve
-                        </button>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No male guests on the waitlist yet.</p>
-                )}
-              </div>
-            </div>
+        <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>
+          <div className="mb-8 space-y-4 min-h-[20rem]">
+            {filteredMaleGuests.length > 0 ? (
+              filteredMaleGuests.map((guest, index) => (
+                <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                  <div className="grid-rows-2 w-full">
+                    <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
           </div>
+          {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+                      <button
+                        onClick={() => handleDeleteGuest('male', index, 'guestList')}
+                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    )}
+            {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+              <button
+                onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}
+                className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600`}
+                disabled={guest.checkedIn !== -1}
+              >
+                {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+              </button>
+            )}
+          </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No male guests added yet.</p>
+            )}
+          </div>
+        </div>
 
-          {/* Female Guests Section */}
-          <div id="Female Section">
-            <div className="flex-1 m-10 md:col-span-full md:w-auto">
-              <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
-              <div>
-              </div>
-              <div className="mb-8 space-y-4 min-h-[20rem]">
-                {filteredFemaleGuests.length > 0 ? (
-                  filteredFemaleGuests.map((guest, index) => (
-                    <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                      <div className="grid-rows-2 w-full">
-                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                      </div>
-                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                        <button
-                          onClick={() => handleDeleteGuest('female', index, 'guestList')}
-                         className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      )}
-                      {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
+        {/* Female Guests Section */}
+        <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
+          <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>
+          <div className="mb-8 space-y-4 min-h-[20rem]">
+          {filteredFemaleGuests.length > 0 ? (
+                filteredFemaleGuests.map((guest, index) => (
+                  <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                    <div className="grid-rows-2 w-full">
+                      <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                      <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
+                    </div>
+                    {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+                      <button
+                        onClick={() => handleDeleteGuest('female', index, 'guestList')}
+                      className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    )}
+                    {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (
                         <button
                           onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('female', index) : undefined}
                           className={`mt-2 ml-2 sm:mt-0 px-4 py-2 rounded-md font-semibold bg-pink-500 text-white hover:bg-pink-600`}
@@ -754,55 +710,92 @@ const IndividualEventPage = () => {
                         >
                           {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
                         </button>
-                      )}
-                </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No female guests added yet.</p>
-                )}
+                    )}
               </div>
-            </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No female guests added yet.</p>
+              )}
+          </div>
 
-            {/* Female Waitlist Section */}
-            <div className="flex-1 m-10">
-              <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
-              <div>
-              </div>
-              <div className="mb-8 space-y-4 min-h-[20rem]">
-                {filteredFemaleWaitListed.length > 0 ? (
-                  filteredFemaleWaitListed.map((guest, index) => (
-                    <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                      <div className="grid-rows-2 w-full">
-                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                      </div>
-                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                        <button
-                          onClick={() => handleDeleteGuest('female', index, 'waitList')}
-                          className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      )}
-                      {(userStatus === "Admin" || userStatus === "Social") && (
+        {/* Male Waitlist Section */}
+        <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Waitlist</h2>
+          <div>
+          </div>
+          <div className="mb-8 space-y-4 min-h-[20rem]">
+            {filteredMaleWaitListed.length > 0 ? (
+              filteredMaleWaitListed.map((guest, index) => (
+                <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                    <div className="grid-rows-2 w-full">
+                    <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                    <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
+                  </div>
+                  {(user?.uid === guest.addedBy || userStatus === "Admin") && (
                       <button
-                        onClick={() => handleApproveGuest('female', index)}
-                        className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
+                        onClick={() => handleDeleteGuest('male', index, 'waitList')}
+                        className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
                       >
-                        Approve
+                        Delete
                       </button>
                     )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No female guests added to waitlist</p>
-                )}
-              </div>
-            </div>
+                  {(userStatus === "Admin" || userStatus === "Social") && (
+                    <button
+                      onClick={() => handleApproveGuest('male', index)}
+                      className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
+                    >
+                      Approve
+                    </button>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No male guests on the waitlist yet.</p>
+            )}
           </div>
-        </>
-        <div className="flex items-start">
-          <button
+        </div>
+        </div>
+
+        {/* Female Waitlist Section */}
+        <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
+          <div>
+          </div>
+          <div className="mb-8 space-y-4 min-h-[20rem]">
+          {filteredFemaleWaitListed.length > 0 ? (
+                filteredFemaleWaitListed.map((guest, index) => (
+                  <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
+                    <div className="grid-rows-2 w-full">
+                      <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                      <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
+                    </div>
+                    {(user?.uid === guest.addedBy || userStatus === "Admin") && (
+                      <button
+                        onClick={() => handleDeleteGuest('female', index, 'waitList')}
+                        className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    )}
+                    {(userStatus === "Admin" || userStatus === "Social") && (
+                    <button
+                      onClick={() => handleApproveGuest('female', index)}
+                      className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
+                    >
+                      Approve
+                    </button>
+                  )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No female guests added to waitlist</p>
+              )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center mt-4 col-span-full">
+      <button
             onClick={exportGuestListAsCSV}
             className="bg-purple-500 text-white mx-4 mb-5 rounded-md font-semibold hover:bg-purple-600 p-2"
           >
@@ -810,7 +803,6 @@ const IndividualEventPage = () => {
           </button>
         </div>
       </div>
-    </div>
   );
 };
 

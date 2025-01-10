@@ -146,67 +146,65 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       {/* Event Input Form */}
       <div className="bg-white shadow-lg rounded-lg p-6 mb-10 mx-auto max-w-xl">
         <h2 className="text-2xl font-semibold text-center text-gray-700 mb-4">Add New Event</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Event Name</label>
             <input
-                id="name"
-                type="text"
-                value={newEvent.name}
-                onChange={(e) => setNewEvent(new Event({...newEvent, name: e.target.value}))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="name"
+              type="text"
+              value={newEvent.name}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, name: e.target.value }))}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
             <input
-                id="date"
-                type="date"
-                value={newEvent.date}
-                onChange={(e) => setNewEvent(new Event({...newEvent, date: e.target.value}))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="date"
+              type="date"
+              value={newEvent.date}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, date: e.target.value }))}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700">Event Type</label>
             <input
-                id="type"
-                type="text"
-                value={newEvent.type}
-                onChange={(e) => setNewEvent(new Event({...newEvent, type: e.target.value}))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="type"
+              type="text"
+              value={newEvent.type}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, type: e.target.value }))}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
+          <div className='col-span-2 md:col-span-1'>
             <label htmlFor="males" className="block text-sm font-medium text-gray-700">Male Invites Per Brother</label>
             <input
-                id="males"
-                type="number"
-                value={Number.isNaN(newEvent.maxMales) ? "" : newEvent.maxMales}
-                onChange={(e) => setNewEvent(new Event({...newEvent, maxMales: parseInt(e.target.value)}))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="males"
+              type="number"
+              value={Number.isNaN(newEvent.maxMales) ? "" : newEvent.maxMales}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxMales: parseInt(e.target.value)}))}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
-            <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per
-              Brother</label>
+          <div className='col-span-2 md:col-span-1'>
+            <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per Brother</label>
             <input
-                id="females"
-                type="number"
-                value={Number.isNaN(newEvent.maxFemales) ? "" : newEvent.maxFemales}
-                onChange={(e) => setNewEvent(new Event({...newEvent, maxFemales: parseInt(e.target.value)}))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="females"
+              type="number"
+              value={Number.isNaN(newEvent.maxFemales) ? "" : newEvent.maxFemales}
+              onChange={(e) => setNewEvent(new Event({ ...newEvent, maxFemales: parseInt(e.target.value) }))}
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div>
-            <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per
-              Brother</label>
+          <div className='col-span-2 md:col-span-1'>
+            <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
             <input
                 id="maxGuests"
                 type="number"
                 value={Number.isNaN(newEvent.maxGuests) ? "" : newEvent.maxGuests}
                 onChange={(e) => setNewEvent(new Event({...newEvent, maxGuests: parseInt(e.target.value)}))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div
