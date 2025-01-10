@@ -5,6 +5,7 @@ import {get, ref, update} from "firebase/database";
 import Event, {EventType, GuestList, validateAndReturnEvent} from "../types/Event";
 import Guest from "../types/Guest";
 import {getAuth} from "firebase/auth";
+import JobsButton from "../elements/JobsButton.tsx";
 
 const IndividualEventPage = () => {
   
@@ -610,15 +611,7 @@ return (
         <p className="text-lg font-semibold text-gray-700">
           If everyone from the approval list was added, there would be {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0)} females and {(event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} males on the list. For a total of {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0) + (event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} guests.
         </p>
-        <button
-          className={`mt-3 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:hover:border-transparent`}
-          onClick={() => {
-            if(event?.jobsURL !== "") window.open(event?.jobsURL, "_blank");
-          }}
-          disabled={event?.jobsURL === ""}
-        >
-          {event.jobsURL === "" ? "No Party Job URL" : "Party Jobs"}
-        </button>
+        <JobsButton event={event} className={`mt-3 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:hover:border-transparent`}/>
       </div>
       {/* Search Bar and Input Section */}
       <div className="flex flex-col items-center col-span-full mb-5 w-full">
