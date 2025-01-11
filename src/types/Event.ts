@@ -18,7 +18,7 @@ export type EventType = {
     femaleWaitList?: Guest[]
 }
 
-export enum GuestList {
+export enum GuestListTypes {
     MaleGuestList = "maleGuestList",
     FemaleGuestList = "femaleGuestList",
     MaleWaitList = "maleWaitList",
