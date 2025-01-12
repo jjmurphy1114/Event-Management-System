@@ -11,13 +11,14 @@ export type EventType = {
     maxFemales: number,
     maxGuests: number,
     open: boolean,
+    jobsURL: string,
     maleGuestList?: Guest[],
     femaleGuestList?: Guest[],
     maleWaitList?: Guest[],
     femaleWaitList?: Guest[]
 }
 
-export enum GuestList {
+export enum GuestListTypes {
     MaleGuestList = "maleGuestList",
     FemaleGuestList = "femaleGuestList",
     MaleWaitList = "maleWaitList",
@@ -33,6 +34,7 @@ const eventSchema = z.object({
     maxFemales: z.number(),
     maxGuests: z.number(),
     open: z.boolean(),
+    jobsURL: z.string().optional(),
     maleGuestList: z.array(guestSchema).optional(),
     femaleGuestList: z.array(guestSchema).optional(),
     maleWaitList: z.array(guestSchema).optional(),
@@ -52,6 +54,7 @@ export default class Event implements EventType{
     maleWaitList: Guest[] = [];
     femaleWaitList: Guest[] = [];
     open: boolean = true;
+    jobsURL: string = '';
 
     constructor(
         params?: EventType
@@ -65,6 +68,7 @@ export default class Event implements EventType{
             this.maxFemales = params.maxFemales;
             this.maxGuests = params.maxGuests;
             this.open = params.open;
+            this.jobsURL = params.jobsURL;
             this.maleGuestList = params.maleGuestList ?? [];
             this.femaleGuestList = params.femaleGuestList ?? [];
             this.maleWaitList = params.maleWaitList ?? [];
@@ -102,6 +106,7 @@ export default class Event implements EventType{
             maleWaitList: this.maleWaitList,
             femaleWaitList: this.femaleWaitList,
             open: this.open,
+            jobsURL: this.jobsURL,
         };
     }
 
@@ -134,6 +139,7 @@ export default class Event implements EventType{
             maxFemales: parsedData.data.maxFemales,
             maxGuests: parsedData.data.maxGuests,
             open: parsedData.data.open,
+            jobsURL: parsedData.data.jobsURL ?? '',
             maleGuestList: parsedData.data.maleGuestList ?? [],
             femaleGuestList: parsedData.data.femaleGuestList ?? [],
             maleWaitList: parsedData.data.maleWaitList ?? [],
