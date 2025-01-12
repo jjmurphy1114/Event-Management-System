@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import { ref, push, onValue, set, update, remove, Database } from "firebase/database";
 import Event, {emptyEvent, EventType, validateAndReturnEvent} from '../types/Event';
-import { useNavigate } from 'react-router-dom';
 
 interface EventsPageProps {
   database: Database;
@@ -11,14 +10,9 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [newEvent, setNewEvent] = useState(emptyEvent);
   const eventsRef = useRef(ref(database, 'events')).current;
-  const navigate = useNavigate();
   const [error, setError] = useState('');
   const [editError, setEditError] = useState('');
   const [editingEventId, setEditingEventId] = useState<string | null>(null); // ID of event in edit mode
-
-  const handleRedirect = () => {
-    navigate('/');
-  };
 
   // Fetch events from Firebase Realtime Database
   useEffect(() => {
@@ -134,11 +128,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
   return (
-    <div className='w-screen h-screen flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100 overflow-auto'>
-      <button type="button" onClick={handleRedirect} className="px-4 py-2 mb-2 mt-4 bg-indigo-500 text-white font-semibold rounded-md shadow hover:bg-indigo-600 focus:outline-none focus:ring focus:ring-indigo-200">
-      Back to Home
-    </button>
-    <div className="p-8 w-full bg-gradient-to-b items-center justify-center from-blue-50 to-gray-100 min-h-screen">
+    <div className='absolute box-border min-w-[420px] top-16 w-full h-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100 '>
+    <div className="p-8 w-full bg-gradient-to-b items-center justify-center from-blue-50 to-gray-100">
       {/* Error message */}
       {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
     
@@ -147,68 +138,68 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       <div className="bg-white shadow-lg rounded-lg p-6 mb-10 mx-auto max-w-xl">
         <h2 className="text-2xl font-semibold text-center text-gray-700 mb-4">Add New Event</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className='col-span-2 md:col-span-1'>
+          <div className='col-span-1'>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Event Name</label>
             <input
               id="name"
               type="text"
               value={newEvent.name}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, name: e.target.value }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div className='col-span-2 md:col-span-1'>
+          <div className='col-span-1'>
             <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
             <input
               id="date"
               type="date"
               value={newEvent.date}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, date: e.target.value }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div className='col-span-2 md:col-span-1'>
+          <div className='col-span-1'>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700">Event Type</label>
             <input
               id="type"
               type="text"
               value={newEvent.type}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, type: e.target.value }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div className='col-span-2 md:col-span-1'>
+          <div className='col-span-1'>
             <label htmlFor="males" className="block text-sm font-medium text-gray-700">Male Invites Per Brother</label>
             <input
               id="males"
               type="number"
               value={Number.isNaN(newEvent.maxMales) ? "" : newEvent.maxMales}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, maxMales: parseInt(e.target.value)}))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div className='col-span-2 md:col-span-1'>
+          <div className='col-span-1'>
             <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per Brother</label>
             <input
               id="females"
               type="number"
               value={Number.isNaN(newEvent.maxFemales) ? "" : newEvent.maxFemales}
               onChange={(e) => setNewEvent(new Event({ ...newEvent, maxFemales: parseInt(e.target.value) }))}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div className='col-span-2 md:col-span-1'>
+          <div className='col-span-1'>
             <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
             <input
                 id="maxGuests"
                 type="number"
                 value={Number.isNaN(newEvent.maxGuests) ? "" : newEvent.maxGuests}
                 onChange={(e) => setNewEvent(new Event({...newEvent, maxGuests: parseInt(e.target.value)}))}
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div
-            className="col-span-2"
+            className="col-span-1 md:col-span-2"
           >
             <label htmlFor="jobsURL" className="block text-sm font-medium text-gray-700">Party Jobs URL</label>
             <input
@@ -222,7 +213,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
           </div>
           <button
               onClick={handleAddEvent}
-              className="col-span-2 bg-blue-500 text-white px-6 py-3 rounded-md font-semibold mt-4 hover:bg-blue-600 transition duration-200"
+              className="w-full col-span-1 md:col-span-2 bg-blue-500 text-white px-6 py-3 rounded-md font-semibold mt-4 hover:bg-blue-600 transition duration-200"
           >
             Add Event
           </button>
@@ -230,7 +221,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       </div>
 
       {/* Event List */}
-      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {events.map((event) => (
             <li key={event.id}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg text-center transition duration-200">
