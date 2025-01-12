@@ -25,9 +25,9 @@ const GuestList = (props: GuestListProps) => {
         {props.guestList.length > 0 ? (
           props.guestList.map((guest, index) => (
             <div key={index}
-              className={`${backgroundColor.current} p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between space-x-0 space-y-5 sm:space-x-5 sm:space-y-0 items-center w-full`}
+              className={`${backgroundColor.current} p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between space-x-0 space-y-5 sm:space-x-5 sm:space-y-0 items-center align-middle w-full`}
             >
-              <div className="grid-rows-2 self-start">
+              <div className="grid-rows-2 self-start sm:self-auto">
                 <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
                 <p className="text-sm text-gray-700">Added By: {props.userNames[guest.addedBy] || (() => {
                   props.fetchUserName(guest.addedBy).then();
@@ -39,10 +39,18 @@ const GuestList = (props: GuestListProps) => {
                 {(guest.checkedIn !== -1 || (props.userStatus === "Admin" && props.frontDoorMode)) && (
                   <button
                     onClick={guest.checkedIn === -1 ? () => props.handleCheckInGuest(props.gender, index) : undefined}
-                    className={`${guest.checkedIn !== -1 ? "text-sm": ""} flex-grow sm:mt-0 rounded-md font-semibold ${checkInIdleColor.current} text-white hover:${checkInHoverColor.current}`}
+                    className={`${guest.checkedIn !== -1 ? "text-sm": ""} self-stretch flex-grow sm:mt-0 rounded-md font-semibold ${checkInIdleColor.current} text-white hover:${checkInHoverColor.current}`}
                     disabled={guest.checkedIn !== -1}
                   >
-                    {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}
+                    {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString("en-US", {
+                      year: "2-digit",
+                      month: "numeric",
+                      day: "numeric",
+                      hour12: true,
+                      hour: "numeric",
+                      minute: "numeric",
+                      second: "numeric"
+                    })}`}
                   </button>
                 )}
                 {(props.userID === guest.addedBy || props.userStatus === "Admin") && (
