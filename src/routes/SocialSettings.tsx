@@ -132,7 +132,7 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
 
 
   return (
-  <div className="h-screen w-screen bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 py-10 px-5 md:px-80 pt-20 overflow-auto">
+  <div className="min-w-[420px] h-screen w-screen bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 p-5 pt-20 overflow-auto">
     <h1 className="text-4xl md:text-4xl font-bold text-center align-top my-4 mt-6 text-gray-800">Manage Users</h1>
 
     <div className="flex justify-center mb-4">
@@ -144,10 +144,10 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
       </button>
     </div>
 
-    <div className="container mx-auto bg-white p-4 md:p-6 shadow-md rounded-lg">
+    <div className="container mx-auto lg:w-[80%] bg-white p-4 md:p-6 shadow-md rounded-lg">
       {/* Table Container */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white text-gray-700 text-center border-collapse">
+      <div className={"w-full overflow-x-auto"}>
+        <table className="box-border w-full bg-white text-gray-700 text-center border-collapse">
           <thead>
             <tr className="bg-gray-100">
               <th className="py-2 px-4 border">Email</th>
