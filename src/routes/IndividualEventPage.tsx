@@ -642,43 +642,6 @@ return (
         {/* Guest Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 col-span-full">
           {/* Male Guests Section */}
-          {/*<div className="p-4 rounded-lg col-span-1 lg:col-span-1">*/}
-          {/*  <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Guests</h2>*/}
-          {/*  <div className="mb-8 space-y-4 min-h-[20rem]">*/}
-          {/*    {filteredMaleGuests.length > 0 ? (*/}
-          {/*      filteredMaleGuests.map((guest, index) => (*/}
-          {/*        <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">*/}
-          {/*          <div className="grid-rows-2">*/}
-          {/*            <p className="text-lg font-semibold text-gray-700">{guest.name}</p>*/}
-          {/*            <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>*/}
-          {/*          </div>*/}
-          {/*          <div className={"basis-[50%] flex flex-row items-center align-middle justify-end space-x-5"}>*/}
-          {/*            {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (*/}
-          {/*              <button*/}
-          {/*                onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('male', index) : undefined}*/}
-          {/*                className={`flex-grow sm:mt-0 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600`}*/}
-          {/*                disabled={guest.checkedIn !== -1}*/}
-          {/*              >*/}
-          {/*                {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}*/}
-          {/*              </button>*/}
-          {/*            )}*/}
-          {/*            {(user?.uid === guest.addedBy || userStatus === "Admin") && (*/}
-          {/*              <button*/}
-          {/*                onClick={() => handleDeleteGuest('male', index, 'guestList')}*/}
-          {/*              className="sm:mt-0 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"*/}
-          {/*              >*/}
-          {/*                Delete*/}
-          {/*              </button>*/}
-          {/*            )}*/}
-          {/*          </div>*/}
-          {/*        </div>*/}
-          {/*      ))*/}
-          {/*    ) : (*/}
-          {/*      <p className="text-gray-500 text-center">No male guests added yet.</p>*/}
-          {/*    )}*/}
-          {/*  </div>*/}
-          {/*</div>*/}
-          
           <GuestList
             guestList={filteredMaleGuests}
             gender={"male"}
@@ -690,44 +653,6 @@ return (
             handleCheckInGuest={handleCheckInGuest}
             handleDeleteGuest={handleDeleteGuest}
           />
-
-          {/* Female Guests Section */}
-          {/*<div className="p-4 rounded-lg col-span-1 lg:col-span-1">*/}
-          {/*  <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">Female Guests</h2>*/}
-          {/*  <div className="mb-8 space-y-4 min-h-[20rem]">*/}
-          {/*    {filteredFemaleGuests.length > 0 ? (*/}
-          {/*      filteredFemaleGuests.map((guest, index) => (*/}
-          {/*        <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-row justify-between items-center w-full">*/}
-          {/*          <div className="grid-rows-2">*/}
-          {/*            <p className="text-lg font-semibold text-gray-700">{guest.name}</p>*/}
-          {/*            <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>*/}
-          {/*          </div>*/}
-          {/*          <div className={"basis-[50%] flex flex-row items-center align-middle justify-end space-x-5"}>*/}
-          {/*            {(guest.checkedIn !== -1 || (userStatus === "Admin" && frontDoorMode)) && (*/}
-          {/*                <button*/}
-          {/*                  onClick={guest.checkedIn === -1 ? () => handleCheckInGuest('female', index) : undefined}*/}
-          {/*                  className={`flex-grow sm:mt-0 rounded-md font-semibold bg-pink-500 text-white hover:bg-pink-600`}*/}
-          {/*                  disabled={guest.checkedIn !== -1}*/}
-          {/*                >*/}
-          {/*                  {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString()}`}*/}
-          {/*                </button>*/}
-          {/*            )}*/}
-          {/*            {(user?.uid === guest.addedBy || userStatus === "Admin") && (*/}
-          {/*              <button*/}
-          {/*                onClick={() => handleDeleteGuest('female', index, 'guestList')}*/}
-          {/*                className="sm:mt-0 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"*/}
-          {/*              >*/}
-          {/*                Delete*/}
-          {/*              </button>*/}
-          {/*            )}*/}
-          {/*          </div>*/}
-          {/*        </div>*/}
-          {/*      ))*/}
-          {/*    ) : (*/}
-          {/*      <p className="text-gray-500 text-center">No female guests added yet.</p>*/}
-          {/*    )}*/}
-          {/*  </div>*/}
-          {/*</div>*/}
           
           <GuestList
             guestList={filteredFemaleGuests}

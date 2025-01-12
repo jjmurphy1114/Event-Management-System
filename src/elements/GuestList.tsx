@@ -35,7 +35,7 @@ const GuestList = (props: GuestListProps) => {
                 })()}</p>
               </div>
               <div
-                className={"basis-[50%] flex flex-row items-center align-middle justify-end space-x-5"}>
+                className={`${props.userStatus !== "Admin" && guest.addedBy !== props.userID && guest.checkedIn != -1 ? "basis-[25%]" : "basis-[50%]"} flex flex-row items-center align-middle justify-end space-x-5`}>
                 {(guest.checkedIn !== -1 || (props.userStatus === "Admin" && props.frontDoorMode)) && (
                   <button
                     onClick={guest.checkedIn === -1 ? () => props.handleCheckInGuest(props.gender, index) : undefined}
