@@ -282,7 +282,7 @@ const IndividualEventPage = () => {
       const userRef = ref(database, `users/${userID}`);
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
-        return snapshot.val().displayName; // Return the user's name if it exists
+        return snapshot.val().displayName as string; // Return the user's name if it exists
       } else {
         console.error("No user found with ID: ", userID); // Log an error if no user is found
         return "Unknown User";
@@ -301,6 +301,29 @@ const IndividualEventPage = () => {
       const displayName = await getNameFromID(userID);
       setUserNames(prevNames => ({ ...prevNames, [userID]: displayName })); // Cache the name
       return displayName;
+    }
+  }
+  
+  const handleUncheckInGuest = async (gender: "male" | "female", index: number) => {
+    if(!event) return;
+    
+    if(userStatus !== "Admin") return;
+    
+    try {
+      const guestListName = gender === "male" ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList;
+      const updatedGuestList = [...event[guestListName]];
+      updatedGuestList[index].checkedIn = -1;
+      
+      const eventRef = ref(database, `events/${id}`);
+      await update(eventRef, { [guestListName]: updatedGuestList });
+      
+      setEvent((prevEvent) => new Event({
+        ...prevEvent!,
+        [guestListName]: updatedGuestList
+      }));
+    } catch (error) {
+      console.error("Error unchecking in guest: ", error);
+      setError("Failed to uncheck in guest");
     }
   }
 
@@ -641,7 +664,7 @@ return (
 
         {/* Guest Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 col-span-full">
-          {/* Male Guests Section */}
+          {/* Male Guests */}
           <GuestList
             guestList={filteredMaleGuests}
             gender={"male"}
@@ -651,9 +674,11 @@ return (
             userStatus={userStatus}
             frontDoorMode={frontDoorMode}
             handleCheckInGuest={handleCheckInGuest}
+            handleUncheckInGuest={handleUncheckInGuest}
             handleDeleteGuest={handleDeleteGuest}
           />
           
+          {/* Female Guests */}
           <GuestList
             guestList={filteredFemaleGuests}
             gender={"female"}
@@ -663,82 +688,38 @@ return (
             userStatus={userStatus}
             frontDoorMode={frontDoorMode}
             handleCheckInGuest={handleCheckInGuest}
+            handleUncheckInGuest={handleUncheckInGuest}
             handleDeleteGuest={handleDeleteGuest}
           />
 
-          {/* Male Waitlist Section */}
-          <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
-            <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Male Waitlist</h2>
-            <div>
-            </div>
-            <div className="mb-8 space-y-4 min-h-[20rem]">
-              {filteredMaleWaitListed.length > 0 ? (
-                filteredMaleWaitListed.map((guest, index) => (
-                  <div key={index} className="bg-blue-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                      <div className="grid-rows-2 w-full">
-                      <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                      <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                    </div>
-                    {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                        <button
-                          onClick={() => handleDeleteGuest('male', index, 'waitList')}
-                          className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    {(userStatus === "Admin" || userStatus === "Social") && (
-                      <button
-                        onClick={() => handleApproveGuest('male', index)}
-                        className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
-                      >
-                        Approve
-                      </button>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center">No male guests on the waitlist yet.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Female Waitlist Section */}
-          <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
-            <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">Female Waitlist</h2>
-            <div>
-            </div>
-            <div className="mb-8 space-y-4 min-h-[20rem]">
-            {filteredFemaleWaitListed.length > 0 ? (
-                  filteredFemaleWaitListed.map((guest, index) => (
-                    <div key={index} className="bg-pink-100 p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-center w-full">
-                      <div className="grid-rows-2 w-full">
-                        <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                        <p className="text-sm text-gray-700">Added By: {userNames[guest.addedBy] || (() => { fetchUserName(guest.addedBy).then(); return 'Loading...'; })()}</p>
-                      </div>
-                      {(user?.uid === guest.addedBy || userStatus === "Admin") && (
-                        <button
-                          onClick={() => handleDeleteGuest('female', index, 'waitList')}
-                          className="m-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      )}
-                      {(userStatus === "Admin" || userStatus === "Social") && (
-                      <button
-                        onClick={() => handleApproveGuest('female', index)}
-                        className="m-2 sm:mt-0 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-purple-600"
-                      >
-                        Approve
-                      </button>
-                    )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 text-center">No female guests added to waitlist</p>
-                )}
-            </div>
-          </div>
+          {/* Male Waitlist */}
+          <GuestList
+            guestList={filteredMaleWaitListed}
+            gender={'male'}
+            isWaitList={true}
+            userNames={userNames}
+            fetchUserName={fetchUserName}
+            userID={user ? user.uid : ""}
+            userStatus={userStatus}
+            frontDoorMode={frontDoorMode}
+            handleDeleteGuest={handleDeleteGuest}
+            handleApproveGuest={handleApproveGuest}
+          />
+          
+          {/* Female Waitlist */}
+          <GuestList
+            guestList={filteredFemaleWaitListed}
+            gender={"female"}
+            isWaitList={true}
+            userNames={userNames}
+            fetchUserName={fetchUserName}
+            userID={user ? user.uid : ""}
+            userStatus={userStatus}
+            frontDoorMode={frontDoorMode}
+            handleDeleteGuest={handleDeleteGuest}
+            handleApproveGuest={handleApproveGuest}
+          />
+          
         </div>
 
         <div className="flex justify-center mt-4 col-span-full">
