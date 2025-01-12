@@ -40,9 +40,9 @@ export default function HomePage() {
   };
 
   return (
-    <div className="box-border h-screen w-screen bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 py-10 px-5 min-w-[420px] md:px-[10%] lg:px-[20%] pt-20 overflow-auto">
-      <h1 className="text-4xl font-bold text-center w-full align-top text-indigo-600 mt-10 mb-10">ZM PARTIES</h1>
-      <div className="flex w-full justify-center mx-auto bg-gradient-to-b from-blue-50 to-gray-100">
+    <div className="absolute box-border top-16 h-screen w-full bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 p-5 min-w-[420px] overflow-auto">
+      <h1 className="text-4xl font-bold text-center w-full align-top text-indigo-600 py-5">ZM PARTIES</h1>
+      <div className="md:w-[80%] lg:w-[70%] py-5 flex w-full justify-center mx-auto bg-gradient-to-b from-blue-50 to-gray-100">
         <div className="bg-white shadow-md w-full item-center rounded-lg p-6">
           {events.length > 0 ? (
             <ul className="space-y-4">

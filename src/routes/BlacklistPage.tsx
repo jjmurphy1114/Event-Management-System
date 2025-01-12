@@ -91,8 +91,8 @@ const BlacklistPage = () => {
   );
 
   return (
-    <div className="min-w-[420px] h-screen w-screen overflow-auto bg-gradient-to-b from-blue-50 to-gray-100 p-5">
-      <h1 className="text-4xl font-bold text-center col-span-full mt-10 text-gray-800 w-100 h-10">Blacklist Management</h1>
+    <div className="absolute top-16 min-w-[420px] h-screen w-screen overflow-auto bg-gradient-to-b from-blue-50 to-gray-100 p-5">
+      <h1 className="text-4xl font-bold text-center col-span-full mt-5 text-gray-800 w-100 h-10">Blacklist Management</h1>
       <div className="mx-auto md:w-[80%] bg-white shadow-md rounded-lg p-6 mt-5">
         <div className="mb-6">
           <input

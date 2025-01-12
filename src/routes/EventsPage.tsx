@@ -9,6 +9,7 @@ interface EventsPageProps {
 const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [newEvent, setNewEvent] = useState(emptyEvent);
+  const [prevEvents, setPrevEvents] = useState<Event[]>([]);
   const eventsRef = useRef(ref(database, 'events')).current;
   const [error, setError] = useState('');
   const [editError, setEditError] = useState('');
@@ -72,6 +73,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
    // Handler for updating an existing event
    const handleEditEvent = (id: string) => {
     setEditingEventId(id);
+    setPrevEvents(events)
   };
 
   const handleSaveEdit = (id: string) => {
@@ -121,10 +123,16 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
   const deleteEvent = (id: string) => {
-    const eventRef = ref(database, `events/${id}`);
-    remove(eventRef).catch((e) => {
-      console.error(`Error deleting event: ${e}`);
-    });
+    const eventToDelete = events.find(e => e.id === id);
+    
+    if(!eventToDelete) return;
+    
+    if(confirm(`Delete event, ${eventToDelete.name}?`)) {
+      const eventRef = ref(database, `events/${id}`);
+      remove(eventRef).catch((e) => {
+        console.error(`Error deleting event: ${e}`);
+      });
+    }
   };
 
   return (
@@ -208,7 +216,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                 value={newEvent.jobsURL}
                 width="100%"
                 onChange={(e) => setNewEvent(new Event({...newEvent, jobsURL: e.target.value}))}
-                className="w-full border border-gray-300 rounded-md py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <button
@@ -302,12 +310,25 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                           className="border p-2 w-full mb-2"
                       />
                     </div>
-                    <button
-                        onClick={() => handleSaveEdit(event.id)}
-                        className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                    >
-                      Save
-                    </button>
+                    <div className={`flex flex-row align-middle items-center justify-center`}>
+                      <button
+                          onClick={() => handleSaveEdit(event.id)}
+                          className="basis-[50%] bg-green-500 text-white rounded-md hover:bg-green-600"
+                      >
+                        Save
+                      </button>
+                      <div className={`w-[5%]`}></div>
+                      <button
+                        onClick={() => {
+                          setEditingEventId(null);
+                          setEvents(prevEvents);
+                          setPrevEvents([]);
+                        }}
+                        className={`basis-[50%] bg-red-500 text-white rounded-md hover:bg-red-600`}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
               ) : (
                   <div>
