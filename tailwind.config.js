@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       spacing: {
-        "screen-with-nav": "var(--screen-height)"
+        "screen-with-nav": "var(--screen-height)",
+        "nav": "var(--navbar-height)",
       }
     },
   },

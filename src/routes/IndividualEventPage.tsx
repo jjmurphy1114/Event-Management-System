@@ -538,10 +538,10 @@ const IndividualEventPage = () => {
   ) || [];
 
 return (
-  <div className={"absolute box-border w-full h-fit min-h-screen-with-nav top-16 items-center overflow-auto min-w-[375px]"}>
-    <div style={{boxShadow: "rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px"}} className="rounded-md m-auto mt-4 mb-4 w-[90%] h-full md:w-[80%] gap-4 bg-gradient-to-b from-blue-50 to-gray-100">
-      <div className={"w-full px-8 grid grid-cols-1 md:grid-cols-2"}>
-        <h1 className="text-4xl font-bold text-center col-span-full mt-4 text-gray-800 w-full h-10">{eventName}</h1>
+  <div className={"absolute box-border p-5 w-full h-fit min-h-screen-with-nav top-nav items-center overflow-auto min-w-[375px]"}>
+    <div style={{boxShadow: "rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px"}} className="rounded-md m-auto w-[90%] h-full md:w-[80%] gap-4 bg-gradient-to-b from-blue-50 to-gray-100">
+      <div className={"w-full px-6 grid grid-cols-1 md:grid-cols-2"}>
+        <h1 className="text-4xl font-bold text-center col-span-full mt-4 text-gray-800 w-full">{eventName}</h1>
         {userStatus === "Admin" && (
           <div className="col-span-full my-4 flex justify-center">
             <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">

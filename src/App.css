@@ -14,5 +14,6 @@ html, body {
 }
 
 :root {
-  --screen-height: calc(100vh - 4rem);
+  --navbar-height: 4rem;
+  --screen-height: calc(100vh - var(--navbar-height));
 }

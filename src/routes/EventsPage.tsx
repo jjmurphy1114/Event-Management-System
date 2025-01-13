@@ -136,14 +136,14 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
   return (
-    <div className='absolute box-border min-w-[420px] top-16 w-full h-screen-with-nav flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100 '>
-    <div className="p-8 w-full bg-gradient-to-b items-center justify-center from-blue-50 to-gray-100">
+    <div className='absolute box-border min-w-[420px] top-nav p-5 w-full h-screen-with-nav flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100 '>
+    <div className="w-full bg-gradient-to-b items-center justify-center from-blue-50 to-gray-100">
       {/* Error message */}
       {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
     
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Manage Events</h1>
       {/* Event Input Form */}
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-10 mx-auto max-w-xl">
+      <div className="bg-white shadow-lg rounded-lg p-6 mx-auto max-w-xl">
         <h2 className="text-2xl font-semibold text-center text-gray-700 mb-4">Add New Event</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className='col-span-1'>
@@ -229,7 +229,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       </div>
 
       {/* Event List */}
-      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <ul className="p-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {events.map((event) => (
             <li key={event.id}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg text-center transition duration-200">
