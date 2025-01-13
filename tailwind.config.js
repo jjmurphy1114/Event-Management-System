@@ -5,7 +5,12 @@ export default {
     "./src/**/*.{html,js,jsx,ts,tsx}", // Recursively include all source files
   ],
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        "screen-with-nav": "var(--screen-height)",
+        "nav": "var(--navbar-height)",
+      }
+    },
   },
   plugins: [],
 }

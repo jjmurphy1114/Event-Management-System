@@ -48,7 +48,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center w-screen h-screen bg-gradient-to-b from-blue-100 to-gray-200">
+    <div className="min-w-[420px] flex items-center justify-center w-screen h-screen bg-gradient-to-b from-blue-100 to-gray-200">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-sm text-gray-700">
         <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}

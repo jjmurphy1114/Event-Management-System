@@ -124,10 +124,10 @@ function Root() {
   const showBanner = !hideBannerRoutes.includes(location.pathname);
 
   return (
-    <>
+    <div>
       {showBanner && <Banner />}
       <Outlet />
-    </>
+    </div>
   );
 }
 const router = createBrowserRouter([
