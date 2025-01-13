@@ -141,7 +141,7 @@ const UserAccount = () => {
   
   return (
     <div className={"absolute box-border top-nav w-full h-screen-with-nav min-w-[420px] p-5 flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100"}>
-      <div className={`w-[80%] h-fit rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
+      <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full h-fit rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
         <div className={`box-border p-5 flex flex-col items-center`}>
           <h1 className="text-4xl font-bold text-center text-gray-800 w-full">
             User Settings
@@ -269,7 +269,7 @@ const UserAccount = () => {
             </div>
           </div>
           <button
-            className={`xl:w-[20%] lg:w-[25%] md:w-[40%] sm:w-[60%] w-full bg-red-500 text-white rounded-md hover:bg-red-600`}
+            className={`md:w-[30%] sm:w-[40%] w-[75%] bg-red-500 text-white rounded-md hover:bg-red-600`}
             onClick={() => {
               if(confirm(`Are you sure you want to delete your account? This is irreversible!`)) {
                 // Check if there is more than 1 user in the database
