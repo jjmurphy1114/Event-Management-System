@@ -58,7 +58,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex items-center justify-center w-screen h-screen bg-gradient-to-b from-blue-100 to-gray-200">
+    <div className="min-w-[420px] flex items-center justify-center w-screen h-screen bg-gradient-to-b from-blue-100 to-gray-200">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-sm">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Sign Up</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -97,25 +97,27 @@ export default function SignUpPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => {
+              if(e.key === "Enter") handleSignUp();
+            }}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Enter your password"
           />
         </div>
         <div className='flex items-center justify-between'>
-            <button
+          <button
             onClick={handleSignUp}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
+          >
             Sign Up
-            </button>
-            <button
+          </button>
+          <button
             onClick={() => {navigate('/login')}}
             className="bg-indigo-500 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
+          >
             Back
-            </button>
+          </button>
         </div>
-       
       </div>
     </div>
   );
