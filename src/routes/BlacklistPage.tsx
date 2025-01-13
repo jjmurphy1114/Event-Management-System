@@ -110,7 +110,6 @@ const BlacklistPage = () => {
               Add to Blacklist
             </button>
           </div>
-          
         </div>
 
         {notification && (
