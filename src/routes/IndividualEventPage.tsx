@@ -538,7 +538,7 @@ const IndividualEventPage = () => {
   ) || [];
 
 return (
-  <div className={"absolute box-border w-full h-fit top-16 items-center overflow-auto min-w-[375px]"}>
+  <div className={"absolute box-border w-full h-fit min-h-screen-with-nav top-16 items-center overflow-auto min-w-[375px]"}>
     <div style={{boxShadow: "rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px"}} className="rounded-md m-auto mt-4 mb-4 w-[90%] h-full md:w-[80%] gap-4 bg-gradient-to-b from-blue-50 to-gray-100">
       <div className={"w-full px-8 grid grid-cols-1 md:grid-cols-2"}>
         <h1 className="text-4xl font-bold text-center col-span-full mt-4 text-gray-800 w-full h-10">{eventName}</h1>
@@ -635,7 +635,7 @@ return (
           <p className="text-lg font-semibold text-gray-700">
             If everyone from the approval list was added, there would be {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0)} females and {(event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} males on the list. For a total of {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0) + (event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} guests.
           </p>
-          <JobsButton event={event} className={`mt-4 w-40 bg-purple-600 text-white semi-bold rounded-md hover:bg-purple-500 p-2 disabled:bg-purple-500 disabled:hover:border-transparent`}/>
+          <JobsButton event={event} className={`mt-4 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:text-gray-200 disabled:hover:border-transparent disabled:cursor-not-allowed`}/>
         </div>
         {/* Search Bar and Input Section */}
         <div className="flex flex-col items-center col-span-full my-4 w-full">

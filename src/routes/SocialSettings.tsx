@@ -132,7 +132,7 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
 
 
   return (
-  <div className="absolute top-16 min-w-[420px] h-screen w-screen bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 p-5 overflow-auto">
+  <div className="absolute top-16 min-w-[420px] h-screen-with-nav w-screen bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 p-5 overflow-auto">
     <h1 className="text-4xl md:text-4xl font-bold text-center align-top py-4 text-gray-800">Manage Users</h1>
 
     <div className="flex justify-center pt-4 pb-8">

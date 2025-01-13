@@ -136,7 +136,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
   };
 
   return (
-    <div className='absolute box-border min-w-[420px] top-16 w-full h-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100 '>
+    <div className='absolute box-border min-w-[420px] top-16 w-full h-screen-with-nav flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100 '>
     <div className="p-8 w-full bg-gradient-to-b items-center justify-center from-blue-50 to-gray-100">
       {/* Error message */}
       {error && <p className="text-red-500 text-center font-medium mb-2">{error}</p>}
