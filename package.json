@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "firebase:emulate": "firebase use default && firebase emulators:start",
-    "firebase:deploy:hosting": "firebase deploy --only hosting",
+    "firebase:deploy:hosting": "yarn run build && firebase use default && firebase deploy --only hosting",
     "firebase:deploy:database": "firebase deploy --only database"
   },
   "dependencies": {
