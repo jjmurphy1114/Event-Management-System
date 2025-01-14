@@ -139,15 +139,46 @@ const UserAccount = () => {
     setConfirmNewPassword(null);
   };
   
+  const handleDeleteUser = () => {
+    if(confirm(`Are you sure you want to delete your account? This is irreversible!`)) {
+      // Check if there is more than 1 user in the database
+      const usersRef = ref(database, `/users`);
+      get(usersRef).then((usersSnapshot) => {
+        if (usersSnapshot.exists()) {
+          const users = usersSnapshot.val();
+          const userCount = Object.keys(users).length;
+    
+          if (userCount <= 1) {
+            console.error("Cannot remove user, only 1 user in database");
+            alert("Cannot remove user, only 1 user in database");
+            return;
+          }
+        }
+        const databaseRef = ref(database, `/users/${user.id}`);
+        remove(databaseRef).then(() => {
+          console.log("Successfully deleted user");
+          auth.signOut().then(() => {
+            navigate("/");
+          });
+        }).catch((error) => {
+          console.error("Error deleting user", error);
+        });
+      }).catch((error) => {
+        console.error("Error getting user data", error);
+      });
+    }
+  }
+  
   return (
     <div className={"absolute box-border top-nav w-full h-screen-with-nav min-w-[420px] p-5 flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100"}>
-      <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full h-fit rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
+      <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full h-fit mb-5 rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
         <div className={`box-border p-5 flex flex-col items-center`}>
           <h1 className="text-4xl font-bold text-center text-gray-800 w-full">
             User Settings
           </h1>
           <div className={`w-full grid grid-cols-1 gap-5 lg:grid-cols-2 py-5`}>
-            <div className={`w-full p-5 col-span-1 flex flex-col align-middle items-center rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
+            <div
+              className={`w-full p-5 col-span-1 flex flex-col align-middle items-center rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
               <h1 className="text-2xl pb-4 font-bold text-center text-gray-800 w-full">Information</h1>
               <label htmlFor={"displayName"}
                      className="self-start block text-sm font-medium text-gray-700">Change Display Name</label>
@@ -161,10 +192,11 @@ const UserAccount = () => {
                 }))}
                 className="mb-5 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
-              <label htmlFor={"email"} className="self-start block text-sm font-medium text-gray-700">Change Email</label>
+              <label htmlFor={"email"} className="self-start block text-sm font-medium text-gray-700">Change
+                Email</label>
               {emailError &&
                 <label htmlFor={"email"} className="self-start block text-sm font-medium text-red-700">Email
-                incorrectly formatted!</label>
+                  incorrectly formatted!</label>
               }
               <input
                 id={"email"}
@@ -178,7 +210,8 @@ const UserAccount = () => {
                 }}
                 className={`mb-5 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 ${emailError ? `focus:ring-red-500` : `focus:ring-blue-400`}`}
               />
-              <label htmlFor={"status"} className="self-start block text-sm font-medium text-gray-700">User Status</label>
+              <label htmlFor={"status"} className="self-start block text-sm font-medium text-gray-700">User
+                Status</label>
               <input
                 id={"status"}
                 type={"text"}
@@ -210,7 +243,8 @@ const UserAccount = () => {
               className={`w-full p-5 col-span-1 flex flex-col align-middle items-center rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
               <h1 className="text-2xl pb-5 font-bold text-center text-gray-800 w-full">Password</h1>
               {passwordUpdateText && (
-                <p className={`w-full pb-5 text-center text-xl ${passwordUpdateText.type === "error" ? `text-red-500` : 'text-gray-700'}`}>
+                <p
+                  className={`w-full pb-5 text-center text-xl ${passwordUpdateText.type === "error" ? `text-red-500` : 'text-gray-700'}`}>
                   {passwordUpdateText.text}
                 </p>
               )}
@@ -229,13 +263,14 @@ const UserAccount = () => {
                 id={"newPassword"}
                 type={"password"}
                 value={newPassword ?? ""}
-                onChange={(event) => event.target.value === "" ? setNewPassword(null) :setNewPassword(event.target.value)}
+                onChange={(event) => event.target.value === "" ? setNewPassword(null) : setNewPassword(event.target.value)}
                 className="mb-5 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               <label htmlFor={"confirmPassword"}
                      className="self-start block text-sm font-medium text-gray-700">Confirm New Password</label>
               {passwordError && confirmNewPassword !== null &&
-                <label htmlFor={"confirmPassword"} className="self-start block text-sm font-medium text-red-700">Passwords must match!</label>
+                <label htmlFor={"confirmPassword"} className="self-start block text-sm font-medium text-red-700">Passwords
+                  must match!</label>
               }
               <input
                 id={"confirmPassword"}
@@ -270,38 +305,18 @@ const UserAccount = () => {
           </div>
           <button
             className={`md:w-[30%] sm:w-[40%] w-[75%] bg-red-500 text-white rounded-md hover:bg-red-600`}
-            onClick={() => {
-              if(confirm(`Are you sure you want to delete your account? This is irreversible!`)) {
-                // Check if there is more than 1 user in the database
-                const usersRef = ref(database, `/users`);
-                get(usersRef).then((usersSnapshot) => {
-                  if (usersSnapshot.exists()) {
-                    const users = usersSnapshot.val();
-                    const userCount = Object.keys(users).length;
-              
-                    if (userCount <= 1) {
-                      console.error("Cannot remove user, only 1 user in database");
-                      alert("Cannot remove user, only 1 user in database");
-                      return;
-                    }
-                  }
-                  const databaseRef = ref(database, `/users/${user.id}`);
-                  remove(databaseRef).then(() => {
-                    console.log("Successfully deleted user");
-                    auth.signOut().then(() => {
-                      navigate("/");
-                    });
-                  }).catch((error) => {
-                    console.error("Error deleting user", error);
-                  });
-                }).catch((error) => {
-                  console.error("Error getting user data", error);
-                });
-              }
-            }}
+            onClick={handleDeleteUser}
           >
             Delete Account
           </button>
+        </div>
+      </div>
+      <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full h-fit rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
+        <div className={`box-border p-5 flex flex-col items-center`}>
+          <h1 className={`text-4xl font-bold text-center text-gray-800 w-full`}>Personal Guest Lists</h1>
+          <div className={`grid grid-cols-2`}>
+          
+          </div>
         </div>
       </div>
     </div>
