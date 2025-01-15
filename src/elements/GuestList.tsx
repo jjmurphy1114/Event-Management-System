@@ -4,13 +4,13 @@ import {useRef} from "react";
 interface GuestListProps {
     guestList: Guest[];
     gender: "male" | "female";
-    type: "general" | "waitlist" | "personal";
+    type: "general" | "waitlist";
     userNames: { [p: string]: string };
     fetchUserName: (userID: string) => Promise<string>;
     userID: string;
     userStatus: string;
     frontDoorMode: boolean;
-    handleDeleteGuest: (gender: "male" | "female", index: number, listType: "guestList" | "waitList" | "personalList") => Promise<void>;
+    handleDeleteGuest: (gender: "male" | "female", index: number, listType: "guestList" | "waitList") => Promise<void>;
     handleCheckInGuest?: (gender: "male" | "female", index: number) => Promise<void>;
     handleUncheckInGuest?: (gender: "male" | "female", index: number) => Promise<void>;
     handleApproveGuest?: (gender: "male" | "female", index: number) => Promise<void>

@@ -358,7 +358,7 @@ const IndividualEventPage = () => {
   const handleDeleteGuest = async (
     gender: 'male' | 'female',
     index: number,
-    listType: 'guestList' | 'waitList' | 'personalList',
+    listType: 'guestList' | 'waitList',
   ) => {
     if (!event || !user) return;
   
