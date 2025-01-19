@@ -17,3 +17,7 @@ html, body {
   --navbar-height: 4rem;
   --screen-height: calc(100vh - var(--navbar-height));
 }
+
+input {
+  background-color: black;
+}
