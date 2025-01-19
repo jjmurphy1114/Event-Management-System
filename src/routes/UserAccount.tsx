@@ -6,10 +6,13 @@ import {database} from "../services/firebaseConfig.ts";
 import {get, ref, remove, update} from "firebase/database";
 import {isEqual} from "lodash";
 import {FirebaseError} from "firebase/app";
+import PersonalGuestList from "../elements/PersonalGuestList.tsx";
 
 const UserAccount = () => {
   const [user, setUser] = useState<User>(new User(defaultUserType));
   const [prevUserData, setPrevUserData] = useState<User>(user);
+  
+  const [guestName, setGuestName] = useState<string>("");
   
   const [oldPassword, setOldPassword] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState<string | null>(null);
@@ -169,6 +172,24 @@ const UserAccount = () => {
     }
   }
   
+  const handleDeleteGuest = async (gender: 'male' | 'female', index: number) => {
+    const guestList = gender === "male" ? user.malePersonalGuests : user.femalePersonalGuests;
+    const updatedGuestList = guestList.filter((_, guestIndex) => guestIndex !== index);
+    
+    const databaseRef = ref(database, `/users/${user.id}`);
+    await update(databaseRef, gender === "male" ? {malePersonalGuests: updatedGuestList} : {femalePersonalGuests: updatedGuestList});
+    setUser((prevUser) => {
+      const updatedUser = prevUser;
+      if(gender === "male") {
+        updatedUser.malePersonalGuests = updatedGuestList;
+      } else {
+        updatedUser.femalePersonalGuests = updatedGuestList;
+      }
+      
+      return updatedUser
+    });
+  }
+  
   return (
     <div className={"absolute box-border top-nav w-full h-screen-with-nav min-w-[420px] p-5 flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100"}>
       <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full h-fit mb-5 rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
@@ -314,8 +335,32 @@ const UserAccount = () => {
       <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full h-fit rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
         <div className={`box-border p-5 flex flex-col items-center`}>
           <h1 className={`text-4xl font-bold text-center text-gray-800 w-full`}>Personal Guest Lists</h1>
-          <div className={`grid grid-cols-2`}>
-          
+          <div className="flex flex-col items-center col-span-full my-4 w-full">
+            <input
+              type="text"
+              value={guestName}
+              onChange={(e) => setGuestName(e.target.value)}
+              placeholder="Enter guest name"
+              className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <div className="mt-7 flex flex-auto justify-between space-x-5 m-2 w-[70%] sm:w-[50%] lg:w-[35%]">
+              <button
+                onClick={() => handleAddGuest('male')}
+                className="bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600 p-2 w-[50%]"
+              >
+                Add Male
+              </button>
+              <button
+                  onClick={() => handleAddGuest('female')}
+                  className="bg-pink-500 text-white rounded-md font-semibold hover:bg-pink-600 p-2 w-[50%]"
+                >
+                  Add Female
+              </button>
+            </div>
+          </div>
+          <div className={`grid grid-cols-1 xl:grid-cols-2 gap-4 w-full`}>
+            <PersonalGuestList guestList={user.malePersonalGuests} gender={"male"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
+            <PersonalGuestList guestList={user.femalePersonalGuests} gender={"female"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
           </div>
         </div>
       </div>
