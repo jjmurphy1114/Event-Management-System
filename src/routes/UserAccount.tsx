@@ -217,8 +217,8 @@ const UserAccount = () => {
   }
   
   return (
-    <div className={"absolute box-border top-nav w-full h-screen-with-nav min-w-[420px] p-5 flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100"}>
-      <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full h-fit mb-5 rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
+    <div className={"absolute box-border top-nav w-full h-fit min-w-[420px] p-5 flex flex-col items-center bg-gradient-to-b from-blue-50 to-gray-100"}>
+      <div className={`2xl:w-[50%] xl:w-[60%] lg:w-[70%] md:w-[80%] sm:w-[90%] w-full mb-5 rounded-md shadow-lg bg-gradient-to-b from-blue-50 to-gray-100`}>
         <div className={`box-border p-5 flex flex-col items-center`}>
           <h1 className="text-4xl font-bold text-center text-gray-800 w-full">
             User Settings
