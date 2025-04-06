@@ -358,7 +358,7 @@ const IndividualEventPage = () => {
   const handleDeleteGuest = async (
     gender: 'male' | 'female',
     index: number,
-    listType: 'guestList' | 'waitList'
+    listType: 'guestList' | 'waitList',
   ) => {
     if (!event || !user) return;
   
@@ -668,6 +668,7 @@ const IndividualEventPage = () => {
             <GuestList
               guestList={filteredMaleGuests}
               gender={"male"}
+              type={"general"}
               userNames={userNames}
               fetchUserName={fetchUserName}
               userID={user ? user.uid : ""}
@@ -682,6 +683,7 @@ const IndividualEventPage = () => {
             <GuestList
               guestList={filteredFemaleGuests}
               gender={"female"}
+              type={"general"}
               userNames={userNames}
               fetchUserName={fetchUserName}
               userID={user ? user.uid : ""}
@@ -696,7 +698,7 @@ const IndividualEventPage = () => {
             <GuestList
               guestList={filteredMaleWaitListed}
               gender={'male'}
-              isWaitList={true}
+              type={"waitlist"}
               userNames={userNames}
               fetchUserName={fetchUserName}
               userID={user ? user.uid : ""}
@@ -710,7 +712,7 @@ const IndividualEventPage = () => {
             <GuestList
               guestList={filteredFemaleWaitListed}
               gender={"female"}
-              isWaitList={true}
+              type={"waitlist"}
               userNames={userNames}
               fetchUserName={fetchUserName}
               userID={user ? user.uid : ""}
