@@ -11,11 +11,11 @@ export default class Guest {
       this.addedBy = addedBy;
       this.checkedIn = -1;
     }
-  }
+}
 
-  export const guestSchema = z.object({
-      name: z.string(),
-      addedBy: z.string(),
-      checkedIn: z.number().or(z.string()),
-  });
+export const guestSchema = z.object({
+    name: z.string(),
+    addedBy: z.string(),
+    checkedIn: z.number().or(z.string()),
+});
   

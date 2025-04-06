@@ -2,11 +2,11 @@ import Guest from "../types/Guest.ts";
 import {useRef} from "react";
 
 interface PersonalGuestListProps {
-  guestList: Guest[];
+  guestList: Record<string, Guest>;
   gender: 'male' | 'female';
   editingMode: boolean;
-  handleDeletePersonalGuest?: (gender: 'male' | 'female', index: number) => Promise<void>;
-  handleAddPersonalGuestToList?: (gender: 'male' | 'female', index: number) => Promise<void>;
+  handleDeletePersonalGuest?: (gender: 'male' | 'female', id: string) => Promise<void>;
+  handleAddPersonalGuestToList?: (gender: 'male' | 'female', id: string) => Promise<void>;
 }
 
 const PersonalGuestList = (props: PersonalGuestListProps) => {
@@ -27,20 +27,21 @@ const PersonalGuestList = (props: PersonalGuestListProps) => {
       <h2
         className="text-3xl font-bold mb-4 text-center text-gray-800">{props.gender === "female" ? "Female" : "Male"} Guests</h2>
       <div className="mb-8 space-y-4 min-h-[20rem]">
-        {props.guestList.length > 0 ? (
-          props.guestList.map((guest, index) => (
-            <div key={index}
+        {Object.keys(props.guestList).length > 0 ? (
+          
+          Object.entries<Guest>(props.guestList).map(([guestID, guestData]) => (
+            <div key={guestID}
                  className={`${backgroundColor.current} p-4 rounded-lg shadow-md flex flex-col sm:flex-row justify-between space-x-0 space-y-5 sm:space-x-5 sm:space-y-0 items-center align-middle w-full`}
             >
               <div className="grid-rows-2 self-start sm:self-auto">
-                <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
+                <p className="text-lg font-semibold text-gray-700">{guestData.name}</p>
               </div>
               <div
                 className={`basis-[25%] flex flex-row items-center align-middle justify-end space-x-5`}
               >
                 {!props.editingMode &&
                   <button
-                    onClick={() => props.handleAddPersonalGuestToList!(props.gender, index)}
+                    onClick={() => props.handleAddPersonalGuestToList!(props.gender, guestID)}
                     className="sm:mt-0 bg-purple-500 text-white rounded-md font-semibold hover:bg-purple-600"
                   >
                     Add to list
@@ -48,7 +49,7 @@ const PersonalGuestList = (props: PersonalGuestListProps) => {
                 }
                 {props.editingMode && (
                   <button
-                    onClick={() => props.handleDeletePersonalGuest!(props.gender, index)}
+                    onClick={() => props.handleDeletePersonalGuest!(props.gender, guestID)}
                     className="sm:mt-0 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
                   >
                     Delete

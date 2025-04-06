@@ -1,12 +1,13 @@
 import {getAuth, updateEmail, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, User as FirebaseUser} from "firebase/auth";
 import {useNavigate} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import User, {defaultUserType, UserType, validateAndReturnUser} from "../types/User.ts";
 import {database} from "../services/firebaseConfig.ts";
-import {get, ref, remove, update} from "firebase/database";
+import {get, push, ref, remove, update} from "firebase/database";
 import {isEqual} from "lodash";
 import {FirebaseError} from "firebase/app";
 import PersonalGuestList from "../elements/PersonalGuestList.tsx";
+import Guest from "../types/Guest.ts";
 
 const UserAccount = () => {
   const [user, setUser] = useState<User>(new User(defaultUserType));
@@ -34,32 +35,46 @@ const UserAccount = () => {
     return emailRegex.test(email);
   };
   
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const databaseRef = ref(database, `/users/${authUser.uid}`);
-      const userSnapshot = await get(databaseRef);
-      
-      if(userSnapshot.exists()) {
-        const userData: UserType | undefined = validateAndReturnUser(userSnapshot.val());
-        if(userData) {
-          const userObj = new User(userData);
-          setUser(userObj);
-          setPrevUserData(userObj);
-        } else {
-          console.error("Could not validate user data!");
-        }
-      } else {
-        console.error(`Could not fetch user data for uid: ${authUser.uid}!`);
-      }
-    }
+  const fetchUserData = useCallback(async () => {
+    const databaseRef = ref(database, `/users/${authUser.uid}`);
+    const userSnapshot = await get(databaseRef);
     
+    if(userSnapshot.exists()) {
+      const userData: UserType | undefined = validateAndReturnUser(userSnapshot.val());
+      if(userData) {
+        const userObj = new User(userData);
+        setUser(userObj);
+        setPrevUserData(userObj);
+      } else {
+        console.error("Could not validate user data!");
+      }
+    } else {
+      console.error(`Could not fetch user data for uid: ${authUser.uid}!`);
+    }
+  }, [authUser.uid]);
+  
+  useEffect(() => {
     fetchUserData().then(
       () => console.debug("Successfully fetched user data!")
     ).catch(
       (e) => console.error("An error occurred while fetching user data: ", e)
     );
     
-  }, [authUser]);
+  }, [authUser, fetchUserData]);
+  
+  useEffect(() => {
+    console.debug(`User ID: ${user.id}`);
+    
+    const males: Record<string, Guest> = user.malePersonalGuestList;
+    const females: Record<string, Guest> = user.femalePersonalGuestList;
+    
+    console.debug(`Male Personal Guest List:`);
+    console.debug(males);
+    
+    console.debug(`Female Personal Guest List:`);
+    console.debug(females);
+    
+  }, [user]);
   
   useEffect(() => {
     if(validateEmail(user.email)) {
@@ -172,21 +187,32 @@ const UserAccount = () => {
     }
   }
   
-  const handleDeleteGuest = async (gender: 'male' | 'female', index: number) => {
-    const guestList = gender === "male" ? user.malePersonalGuests : user.femalePersonalGuests;
-    const updatedGuestList = guestList.filter((_, guestIndex) => guestIndex !== index);
+  const handleAddGuest = async (gender: 'male' | 'female') => {
+    const databaseRef = ref(database,
+      `/users/${user.id}/${gender == 'male' ? 'malePersonalGuestList' : 'femalePersonalGuestList'}`);
     
-    const databaseRef = ref(database, `/users/${user.id}`);
-    await update(databaseRef, gender === "male" ? {malePersonalGuests: updatedGuestList} : {femalePersonalGuests: updatedGuestList});
-    setUser((prevUser) => {
-      const updatedUser = prevUser;
-      if(gender === "male") {
-        updatedUser.malePersonalGuests = updatedGuestList;
-      } else {
-        updatedUser.femalePersonalGuests = updatedGuestList;
-      }
-      
-      return updatedUser
+    const newGuestRef = await push(databaseRef);
+    const newGuestData = new Guest(guestName, user.id);
+    
+    await update(newGuestRef, newGuestData);
+    
+    fetchUserData().then(() => {
+      console.debug(`User data updated successfully!`);
+    }).catch((error) => {
+      console.error(`User data not updated successfully!`);
+      console.error(error);
+    });
+  }
+  
+  const handleDeleteGuest = async (gender: 'male' | 'female', id: string) => {
+    const databaseRef = ref(database, `/users/${user.id}/${gender == 'male' ? 'malePersonalGuestList' : 'femalePersonalGuestList'}/${id}`);
+    await remove(databaseRef);
+    
+    fetchUserData().then(() => {
+      console.debug(`User data updated successfully!`);
+    }).catch((error) => {
+      console.error(`User data not updated successfully!`);
+      console.error(error);
     });
   }
   
@@ -359,8 +385,8 @@ const UserAccount = () => {
             </div>
           </div>
           <div className={`grid grid-cols-1 xl:grid-cols-2 gap-4 w-full`}>
-            <PersonalGuestList guestList={user.malePersonalGuests} gender={"male"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
-            <PersonalGuestList guestList={user.femalePersonalGuests} gender={"female"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
+            <PersonalGuestList guestList={user.malePersonalGuestList} gender={"male"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
+            <PersonalGuestList guestList={user.femalePersonalGuestList} gender={"female"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
           </div>
         </div>
       </div>
