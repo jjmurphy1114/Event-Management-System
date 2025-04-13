@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {database} from "../services/firebaseConfig";
 import {get, onValue, push, ref, remove, set, update} from "firebase/database";
-import Event, {EventType, GuestListTypes, validateAndReturnEvent} from "../types/Event";
+import Event, {EventType, getGenderAndTypeFromGuestList, GuestListTypes, validateAndReturnEvent} from "../types/Event";
 import Guest, {validateAndReturnGuest} from "../types/Guest";
 import {getAuth, User as FirebaseUser} from "firebase/auth";
 import JobsButton from "../elements/JobsButton.tsx";
@@ -31,6 +31,7 @@ const IndividualEventPage = () => {
   
   useEffect(() => {
     const eventRef = ref(database, `events/${id}`);
+    const blacklistRef = ref(database, "blacklist");
   
     onValue(eventRef, (snapshot) => {
       if(snapshot.exists()) {
@@ -41,7 +42,12 @@ const IndividualEventPage = () => {
           setEvent(new Event(validatedEventData));
         }
       }
-    });
+    }, (err) => console.error("Error fetching event!", err));
+    
+    onValue(blacklistRef, (snapshot) => {
+      if(snapshot.exists()) setBlacklist(Object.keys(snapshot.val()));
+      else setBlacklist([]);
+    }, (err) => console.error("Error fetching blacklist!", err));
   }, [id]);
   
   const fetchUserData = useCallback(async () => {
@@ -177,6 +183,8 @@ const IndividualEventPage = () => {
       
       await update(newGuestRef, guestData);
 
+      const genderAndType = getGenderAndTypeFromGuestList(listName);
+      setNotification(`Added guest to ${genderAndType.gender} ${genderAndType.type}`);
       setGuestName("");
       setError("");
     } catch (error) {
@@ -281,6 +289,9 @@ const IndividualEventPage = () => {
       const guestRef = ref(database, `events/${id}/${listName}/${guestID}`);
       await remove(guestRef);
       
+      const genderAndType = getGenderAndTypeFromGuestList(listName);
+      
+      setNotification(`Removed guest from ${genderAndType.gender} ${genderAndType.type}`);
     } catch (error) {
       console.error('Error deleting guest: ', error);
       setError("Failed to delete guest.");

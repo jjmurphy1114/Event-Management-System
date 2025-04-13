@@ -131,4 +131,14 @@ export function getGuestListTypeFromGenderAndType(gender: 'male' | 'female', typ
     }
 }
 
+export function getGenderAndTypeFromGuestList(guestList: GuestListTypes): {gender: 'male' | 'female' | '', type: 'guest list' | 'waitlist' | ''} {
+    switch(guestList) {
+        case GuestListTypes.MaleGuestList: return {gender: "male", type: "guest list"};
+        case GuestListTypes.FemaleGuestList: return {gender: "female", type: "guest list"};
+        case GuestListTypes.MaleWaitList: return {gender: "male", type: "waitlist"};
+        case GuestListTypes.FemaleWaitList: return {gender: "female", type: "waitlist"};
+        default: return {gender: "", type: ""};
+    }
+}
+
 export const emptyEvent = new Event();
