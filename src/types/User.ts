@@ -76,7 +76,7 @@ export function validateAndReturnUser(data: unknown): UserType | undefined {
         }
     } else {
         console.error('User data is unrecognized! Returned data is missing required fields.', parsedData.error);
-        console.error(`Passed in data: ${JSON.stringify(data)}`);
+        console.error(`Passed in data: \n${JSON.stringify(data, null, 2)}`);
         return undefined;
     }
 }
