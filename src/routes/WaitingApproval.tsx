@@ -1,4 +1,3 @@
-
 export default function WaitingApproval() {
   return(
     <div className='absolute top-nav min-w-[420px] box-border w-full h-screen-with-nav p-5 flex flex-col items-center justify-center align-middle bg-gradient-to-b from-blue-50 to-gray-100'>

@@ -3,7 +3,7 @@ import { ref, onValue, update } from 'firebase/database';
 import { database } from '../services/firebaseConfig';
 import { Link } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
-import Event from '../types/Event';
+import Event, {validateAndReturnEvent} from '../types/Event';
 import JobsButton from "../elements/JobsButton.tsx";
 
 export default function HomePage() {
@@ -16,7 +16,13 @@ export default function HomePage() {
     const eventsRef = ref(database, 'events');
     onValue(eventsRef, (snapshot) => {
       const data = snapshot.val();
-      const loadedEvents = data ? Object.keys(data).map((key) => ({ id: key, ...data[key] })) : [];
+      const validatedEvents = data ? Object.values(data).map((data) => {
+        const validatedEventData = validateAndReturnEvent(data);
+        if(validatedEventData) return new Event(validatedEventData);
+      }) : [];
+      
+      const loadedEvents = validatedEvents.filter((data) => data != undefined);
+      
       setEvents(loadedEvents);
     });
 
@@ -53,7 +59,7 @@ export default function HomePage() {
                       <Link to={`/events/${event.id}`} className="text-lg items-center text-center font-semibold text-indigo-500 hover:underline">
                         {event.name}
                       </Link>
-                      <p className="text-sm text-gray-600">Total Guests: {(event.maleGuestList?.length || 0) + (event.femaleGuestList?.length || 0)}</p>
+                      <p className="text-sm text-gray-600">Total Guests: {(Object.keys(event.maleGuestList).length || 0) + (Object.keys(event.femaleGuestList).length || 0)}</p>
                       {(userStatus === 'Admin' || userStatus === 'Social') && (
                         <div className="mt-2 flex items-center">
                           <label htmlFor={`event-toggle-${event.id}`} className="flex items-center cursor-pointer">

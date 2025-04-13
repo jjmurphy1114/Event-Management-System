@@ -3,7 +3,7 @@ import {
   RouterProvider,
   Outlet,
   useNavigate,
-  useLocation
+  useLocation, Navigate
 } from "react-router-dom";
 import './App.css';
 import React, { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ import Banner from "./elements/Banner";
 import IndividualEventPage from "./routes/IndividualEventPage.tsx";
 import BlacklistPage from "./routes/BlacklistPage.tsx";
 import {database} from "./services/firebaseConfig";
-
+import UserAccount from "./routes/UserAccount.tsx";
 
 const auth = getAuth();
 
@@ -115,6 +115,16 @@ function RoleProtectedRoute({ element, allowedStatuses }: { element: React.React
   return element;
 }
 
+function ApprovedProtectedRoute({element}: {element: React.ReactElement}) {
+  const {approved} = useUserStatus();
+  
+  if(approved) {
+    return <Navigate to={"/"} />
+  } else {
+    return element;
+  }
+}
+
 
 function Root() {
   const location = useLocation();
@@ -155,7 +165,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/waiting-approval",
-        element: <WaitingApproval/>
+        element: <ApprovedProtectedRoute element={<WaitingApproval/>}/>
       },
       {
         path: "/social-settings",
@@ -169,8 +179,10 @@ const router = createBrowserRouter([
         path: "/blacklist",
         element: <RoleProtectedRoute allowedStatuses={["Admin"]} element={<BlacklistPage/>}/>
       },
-
-
+      {
+        path: "/user",
+        element: <ProtectedRoute element={<UserAccount />}/>
+      }
     ],
   },
 ]);

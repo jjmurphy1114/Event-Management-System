@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ref, get, remove, set } from "firebase/database";
+import {ref, get, remove, set, onValue} from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { getAuth } from "firebase/auth";
 
@@ -11,27 +11,38 @@ const BlacklistPage = () => {
   const [notification, setNotification] = useState("");
   const auth = getAuth();
   const user = auth.currentUser;
-
+  
   useEffect(() => {
-    const fetchBlacklist = async () => {
-      try {
-        const blacklistRef = ref(database, "blacklist");
-        const snapshot = await get(blacklistRef);
-        if (snapshot.exists()) {
-          setBlacklist(Object.keys(snapshot.val()));
-        } else {
-          setBlacklist([]);
-        }
-      } catch (err) {
-        console.error("Error fetching blacklist:", err);
-        setError("Failed to load the blacklist.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlacklist().then();
+    const blacklistRef = ref(database, "blacklist");
+    onValue(blacklistRef, (snapshot) => {
+      if(snapshot.exists()) setBlacklist(Object.keys(snapshot.val()));
+      else setBlacklist([]);
+      setLoading(false);
+    }, (err) => {
+      console.error("Unable to fetch blacklist!", err);
+    });
   }, []);
+  
+  // useEffect(() => {
+  //   const fetchBlacklist = async () => {
+  //     try {
+  //       const blacklistRef = ref(database, "blacklist");
+  //       const snapshot = await get(blacklistRef);
+  //       if (snapshot.exists()) {
+  //         setBlacklist(Object.keys(snapshot.val()));
+  //       } else {
+  //         setBlacklist([]);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching blacklist:", err);
+  //       setError("Failed to load the blacklist.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //
+  //   fetchBlacklist().then();
+  // }, []);
 
   // Ensure only admins can access this page
   useEffect(() => {
@@ -56,7 +67,6 @@ const BlacklistPage = () => {
     try {
       const blacklistRef = ref(database, `blacklist/${guestName}`);
       await set(blacklistRef, true); // Store a truthy value (e.g., true) to represent the name in the blacklist
-      setBlacklist((prev) => [...prev, guestName]);
       setGuestName("");
       setError("");
       setNotification("Guest added to the blacklist.");
@@ -70,7 +80,6 @@ const BlacklistPage = () => {
     try {
       const blacklistRef = ref(database, `blacklist/${name}`);
       await remove(blacklistRef);
-      setBlacklist((prev) => prev.filter((guest) => guest !== name));
       setNotification("Guest removed from the blacklist.");
     } catch (err) {
       console.error("Error removing from blacklist:", err);
@@ -116,7 +125,7 @@ const BlacklistPage = () => {
           <p className="text-green-500 text-center font-medium mt-4">{notification}</p>
         )}
 
-        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">Blacklisted Guests</h2>
+        <h2 className="text-2xl font-semibold text-center text-gray-800 my-4">Blacklisted Guests</h2>
         {filteredBlacklist.length > 0 ? (
           <ul className="space-y-2">
             {filteredBlacklist.map((name, idx) => (

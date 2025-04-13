@@ -1,4 +1,5 @@
 import {z} from "zod";
+import Guest, {guestSchema} from "./Guest.ts";
 
 export type UserType = {
     id: string;
@@ -7,6 +8,8 @@ export type UserType = {
     approved: boolean;
     status: string;
     privileges: boolean;
+    malePersonalGuestList: Record<string, Guest>;
+    femalePersonalGuestList: Record<string, Guest>;
 }
 
 const userSchema = z.object({
@@ -16,6 +19,8 @@ const userSchema = z.object({
     approved: z.boolean(),
     status: z.string(),
     privileges: z.boolean(),
+    malePersonalGuestList: z.record(guestSchema).optional(),
+    femalePersonalGuestList: z.record(guestSchema).optional(),
 })
 
 export default class User {
@@ -25,6 +30,8 @@ export default class User {
     approved: boolean;
     status: string
     privileges: boolean
+    malePersonalGuestList: Record<string, Guest>;
+    femalePersonalGuestList: Record<string, Guest>;
 
     constructor(
         params: UserType,
@@ -35,6 +42,8 @@ export default class User {
         this.approved = params.approved;
         this.status = params.status;
         this.privileges = params.privileges;
+        this.malePersonalGuestList = params.malePersonalGuestList;
+        this.femalePersonalGuestList = params.femalePersonalGuestList;
     }
 
     get params(): UserType {
@@ -44,7 +53,9 @@ export default class User {
             email: this.email,
             approved: this.approved,
             status: this.status,
-            privileges: this.privileges
+            privileges: this.privileges,
+            malePersonalGuestList: this.malePersonalGuestList,
+            femalePersonalGuestList: this.femalePersonalGuestList,
         };
     }
 }
@@ -60,10 +71,12 @@ export function validateAndReturnUser(data: unknown): UserType | undefined {
             approved: parsedData.data.approved,
             status: parsedData.data.status,
             privileges: parsedData.data.privileges,
+            malePersonalGuestList: parsedData.data.malePersonalGuestList ?? {},
+            femalePersonalGuestList: parsedData.data.femalePersonalGuestList ?? {},
         }
     } else {
         console.error('User data is unrecognized! Returned data is missing required fields.', parsedData.error);
-        console.error(`Passed in data: ${JSON.stringify(data)}`);
+        console.error(`Passed in data: \n${JSON.stringify(data, null, 2)}`);
         return undefined;
     }
 }
@@ -74,5 +87,7 @@ export const defaultUserType: UserType = {
     email: '',
     approved: false,
     status: 'Default',
-    privileges: false
+    privileges: false,
+    malePersonalGuestList: {},
+    femalePersonalGuestList: {},
 };
