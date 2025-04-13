@@ -21,11 +21,8 @@ export default function HomePage() {
         if(validatedEventData) return new Event(validatedEventData);
       }) : [];
       
-      console.log(validatedEvents);
-      
       const loadedEvents = validatedEvents.filter((data) => data != undefined);
       
-      console.log(loadedEvents);
       setEvents(loadedEvents);
     });
 
