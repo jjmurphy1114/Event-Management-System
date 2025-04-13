@@ -64,7 +64,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       setError("Put the blocks down and focus you business major, set max invites to number of males and females. Or more I don't care");
     } else {
       setError("");
-      addEventToDatabase(name, date, type, maxMales as number, maxFemales as number, maxGuests as number, false, jobsURL);
+      addEventToDatabase(name, date, type, maxMales as number, maxFemales as number, maxGuests as number, true, jobsURL);
       setNewEvent(emptyEvent); // Clear form
     }
   };

@@ -63,20 +63,6 @@ const UserAccount = () => {
   }, [authUser, fetchUserData]);
   
   useEffect(() => {
-    console.debug(`User ID: ${user.id}`);
-    
-    const males: Record<string, Guest> = user.malePersonalGuestList;
-    const females: Record<string, Guest> = user.femalePersonalGuestList;
-    
-    console.debug(`Male Personal Guest List:`);
-    console.debug(males);
-    
-    console.debug(`Female Personal Guest List:`);
-    console.debug(females);
-    
-  }, [user]);
-  
-  useEffect(() => {
     if(validateEmail(user.email)) {
       setEmailError(false);
     } else {

@@ -1,12 +1,13 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {database} from "../services/firebaseConfig";
-import {get, ref, update} from "firebase/database";
-import Event, {EventType, GuestListTypes, validateAndReturnEvent} from "../types/Event";
-import Guest from "../types/Guest";
-import {getAuth} from "firebase/auth";
+import {get, onValue, push, ref, remove, set, update} from "firebase/database";
+import Event, {EventType, getGenderAndTypeFromGuestList, GuestListTypes, validateAndReturnEvent} from "../types/Event";
+import Guest, {validateAndReturnGuest} from "../types/Guest";
+import {getAuth, User as FirebaseUser} from "firebase/auth";
 import JobsButton from "../elements/JobsButton.tsx";
 import GuestList from "../elements/GuestList.tsx";
+import User, {defaultUserType, UserType, validateAndReturnUser} from "../types/User.ts";
 
 const IndividualEventPage = () => {
   
@@ -17,119 +18,88 @@ const IndividualEventPage = () => {
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
-  const [eventName, setEventName] = useState("");
-  const [userStatus, setUserStatus] = useState("");
-  const [hasPrivileges, setPrivileges] = useState(false);
   const [frontDoorMode, setFrontDoorMode] = useState(false);
   const [vouchGuestName, setVouchGuestName] = useState("");
   const [vouchPassword, setVouchPassword] = useState("");
   const [isVouching, setIsVouching] = useState(false);
   const [blacklist, setBlacklist] = useState<string[]>([]);
   const auth = getAuth();
-  const user = auth.currentUser;
-
-  // Fetch event details from the Firebase Realtime Database when the component mounts
+  
+  const [authUser] = useState<FirebaseUser>(auth.currentUser!);
+  
+  const [user, setUser] = useState<User>(new User(defaultUserType));
+  
   useEffect(() => {
-    const fetchEventAndUserData = async () => {
-      try {
-        // Fetch event data
-        const eventRef = ref(database, `events/${id}`);
-        const snapshot = await get(eventRef);
-        if (snapshot.exists()) {
-          const eventData = snapshot.val();
-          const validatedEventData: EventType | undefined = validateAndReturnEvent(eventData);
-
-          if(validatedEventData) {
-            setEvent(new Event(validatedEventData));
-            setEventName(validatedEventData.name);
-          }
-
-          if (!eventData.open){
-            setFrontDoorMode(eventData.frontDoorMode || false);
-          } else {
-            setFrontDoorMode(false);
-          }
-         
-          // Ensure that guest lists are defined
-          const maleGuestList = eventData.maleGuestList || [];
-          const femaleGuestList = eventData.femaleGuestList || [];
-          const maleWaitList = eventData.maleWaitList ? [...eventData.maleWaitList] : [];
-          const femaleWaitList = eventData.femaleWaitList ? [...eventData.femaleWaitList] : [];
-
-          // Display error if the event is closed
-          if (!eventData.open) {
-            setError("The event list is currently closed and no guests can be added");
-          }
-
-
-
-          // Fetch usernames for all guests
-          const guestListUserIDs = [
-            ...new Set([
-              ...maleGuestList.map((g: Guest) => g.addedBy),
-              ...femaleGuestList.map((g: Guest) => g.addedBy),
-              ...maleWaitList.map((g: Guest) => g.addedBy),
-              ...femaleWaitList.map((g: Guest) => g.addedBy),
-            ]),
-          ];
+    const eventRef = ref(database, `events/${id}`);
+    const blacklistRef = ref(database, "blacklist");
   
-          const userNamesTemp: { [key: string]: string } = {};
-          for (const userId of guestListUserIDs) {
-            const userRef = ref(database, `users/${userId}`);
-            const userSnapshot = await get(userRef);
-            if (userSnapshot.exists()) {
-              userNamesTemp[userId] = userSnapshot.val().displayName;
-            } else {
-              userNamesTemp[userId] = "Unknown User";
-            }
-          }
+    onValue(eventRef, (snapshot) => {
+      if(snapshot.exists()) {
+        const eventData = snapshot.val();
+        const validatedEventData: EventType | undefined = validateAndReturnEvent(eventData);
+        
+        if(validatedEventData) {
+          setEvent(new Event(validatedEventData));
+        }
+      }
+    }, (err) => console.error("Error fetching event!", err));
+    
+    onValue(blacklistRef, (snapshot) => {
+      if(snapshot.exists()) setBlacklist(Object.keys(snapshot.val()));
+      else setBlacklist([]);
+    }, (err) => console.error("Error fetching blacklist!", err));
+  }, [id]);
   
-          setUserNames(userNamesTemp);
+  const fetchUserData = useCallback(async () => {
+    if(authUser) {
+      const userRef = ref(database, `users/${authUser.uid}`);
+      const userSnapshot = await get(userRef);
+      if (userSnapshot.exists()) {
+        const userData: UserType | undefined = validateAndReturnUser(userSnapshot.val());
+        if(userData) {
+          setUser(new User(userData));
         } else {
-          setError("Event not found.");
+          console.error("Failed to validate user data!");
         }
-
-        // Fetch status and social privileges for the current user
-        if (user) {
-          const userRef = ref(database, `users/${user.uid}`);
-          const userSnapshot = await get(userRef);
-          if (userSnapshot.exists()) {
-            setUserStatus(userSnapshot.val().status);
-            setPrivileges(userSnapshot.val().privileges);
-            console.log("Privileges: ", userSnapshot.val().privileges);
-          }
-        }
-      } catch (fetchError) {
-        console.error("Error fetching data:", fetchError);
-        setError("Failed to load event or user data.");
-      } finally {
-        setLoading(false);
+      } else {
+        console.error("Failed to get user data from database!");
       }
-    };
-
-    const fetchBlacklist = async (): Promise<string[]> => {
-      try {
-        const blacklistRef = ref(database, "blacklist");
-        const snapshot = await get(blacklistRef);
-        if (snapshot.exists()) {
-          return Object.keys(snapshot.val());
-        } else {
-          return [];
-        }
-      } catch (err) {
-        console.error("Error fetching blacklist:", err);
-        return [];
+    }
+  }, [authUser]);
+  
+  const fetchBlacklist = useCallback(async () => {
+    try {
+      const blacklistRef = ref(database, "blacklist");
+      const snapshot = await get(blacklistRef);
+      
+      if (snapshot.exists()) {
+        setBlacklist(Object.keys(snapshot.val()));
+      } else {
+        setBlacklist([]);
       }
-    };
-
-    const loadBlacklist = async () => {
-      const blacklistData = await fetchBlacklist();
-      setBlacklist(blacklistData);
-    };
-
-    fetchEventAndUserData().then();
-    loadBlacklist().then();
-  }, [id, user, hasPrivileges]);
+    } catch (err) {
+      console.error("Error fetching blacklist:", err);
+      setBlacklist([]);
+    }
+  }, []);
+  
+  useEffect(() => {
+    setLoading(true);
+    
+    fetchUserData()
+      .then(() => console.debug("User data fetched successfully"))
+      .catch((err) => {
+        console.error("User data not fetched successfully");
+        console.error(err);
+      });
+    
+    fetchBlacklist()
+      .then(() => console.debug(`Blacklist data fetched successfully!`))
+      .catch((err) => {
+        console.error("Blacklist data not fetched successfully!");
+        console.error(err);
+      }).finally(() => setLoading(false));
+  }, [fetchBlacklist, fetchUserData]);
 
   // Guarded render
   if (loading) {
@@ -141,19 +111,19 @@ const IndividualEventPage = () => {
   }
 
   // Function to count the number of guests added by a specific user
-  const countUserGuests = (guestList: Guest[], userId: string) => {
-    return guestList.filter(guest => guest.addedBy === userId).length;
+  const countUserGuests = (guestList: Record<string, Guest>, userId: string) => {
+    return Object.values(guestList).filter(guest => guest.addedBy === userId).length;
   };
 
   // Function to count the number of guests added by a specific user
   const handleAddGuest = async (gender: 'male' | 'female') => {
-    if (!event || !user) {
-      console.error("Event or user not available. Event:", event, "User:", user);
+    if (!event || !authUser) {
+      console.error("Event or user not available. Event:", event, "User:", authUser);
       return;
     }
 
     if (!event.open) {
-      if (userStatus === "Admin" && !frontDoorMode){
+      if (user.status === "Admin" && !frontDoorMode){
         setNotification("The list is closed but u good");
       } else {
         setError("The event is closed and no guests can be added");
@@ -161,12 +131,10 @@ const IndividualEventPage = () => {
       }
     }
 
-    if (!hasPrivileges) {
+    if (!user.privileges) {
       setError("You don't have social privileges and can't add guests");
       return;
     }
-  
-    const userId = user.uid;
   
     // Ensure guest name is provided
     if (!guestName) {
@@ -175,9 +143,9 @@ const IndividualEventPage = () => {
     }
   
     // Create new guest data
-    const newGuestData = { name: guestName, addedBy: userId, checkedIn: -1 };
-    const userAddedMales = countUserGuests(event.maleGuestList || [], userId);
-    const userAddedFemales = countUserGuests(event.femaleGuestList || [], userId);
+    const newGuestData = new Guest(guestName, user.id);
+    const userAddedMales = countUserGuests(event.maleGuestList || [], user.id);
+    const userAddedFemales = countUserGuests(event.femaleGuestList || [], user.id);
     const totalUserGuests = userAddedMales + userAddedFemales;
   
     const maxMales = event.maxMales;
@@ -185,16 +153,16 @@ const IndividualEventPage = () => {
     const maxGuests = event.maxGuests;
   
     try {
-      if (userStatus === "Admin" || totalUserGuests < maxGuests) {
-        if (gender === "male" && (userStatus === "Admin" || userAddedMales < maxMales)) {
-          await addGuestToMainList(GuestListTypes.MaleGuestList, newGuestData);
-        } else if (gender === "female" && (userStatus === "Admin" || userAddedFemales < maxFemales)) {
-          await addGuestToMainList(GuestListTypes.FemaleGuestList, newGuestData);
+      if (user.status === "Admin" || totalUserGuests < maxGuests) {
+        if (gender === "male" && (user.status === "Admin" || userAddedMales < maxMales)) {
+          await addGuestToList(GuestListTypes.MaleGuestList, newGuestData);
+        } else if (gender === "female" && (user.status === "Admin" || userAddedFemales < maxFemales)) {
+          await addGuestToList(GuestListTypes.FemaleGuestList, newGuestData);
         } else {
-          await handleAddToWaitlist(gender, newGuestData);
+          await addGuestToList(gender === "male" ? GuestListTypes.MaleWaitList : GuestListTypes.FemaleWaitList, newGuestData);
         }
       } else {
-        await handleAddToWaitlist(gender, newGuestData);
+        await addGuestToList(gender === "male" ? GuestListTypes.MaleWaitList : GuestListTypes.FemaleWaitList, newGuestData);
       }
     } catch (error) {
       console.error(`Error adding ${gender} guest: `, error);
@@ -203,57 +171,25 @@ const IndividualEventPage = () => {
   };
 
   // Function to add a guest to the main list
-  const addGuestToMainList = async (listName: GuestListTypes, guestData: Guest) => {
-    
+  const addGuestToList = async (listName: GuestListTypes, guestData: Guest) => {
     if (blacklist.includes(guestData.name.trim())) {
       setError("This guest is blacklisted and cannot be added.");
       return;
     }
     
     try {
-      const updatedGuestList = [...(event![listName] || []), guestData];
-      const eventRef = ref(database, `events/${id}`);
-      await update(eventRef, { [listName]: updatedGuestList });
+      const eventGuestListRef = ref(database, `events/${id}/${listName}`);
+      const newGuestRef = await push(eventGuestListRef);
+      
+      await update(newGuestRef, guestData);
 
-      // Update state with new guest list
-      setEvent(prevEvent => new Event({
-        ...prevEvent!,
-        [listName]: updatedGuestList,
-      }));
-
+      const genderAndType = getGenderAndTypeFromGuestList(listName);
+      setNotification(`Added guest to ${genderAndType.gender} ${genderAndType.type}`);
       setGuestName("");
       setError("");
-      setNotification("Guest added successfully");
     } catch (error) {
       console.error(`Error updating ${listName}: `, error);
       setError(`Failed to add guest. Please try again.`);
-    }
-  };
-
-  // Function to handle adding a guest to the waitlist
-  const handleAddToWaitlist = async (gender: 'male' | 'female', newGuestData: Guest) => {
-    const listName: GuestListTypes = gender === 'male' ? GuestListTypes.MaleWaitList : GuestListTypes.FemaleWaitList;
-    
-    if (blacklist.includes(newGuestData.name.trim())) {
-      setError("This guest is blacklisted and cannot be added.");
-      return;
-    }
-    
-    try {
-      const updatedWaitList = [...(event![listName] || []), newGuestData];
-      const eventRef = ref(database, `events/${id}`);
-      await update(eventRef, { [listName]: updatedWaitList });
-
-      // Update the state to reflect the new waitlist
-      setEvent((prevEvent) => new Event({
-        ...prevEvent!,
-        [listName]: updatedWaitList,
-      }));
-      setGuestName('');
-      setNotification(`Added to ${gender} waitlist successfully.`);
-    } catch (error) {
-      console.error(`Error updating ${gender} waitlist: `, error);
-      setError(`Failed to add guest to ${gender} waitlist. Please try again.`);
     }
   };
   
@@ -304,23 +240,17 @@ const IndividualEventPage = () => {
     }
   }
   
-  const handleUncheckInGuest = async (gender: "male" | "female", index: number) => {
+  const handleUncheckInGuest = async (gender: "male" | "female", guestID: string) => {
     if(!event) return;
     
-    if(userStatus !== "Admin") return;
+    if(user.status !== "Admin") return;
     
     try {
       const guestListName = gender === "male" ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList;
-      const updatedGuestList = [...event[guestListName]];
-      updatedGuestList[index].checkedIn = -1;
       
-      const eventRef = ref(database, `events/${id}`);
-      await update(eventRef, { [guestListName]: updatedGuestList });
+      const guestRef = ref(database, `events/${id}/${guestListName}/${guestID}/checkedIn`);
+      await set(guestRef, -1);
       
-      setEvent((prevEvent) => new Event({
-        ...prevEvent!,
-        [guestListName]: updatedGuestList
-      }));
     } catch (error) {
       console.error("Error unchecking in guest: ", error);
       setError("Failed to uncheck in guest");
@@ -328,26 +258,20 @@ const IndividualEventPage = () => {
   }
 
    // Function to handle checking in a guest
-   const handleCheckInGuest = async (gender: 'male' | 'female', index: number) => {
+   const handleCheckInGuest = async (gender: 'male' | 'female', guestID: string) => {
     if (!event) return;
 
-    if( !(userStatus === "Admin")){
+    if( !(user.status === "Admin")){
       return;
     }
 
     try {
       const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
       const guestListName = gender === 'male' ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList;
-      const updatedGuestList = [...event[guestListName]];
-      updatedGuestList[index].checkedIn = checkedIn;
 
-      const eventRef = ref(database, `events/${id}`);
-      await update(eventRef, { [guestListName]: updatedGuestList });
+      const guestRef = ref(database, `events/${id}/${guestListName}/${guestID}/checkedIn`);
+      await set(guestRef, checkedIn);
 
-      setEvent((prevEvent) => new Event({
-        ...prevEvent!,
-        [guestListName]: updatedGuestList,
-      }));
     } catch (error) {
       console.error("Error checking in guest: ", error);
       setError("Failed to check in guest.");
@@ -356,93 +280,53 @@ const IndividualEventPage = () => {
 
   // Function to handle deleting guests from the list and on firebase
   const handleDeleteGuest = async (
-    gender: 'male' | 'female',
-    index: number,
-    listType: 'guestList' | 'waitList',
+    listName: GuestListTypes,
+    guestID: string
   ) => {
-    if (!event || !user) return;
+    if (!event || !authUser) return;
   
     try {
-      if (gender === 'male') {
-        if (listType === 'guestList') {
-          const updatedMaleGuestList = event.maleGuestList.filter((_, i) => i !== index);
-          const eventRef = ref(database, `events/${id}`);
-          await update(eventRef, { maleGuestList: updatedMaleGuestList });
-          setEvent((prevEvent) => new Event({
-            ...prevEvent!,
-            maleGuestList: updatedMaleGuestList,
-          }));
-        } else if (listType === 'waitList') {
-          const updatedMaleWaitList = event.maleWaitList.filter((_, i) => i !== index);
-          const eventRef = ref(database, `events/${id}`);
-          await update(eventRef, { maleWaitList: updatedMaleWaitList });
-          setEvent((prevEvent) => new Event({
-            ...prevEvent!,
-            maleWaitList: updatedMaleWaitList,
-          }));
-        }
-      } else if (gender === 'female') {
-        if (listType === 'guestList') {
-          const updatedFemaleGuestList = event.femaleGuestList.filter((_, i) => i !== index);
-          const eventRef = ref(database, `events/${id}`);
-          await update(eventRef, { femaleGuestList: updatedFemaleGuestList });
-          setEvent((prevEvent) => new Event({
-            ...prevEvent!,
-            femaleGuestList: updatedFemaleGuestList,
-          }));
-        } else if (listType === 'waitList') {
-          const updatedFemaleWaitList = event.femaleWaitList.filter((_, i) => i !== index);
-          const eventRef = ref(database, `events/${id}`);
-          await update(eventRef, { femaleWaitList: updatedFemaleWaitList });
-          setEvent((prevEvent) => new Event({
-            ...prevEvent!,
-            femaleWaitList: updatedFemaleWaitList,
-          }));
-        }
-      }
+      const guestRef = ref(database, `events/${id}/${listName}/${guestID}`);
+      await remove(guestRef);
+      
+      const genderAndType = getGenderAndTypeFromGuestList(listName);
+      
+      setNotification(`Removed guest from ${genderAndType.gender} ${genderAndType.type}`);
     } catch (error) {
       console.error('Error deleting guest: ', error);
+      setError("Failed to delete guest.");
     }
   };
 
   // Function to handle approving a guest from the waitlist
-  const handleApproveGuest = async (gender: 'male' | 'female', index: number) => {
+  const handleApproveGuest = async (gender: 'male' | 'female', guestID: string) => {
     if (!event) {
       console.error("Event not available when trying to approve guest.");
       return;
     }
   
     try {
-      const eventRef = ref(database, `events/${id}`);
-      if (gender === 'male') {
-        const guestToApprove = event.maleWaitList[index];
-        const updatedMaleGuestList = [...(event.maleGuestList || []), guestToApprove];
-        const updatedMaleWaitList = event.maleWaitList.filter((_, i) => i !== index);
-  
-        await update(eventRef, { maleGuestList: updatedMaleGuestList, maleWaitList: updatedMaleWaitList });
-        console.log("Successfully moved male guest from waitlist to guest list in Firebase.");
-        setNotification("Approved male from waitlist")
-  
-        setEvent((prevEvent) => new Event({
-          ...prevEvent!,
-          maleGuestList: updatedMaleGuestList,
-          maleWaitList: updatedMaleWaitList,
-        }));
+      const mainListRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList}`);
+      const waitListGuestRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.MaleWaitList : GuestListTypes.FemaleWaitList}/${guestID}`);
+      
+      const guestSnapshot = await get(waitListGuestRef);
+      
+      if(guestSnapshot.exists()) {
+        const validatedGuestData: Guest | undefined = validateAndReturnGuest(guestSnapshot.val());
+        if(validatedGuestData) {
+          const mainGuestRef = await push(mainListRef);
+          await update(mainGuestRef, validatedGuestData);
+          await remove(waitListGuestRef);
+        }
       } else {
-        const guestToApprove = event.femaleWaitList[index];
-        const updatedFemaleGuestList = [...(event.femaleGuestList || []), guestToApprove];
-        const updatedFemaleWaitList = event.femaleWaitList.filter((_, i) => i !== index);
-  
-        await update(eventRef, { femaleGuestList: updatedFemaleGuestList, femaleWaitList: updatedFemaleWaitList });
-        console.log("Successfully moved female guest from waitlist to guest list in Firebase.");
-        setNotification("Approved female from waitlist");
-  
-        setEvent((prevEvent) => new Event({
-          ...prevEvent!,
-          femaleGuestList: updatedFemaleGuestList,
-          femaleWaitList: updatedFemaleWaitList,
-        }));
+        console.error("User not found in waitlist!");
+        setError("Failed to approve guest: guest does not exist. Please try again.");
+        return;
       }
+      
+      console.log(`Successfully moved ${gender} guest from waitlist to guest list in Firebase.`);
+      setNotification(`Approved ${gender} from waitlist`)
+
     } catch (error) {
       console.error(`Error approving ${gender} guest: `, error);
       setError(`Failed to approve ${gender} guest. Please try again.`);
@@ -451,12 +335,12 @@ const IndividualEventPage = () => {
 
     // Function to handle vouching for a guest (President Only)
     const handleVouchGuest = async (gender: 'male' | 'female') => {
-      if (!event || !user) {
-        console.error("Event or user not available. Event:", event, "User:", user);
+      if (!event || !authUser) {
+        console.error("Event or user not available. Event:", event, "User:", authUser);
         return;
       }
   
-      if (userStatus !== "Admin") {
+      if (user.status !== "Admin") {
         setError("Only Admins can vouch for guests.");
         return;
       }
@@ -473,14 +357,14 @@ const IndividualEventPage = () => {
       }
   
       // Create new guest data
-      const newGuestData = { name: vouchGuestName, addedBy: user.uid, checkedIn: new Date().toLocaleString("en-US", { timeZone: "America/New_York" })};
+      const newGuestData = { name: vouchGuestName, addedBy: authUser.uid, checkedIn: new Date().toLocaleString("en-US", { timeZone: "America/New_York" })};
   
       try {
         if (!event.open) { // Vouching is allowed even if the event is closed
           if (gender === "male") {
-            await addGuestToMainList(GuestListTypes.MaleGuestList, newGuestData);
+            await addGuestToList(GuestListTypes.MaleGuestList, newGuestData);
           } else if (gender === "female") {
-            await addGuestToMainList(GuestListTypes.FemaleGuestList, newGuestData);
+            await addGuestToList(GuestListTypes.FemaleGuestList, newGuestData);
           }
           setVouchGuestName("");
           setVouchPassword("");
@@ -502,47 +386,48 @@ const IndividualEventPage = () => {
     const rows: string[][] = [];
 
     // Add male guests
-    event.maleGuestList?.forEach((guest: Guest) => {
+    Object.values(event.maleGuestList)?.forEach((guest: Guest) => {
       rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Male", guest.checkedIn !== -1 ? guest.checkedIn as string : "Not Checked In"]);
     });
 
     // Add female guests
-    event.femaleGuestList?.forEach((guest: Guest) => {
+    Object.values(event.femaleGuestList)?.forEach((guest: Guest) => {
       rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Female", guest.checkedIn !== -1 ? guest.checkedIn as string : "Not Checked In"]);
     });
-
-    console.log(rows);
 
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `${eventName}_guest_list.csv`);
+    link.setAttribute("download", `${event.name}_guest_list.csv`);
     link.click();
   };  
 
   // Extract male and female guests from the event object
   // Filtered guest lists based on search input
-  const filteredMaleGuests = event?.maleGuestList?.filter((guest: Guest) =>
+  const filteredMaleGuests: Record<string, Guest> = Object.fromEntries(Object.entries(event?.maleGuestList).filter(([, guest]) =>
     guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ) || [];
-  const filteredFemaleGuests = event?.femaleGuestList?.filter((guest: Guest) =>
+  ));
+  const filteredFemaleGuests: Record<string, Guest> = Object.fromEntries(Object.entries(event?.femaleGuestList).filter(([, guest]) =>
     guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ) || [];
-  const filteredMaleWaitListed = event?.maleWaitList?.filter((guest: Guest) =>
+  ));
+  const filteredMaleWaitListed: Record<string, Guest> = Object.fromEntries(Object.entries(event?.maleWaitList).filter(([, guest]) =>
     guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ) || [];
-  const filteredFemaleWaitListed = event?.femaleWaitList?.filter((guest: Guest) =>
+  ));
+  const filteredFemaleWaitListed: Record<string, Guest> = Object.fromEntries(Object.entries(event?.femaleWaitList).filter(([, guest]) =>
     guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ) || [];
+  ));
 
   return (
     <div className={"absolute box-border p-5 w-full h-fit min-h-screen-with-nav top-nav items-center overflow-auto min-w-[375px]"}>
       <div style={{boxShadow: "rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px"}} className="rounded-md m-auto w-[90%] h-full md:w-[80%] gap-4 bg-gradient-to-b from-blue-50 to-gray-100">
         <div className={"w-full px-6 grid grid-cols-1 md:grid-cols-2"}>
-          <h1 className="text-4xl font-bold text-center col-span-full mt-4 text-gray-800 w-full">{eventName}</h1>
-          {userStatus === "Admin" && (
+          <h1 className="text-4xl font-bold text-center col-span-full mt-4 text-gray-800 w-full">{event.name}</h1>
+          {!event.open && (
+            <p className={"text-red-500 text-center col-span-full font-medium min-h-[2rem] mt-4"}>Party list is closed!</p>
+          )}
+          {user.status === "Admin" && (
             <div className="col-span-full my-4 flex justify-center">
               <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">
                 <div className="relative my-1">
@@ -565,7 +450,7 @@ const IndividualEventPage = () => {
             </div>
           )}
           {/* Vouch for Guest Section (President Only) */}
-          {userStatus === "Admin" && frontDoorMode && (
+          {user.status === "Admin" && frontDoorMode && (
             <div className="flex justify-center items-center col-span-full mb-2 w-full">
               <button
                 onClick={() => setIsVouching(true)}
@@ -627,13 +512,13 @@ const IndividualEventPage = () => {
             {/* Information Section */}
             <div className="text-center col-span-full my-4 w-full">
             <p className="text-lg font-semibold text-gray-700">
-              There are {event?.femaleGuestList?.length || 0} females and {event?.maleGuestList?.length || 0} males on the list for a total of {(event?.femaleGuestList?.length || 0) + (event?.maleGuestList?.length || 0)} guests.
+              There are {Object.keys(event?.femaleGuestList).length || 0} females and {Object.keys(event?.maleGuestList).length || 0} males on the list for a total of {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.maleGuestList).length || 0)} guests.
             </p>
             <p className="text-lg font-semibold text-gray-700">
-              You have added {countUserGuests(event?.femaleGuestList || [], user?.uid || '')} females and {countUserGuests(event?.maleGuestList || [], user?.uid || '')} males for a total of {countUserGuests(event?.femaleGuestList || [], user?.uid || '') + countUserGuests(event?.maleGuestList || [], user?.uid || '')}/{event.maxGuests} added.
+              You have added {countUserGuests(event?.femaleGuestList || {}, authUser?.uid || '')} females and {countUserGuests(event?.maleGuestList || {}, authUser?.uid || '')} males for a total of {countUserGuests(event?.femaleGuestList || {}, authUser?.uid || '') + countUserGuests(event?.maleGuestList || {}, authUser?.uid || '')}/{event.maxGuests} added.
             </p>
             <p className="text-lg font-semibold text-gray-700">
-              If everyone from the approval list was added, there would be {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0)} females and {(event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} males on the list. For a total of {(event?.femaleGuestList?.length || 0) + (event?.femaleWaitList?.length || 0) + (event?.maleGuestList?.length || 0) + (event?.maleWaitList?.length || 0)} guests.
+              If everyone from the approval list was added, there would be {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.femaleWaitList).length || 0)} females and {(Object.keys(event?.maleGuestList).length || 0) + (Object.keys(event?.maleWaitList).length || 0)} males on the list. For a total of {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.femaleWaitList).length || 0) + (Object.keys(event?.maleGuestList).length || 0) + (Object.keys(event?.maleWaitList).length || 0)} guests.
             </p>
             <JobsButton event={event} className={`mt-4 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:text-gray-200 disabled:hover:border-transparent disabled:cursor-not-allowed`}/>
           </div>
@@ -671,8 +556,8 @@ const IndividualEventPage = () => {
               type={"general"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={user ? user.uid : ""}
-              userStatus={userStatus}
+              userID={authUser ? authUser.uid : ""}
+              userStatus={user.status}
               frontDoorMode={frontDoorMode}
               handleCheckInGuest={handleCheckInGuest}
               handleUncheckInGuest={handleUncheckInGuest}
@@ -686,8 +571,8 @@ const IndividualEventPage = () => {
               type={"general"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={user ? user.uid : ""}
-              userStatus={userStatus}
+              userID={authUser ? authUser.uid : ""}
+              userStatus={user.status}
               frontDoorMode={frontDoorMode}
               handleCheckInGuest={handleCheckInGuest}
               handleUncheckInGuest={handleUncheckInGuest}
@@ -701,8 +586,8 @@ const IndividualEventPage = () => {
               type={"waitlist"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={user ? user.uid : ""}
-              userStatus={userStatus}
+              userID={authUser ? authUser.uid : ""}
+              userStatus={user.status}
               frontDoorMode={frontDoorMode}
               handleDeleteGuest={handleDeleteGuest}
               handleApproveGuest={handleApproveGuest}
@@ -715,8 +600,8 @@ const IndividualEventPage = () => {
               type={"waitlist"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={user ? user.uid : ""}
-              userStatus={userStatus}
+              userID={authUser ? authUser.uid : ""}
+              userStatus={user.status}
               frontDoorMode={frontDoorMode}
               handleDeleteGuest={handleDeleteGuest}
               handleApproveGuest={handleApproveGuest}
