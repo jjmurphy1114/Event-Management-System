@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {database} from "../services/firebaseConfig";
-import {get, push, ref, remove, set, update} from "firebase/database";
+import {get, onValue, push, ref, remove, set, update} from "firebase/database";
 import Event, {EventType, GuestListTypes, validateAndReturnEvent} from "../types/Event";
 import Guest, {validateAndReturnGuest} from "../types/Guest";
 import {getAuth, User as FirebaseUser} from "firebase/auth";
@@ -29,6 +29,21 @@ const IndividualEventPage = () => {
   
   const [user, setUser] = useState<User>(new User(defaultUserType));
   
+  useEffect(() => {
+    const eventRef = ref(database, `events/${id}`);
+  
+    onValue(eventRef, (snapshot) => {
+      if(snapshot.exists()) {
+        const eventData = snapshot.val();
+        const validatedEventData: EventType | undefined = validateAndReturnEvent(eventData);
+        
+        if(validatedEventData) {
+          setEvent(new Event(validatedEventData));
+        }
+      }
+    });
+  }, [id]);
+  
   const fetchUserData = useCallback(async () => {
     if(authUser) {
       const userRef = ref(database, `users/${authUser.uid}`);
@@ -45,19 +60,6 @@ const IndividualEventPage = () => {
       }
     }
   }, [authUser]);
-  
-  const fetchEventData = useCallback(async () => {
-    const eventRef = ref(database, `events/${id}`);
-    const eventSnapshot = await get(eventRef);
-    if(eventSnapshot.exists()) {
-      const eventData = eventSnapshot.val();
-      const validatedEventData: EventType | undefined = validateAndReturnEvent(eventData);
-      
-      if(validatedEventData) {
-        setEvent(new Event(validatedEventData));
-      }
-    }
-  }, [id]);
   
   const fetchBlacklist = useCallback(async () => {
     try {
@@ -85,20 +87,13 @@ const IndividualEventPage = () => {
         console.error(err);
       });
     
-    fetchEventData()
-      .then(() => console.debug(`Event data for event fetched successfully!`))
-      .catch((err) => {
-        console.error("Event data not fetched successfully!");
-        console.error(err);
-      });
-    
     fetchBlacklist()
       .then(() => console.debug(`Blacklist data fetched successfully!`))
       .catch((err) => {
         console.error("Blacklist data not fetched successfully!");
         console.error(err);
       }).finally(() => setLoading(false));
-  }, [fetchBlacklist, fetchEventData, fetchUserData]);
+  }, [fetchBlacklist, fetchUserData]);
 
   // Guarded render
   if (loading) {
@@ -182,17 +177,6 @@ const IndividualEventPage = () => {
       
       await update(newGuestRef, guestData);
 
-      fetchEventData()
-        .then(() => {
-          console.debug("Event data updated successfully!");
-          setNotification("Guest added successfully");
-        })
-        .catch((err) => {
-          console.error("Event data not updated successfully!");
-          console.error(err);
-          setError("Failed to add guest. Please try again.");
-        });
-
       setGuestName("");
       setError("");
     } catch (error) {
@@ -259,12 +243,6 @@ const IndividualEventPage = () => {
       const guestRef = ref(database, `events/${id}/${guestListName}/${guestID}/checkedIn`);
       await set(guestRef, -1);
       
-      fetchEventData()
-        .then(() => console.debug("Event data updated successfully!"))
-        .catch((err) => {
-          console.error("Event data not updated successfully!");
-          console.error(err);
-        });
     } catch (error) {
       console.error("Error unchecking in guest: ", error);
       setError("Failed to uncheck in guest");
@@ -286,12 +264,6 @@ const IndividualEventPage = () => {
       const guestRef = ref(database, `events/${id}/${guestListName}/${guestID}/checkedIn`);
       await set(guestRef, checkedIn);
 
-      fetchEventData()
-        .then(() => console.debug("Event data updated successfully!"))
-        .catch((err) => {
-          console.error("Event data not updated successfully!");
-          console.error(err);
-        });
     } catch (error) {
       console.error("Error checking in guest: ", error);
       setError("Failed to check in guest.");
@@ -309,16 +281,6 @@ const IndividualEventPage = () => {
       const guestRef = ref(database, `events/${id}/${listName}/${guestID}`);
       await remove(guestRef);
       
-      fetchEventData()
-        .then(() => {
-          console.debug("Event data updated successfully!");
-          setNotification(`Guest deleted successfully!`);
-        })
-        .catch((err) => {
-          console.error("Event data not updated successfully!");
-          console.error(err);
-          setError("Failed to delete guest.");
-        });
     } catch (error) {
       console.error('Error deleting guest: ', error);
       setError("Failed to delete guest.");
@@ -354,14 +316,6 @@ const IndividualEventPage = () => {
       console.log(`Successfully moved ${gender} guest from waitlist to guest list in Firebase.`);
       setNotification(`Approved ${gender} from waitlist`)
 
-      fetchEventData()
-        .then(() => {
-          console.debug("Event data updated successfully!");
-        })
-        .catch((err) => {
-          console.error("Event data not updated successfully!");
-          console.error(err);
-        });
     } catch (error) {
       console.error(`Error approving ${gender} guest: `, error);
       setError(`Failed to approve ${gender} guest. Please try again.`);
@@ -459,6 +413,9 @@ const IndividualEventPage = () => {
       <div style={{boxShadow: "rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px"}} className="rounded-md m-auto w-[90%] h-full md:w-[80%] gap-4 bg-gradient-to-b from-blue-50 to-gray-100">
         <div className={"w-full px-6 grid grid-cols-1 md:grid-cols-2"}>
           <h1 className="text-4xl font-bold text-center col-span-full mt-4 text-gray-800 w-full">{event.name}</h1>
+          {!event.open && (
+            <p className={"text-red-500 text-center col-span-full font-medium min-h-[2rem] mt-4"}>Party list is closed!</p>
+          )}
           {user.status === "Admin" && (
             <div className="col-span-full my-4 flex justify-center">
               <label htmlFor="front-door-toggle" className="flex items-center cursor-pointer">
