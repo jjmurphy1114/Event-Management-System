@@ -65,7 +65,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
     } else {
       setError("");
       
-      let cleanedJobsURL = '';
+      let cleanedJobsURL;
       
       if(!jobsURL.startsWith("http")) cleanedJobsURL = `https://${jobsURL}`;
       else cleanedJobsURL = jobsURL;
