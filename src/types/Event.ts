@@ -23,6 +23,8 @@ export enum GuestListTypes {
     FemaleGuestList = "femaleGuestList",
     MaleWaitList = "maleWaitList",
     FemaleWaitList = "femaleWaitList",
+    MalePersonalGuestList = "malePersonalGuestList",
+    FemalePersonalGuestList = "femalePersonalGuestList"
 }
 
 const eventSchema = z.object({
@@ -121,22 +123,26 @@ export function validateAndReturnEvent(data: unknown): EventType | undefined {
     }
 }
 
-export function getGuestListTypeFromGenderAndType(gender: 'male' | 'female', type: 'general' | 'waitlist') {
+export function getGuestListTypeFromGenderAndType(gender: 'male' | 'female', type: 'general' | 'waitlist' | 'personal') {
     if(gender === 'male') {
         if(type === 'general') return GuestListTypes.MaleGuestList;
-        else return GuestListTypes.MaleWaitList;
+        else if (type === 'waitlist') return GuestListTypes.MaleWaitList;
+        else return GuestListTypes.MalePersonalGuestList;
     } else {
         if(type === 'general') return GuestListTypes.FemaleGuestList;
-        else return GuestListTypes.FemaleWaitList;
+        else if (type === 'waitlist') return GuestListTypes.FemaleWaitList;
+        else return GuestListTypes.FemalePersonalGuestList;
     }
 }
 
-export function getGenderAndTypeFromGuestList(guestList: GuestListTypes): {gender: 'male' | 'female' | '', type: 'guest list' | 'waitlist' | ''} {
+export function getGenderAndTypeFromGuestList(guestList: GuestListTypes): {gender: 'male' | 'female' | '', type: 'guest list' | 'waitlist' | 'personal guest list' | ''} {
     switch(guestList) {
         case GuestListTypes.MaleGuestList: return {gender: "male", type: "guest list"};
         case GuestListTypes.FemaleGuestList: return {gender: "female", type: "guest list"};
         case GuestListTypes.MaleWaitList: return {gender: "male", type: "waitlist"};
         case GuestListTypes.FemaleWaitList: return {gender: "female", type: "waitlist"};
+        case GuestListTypes.MalePersonalGuestList: return {gender: "male", type: "personal guest list"};
+        case GuestListTypes.FemalePersonalGuestList: return {gender: "female", type: "personal guest list"};
         default: return {gender: "", type: ""};
     }
 }

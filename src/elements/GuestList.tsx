@@ -5,16 +5,18 @@ import {getGuestListTypeFromGenderAndType, GuestListTypes} from "../types/Event.
 interface GuestListProps {
     guestList: Record<string, Guest>;
     gender: "male" | "female";
-    type: "general" | "waitlist";
+    type: "general" | "waitlist" | "personal";
     userNames: { [p: string]: string };
     fetchUserName: (userID: string) => Promise<string>;
     userID: string;
     userStatus: string;
     frontDoorMode: boolean;
-    handleDeleteGuest: (listName: GuestListTypes, guestID: string) => Promise<void>;
+    searching?: boolean;
+    handleDeleteGuest?: (listName: GuestListTypes, guestID: string) => Promise<void>;
     handleCheckInGuest?: (gender: "male" | "female", guestID: string) => Promise<void>;
     handleUncheckInGuest?: (gender: "male" | "female", guestID: string) => Promise<void>;
-    handleApproveGuest?: (gender: "male" | "female", guestID: string) => Promise<void>
+    handleApproveGuest?: (gender: "male" | "female", guestID: string) => Promise<void>;
+    handleAddGuestFromPersonal?: (gender: 'male' | 'female', guestID: string) => Promise<void>;
 }
 
 const GuestList = (props: GuestListProps) => {
@@ -30,9 +32,12 @@ const GuestList = (props: GuestListProps) => {
   if(props.type === "waitlist" && !props.handleApproveGuest)
     throw new Error("If rendering GuestList as a waitlist, you must define the handleApproveGuest method!");
   
+  if(props.type === "personal" && !props.handleAddGuestFromPersonal)
+    throw new Error("If rendering GuestList as a personal guest list, you must define the handleAddGuestFromPersonal method!");
+  
   return (
     <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">{props.gender === "female" ? "Female" : "Male"} {props.type === "waitlist" ? "Waitlist" : "Guests"}</h2>
+      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">{props.gender === "female" ? "Female" : "Male"} {props.type === "waitlist" ? "Waitlist" : props.type === "general" ? "Guests" : "Personal Guests"}</h2>
       <div className="mb-8 space-y-4 min-h-[20rem]">
         {Object.keys(props.guestList).length > 0 ? (
           Object.entries(props.guestList).map(([guestID, guest]) => (
@@ -41,10 +46,10 @@ const GuestList = (props: GuestListProps) => {
             >
               <div className="grid-rows-2 self-start sm:self-auto">
                 <p className="text-lg font-semibold text-gray-700">{guest.name}</p>
-                <p className="text-sm text-gray-700">Added By: {props.userNames[guest.addedBy] || (() => {
+                {props.type !== "personal" && (<p className="text-sm text-gray-700">Added By: {props.userNames[guest.addedBy] || (() => {
                   props.fetchUserName(guest.addedBy).then();
                   return 'Loading...';
-                })()}</p>
+                })()}</p>)}
               </div>
               <div
                 className={`${props.userStatus !== "Admin" && guest.addedBy !== props.userID && guest.checkedIn != -1 ? "basis-[25%]" : "basis-[40%] xl:basis-[50%]"} flex flex-row items-center align-middle justify-end space-x-5`}
@@ -58,10 +63,12 @@ const GuestList = (props: GuestListProps) => {
                       Approve
                     </button>
                   ) :
-                  (guest.checkedIn !== -1 || (props.userStatus === "Admin" && props.frontDoorMode)) && (
+                  (guest.checkedIn !== -1 || (props.userStatus === "Admin" && props.frontDoorMode)) && (props.type !== "personal") && (
                     <button
                       onClick={guest.checkedIn === -1 ? () => props.handleCheckInGuest!(props.gender, guestID) : () => confirm(`Uncheck in ${guest.name}?`) ? props.handleUncheckInGuest!(props.gender, guestID) : undefined}
-                      className={`${guest.checkedIn !== -1 ? "text-sm": ""} self-stretch flex-grow sm:mt-0 rounded-md font-semibold ${checkInIdleColor.current} text-white hover:${checkInHoverColor.current}`}
+                      className={`${guest.checkedIn !== -1 ? "text-sm": ""} self-stretch flex-grow sm:mt-0 rounded-md font-semibold ${checkInIdleColor.current} text-white ${props.userStatus !== "Admin" ? 'cursor-not-allowed border-none hover:border-none' : `hover:${checkInHoverColor.current}`}`}
+                      disabled={props.userStatus !== "Admin"}
+                      
                     >
                       {guest.checkedIn === -1 ? 'Check In' : `${new Date(guest.checkedIn).toLocaleString("en-US", {
                         year: "2-digit",
@@ -75,19 +82,26 @@ const GuestList = (props: GuestListProps) => {
                     </button>
                   )
                 }
-                {(props.userID === guest.addedBy || props.userStatus === "Admin") && (
+                {props.type !== 'personal' ? (props.userID === guest.addedBy || props.userStatus === "Admin") && (
                   <button
-                    onClick={() => props.handleDeleteGuest(guestListType, guestID)}
+                    onClick={() => props.handleDeleteGuest!(guestListType, guestID)}
                     className="sm:mt-0 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
                   >
                     Delete
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => props.handleAddGuestFromPersonal!(props.gender, guestID)}
+                    className={`sm:mt-0 ${checkInIdleColor.current} text-white rounded-md font-semibold hover:${checkInHoverColor.current}`}
+                  >
+                    Add
                   </button>
                 )}
               </div>
             </div>
           ))
         ) : (
-          <p className="text-gray-500 text-center">No {props.gender} guests {props.type === "waitlist" ? "on the waitlist" : "added"} yet.</p>
+          <p className="text-gray-500 text-center">{!props.searching ? `No ${props.gender} guests ${props.type === "waitlist" ? "on the waitlist" : "added"} yet.` : `No guest found.`}</p>
         )}
       </div>
     </div>
