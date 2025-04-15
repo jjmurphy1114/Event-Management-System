@@ -32,6 +32,7 @@ const IndividualEventPage = () => {
   useEffect(() => {
     const eventRef = ref(database, `events/${id}`);
     const blacklistRef = ref(database, "blacklist");
+    const userRef = ref(database, `users/${authUser.uid}`);
   
     onValue(eventRef, (snapshot) => {
       if(snapshot.exists()) {
@@ -48,7 +49,14 @@ const IndividualEventPage = () => {
       if(snapshot.exists()) setBlacklist(Object.keys(snapshot.val()));
       else setBlacklist([]);
     }, (err) => console.error("Error fetching blacklist!", err));
-  }, [id]);
+    
+    onValue(userRef, (snapshot) => {
+      if(snapshot.exists()) {
+        const validatedUser = validateAndReturnUser(snapshot.val());
+        if(validatedUser) setUser(new User(validatedUser));
+      }
+    }, (err) => console.error("Error fetching user!", err));
+  }, [authUser.uid, id]);
   
   const fetchUserData = useCallback(async () => {
     if(authUser) {
@@ -333,50 +341,92 @@ const IndividualEventPage = () => {
     }
   };
 
-    // Function to handle vouching for a guest (President Only)
-    const handleVouchGuest = async (gender: 'male' | 'female') => {
-      if (!event || !authUser) {
-        console.error("Event or user not available. Event:", event, "User:", authUser);
-        return;
-      }
-  
-      if (user.status !== "Admin") {
-        setError("Only Admins can vouch for guests.");
-        return;
-      }
-  
-      if (vouchPassword !== "ZetaMu1959!") { 
-        setError("Incorrect password. Please try again.");
-        return;
-      }
-  
-      // Ensure guest name is provided
-      if (!vouchGuestName) {
-        setError("Guest name cannot be empty.");
-        return;
-      }
-  
-      // Create new guest data
-      const newGuestData = { name: vouchGuestName, addedBy: authUser.uid, checkedIn: new Date().toLocaleString("en-US", { timeZone: "America/New_York" })};
-  
-      try {
-        if (!event.open) { // Vouching is allowed even if the event is closed
-          if (gender === "male") {
-            await addGuestToList(GuestListTypes.MaleGuestList, newGuestData);
-          } else if (gender === "female") {
-            await addGuestToList(GuestListTypes.FemaleGuestList, newGuestData);
-          }
-          setVouchGuestName("");
-          setVouchPassword("");
-          setIsVouching(false);
-        } else {
-          setError("Vouching can only be done when the event list is closed.");
+  // Function to handle vouching for a guest (President Only)
+  const handleVouchGuest = async (gender: 'male' | 'female') => {
+    if (!event || !authUser) {
+      console.error("Event or user not available. Event:", event, "User:", authUser);
+      return;
+    }
+
+    if (user.status !== "Admin") {
+      setError("Only Admins can vouch for guests.");
+      return;
+    }
+
+    if (vouchPassword !== "ZetaMu1959!") {
+      setError("Incorrect password. Please try again.");
+      return;
+    }
+
+    // Ensure guest name is provided
+    if (!vouchGuestName) {
+      setError("Guest name cannot be empty.");
+      return;
+    }
+
+    // Create new guest data
+    const newGuestData = { name: vouchGuestName, addedBy: authUser.uid, checkedIn: new Date().toLocaleString("en-US", { timeZone: "America/New_York" })};
+
+    try {
+      if (!event.open) { // Vouching is allowed even if the event is closed
+        if (gender === "male") {
+          await addGuestToList(GuestListTypes.MaleGuestList, newGuestData);
+        } else if (gender === "female") {
+          await addGuestToList(GuestListTypes.FemaleGuestList, newGuestData);
         }
-      } catch (error) {
-        console.error(`Error vouching for ${gender} guest: `, error);
-        setError(`Failed to vouch for ${gender} guest. Please try again.`);
+        setVouchGuestName("");
+        setVouchPassword("");
+        setIsVouching(false);
+      } else {
+        setError("Vouching can only be done when the event list is closed.");
       }
-    };
+    } catch (error) {
+      console.error(`Error vouching for ${gender} guest: `, error);
+      setError(`Failed to vouch for ${gender} guest. Please try again.`);
+    }
+  };
+  
+  const handleAddGuestFromPersonal = async (gender: 'male' | 'female', guestID: string) => {
+    if (!event || !authUser) {
+      console.error("Event or user not available. Event: ", event, "User: ", authUser);
+      return;
+    }
+
+    if (!event.open) {
+      if (user.status === "Admin" && !frontDoorMode){
+        setNotification("The list is closed but u good");
+      } else {
+        setError("The event is closed and no guests can be added");
+        return;
+      }
+    }
+
+    if (!user.privileges) {
+      setError("You don't have social privileges and can't add guests");
+      return;
+    }
+    
+    const mainListRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList}`);
+    const personalGuestRef = ref(database, `users/${user.id}/${gender === 'male' ? GuestListTypes.MalePersonalGuestList : GuestListTypes.FemalePersonalGuestList}/${guestID}`);
+    
+    const guestSnapshot = await get(personalGuestRef);
+    
+    if(guestSnapshot.exists()) {
+      const validatedGuestData = validateAndReturnGuest(guestSnapshot.val());
+      
+      if(validatedGuestData) {
+        const mainGuestRef = await push(mainListRef);
+        await update(mainGuestRef, validatedGuestData);
+      }
+      
+      console.debug("Added guest from personal guest list");
+      setNotification(`Added ${gender} guest from personal guest list`);
+      setError("");
+    } else {
+      console.debug("Guest not found in personal guest list!");
+      setError("Failed to add guest from personal guest list: Guest does not exist. Please try again.");
+    }
+  };
 
   // Function to export the entire guest list as CSV
   const exportGuestListAsCSV = () => {
@@ -562,6 +612,7 @@ const IndividualEventPage = () => {
               handleCheckInGuest={handleCheckInGuest}
               handleUncheckInGuest={handleUncheckInGuest}
               handleDeleteGuest={handleDeleteGuest}
+              searching={guestName.length != 0}
             />
             
             {/* Female Guests */}
@@ -577,6 +628,7 @@ const IndividualEventPage = () => {
               handleCheckInGuest={handleCheckInGuest}
               handleUncheckInGuest={handleUncheckInGuest}
               handleDeleteGuest={handleDeleteGuest}
+              searching={guestName.length != 0}
             />
   
             {/* Male Waitlist */}
@@ -591,6 +643,7 @@ const IndividualEventPage = () => {
               frontDoorMode={frontDoorMode}
               handleDeleteGuest={handleDeleteGuest}
               handleApproveGuest={handleApproveGuest}
+              searching={guestName.length != 0}
             />
             
             {/* Female Waitlist */}
@@ -605,6 +658,29 @@ const IndividualEventPage = () => {
               frontDoorMode={frontDoorMode}
               handleDeleteGuest={handleDeleteGuest}
               handleApproveGuest={handleApproveGuest}
+              searching={guestName.length != 0}
+            />
+            <GuestList
+              guestList={user.malePersonalGuestList}
+              gender={"male"}
+              type={"personal"}
+              userNames={userNames}
+              fetchUserName={fetchUserName}
+              userID={authUser ? authUser.uid : ""}
+              userStatus={user.status}
+              frontDoorMode={frontDoorMode}
+              handleAddGuestFromPersonal={handleAddGuestFromPersonal}
+            />
+            <GuestList
+              guestList={user.femalePersonalGuestList}
+              gender={"female"}
+              type={"personal"}
+              userNames={userNames}
+              fetchUserName={fetchUserName}
+              userID={authUser ? authUser.uid : ""}
+              userStatus={user.status}
+              frontDoorMode={frontDoorMode}
+              handleAddGuestFromPersonal={handleAddGuestFromPersonal}
             />
           </div>
           <div className="flex justify-center mt-4 col-span-full">
