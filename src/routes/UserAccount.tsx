@@ -182,6 +182,8 @@ const UserAccount = () => {
     
     await update(newGuestRef, newGuestData);
     
+    setGuestName("");
+    
     fetchUserData().then(() => {
       console.debug(`User data updated successfully!`);
     }).catch((error) => {
