@@ -20,6 +20,7 @@ import IndividualEventPage from "./routes/IndividualEventPage.tsx";
 import BlacklistPage from "./routes/BlacklistPage.tsx";
 import {database} from "./services/firebaseConfig";
 import UserAccount from "./routes/UserAccount.tsx";
+import StatsPage from "./routes/StatsPage.tsx";
 
 const auth = getAuth();
 
@@ -182,6 +183,10 @@ const router = createBrowserRouter([
       {
         path: "/user",
         element: <ProtectedRoute element={<UserAccount />}/>
+      },
+      {
+        path: "/stats",
+        element: <ProtectedRoute element={<StatsPage />}/>,
       }
     ],
   },
