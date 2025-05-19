@@ -47,50 +47,63 @@ export default function StatsPage() {
     if (!selectedEventId) return;
     setLoading(true);
     const fetchStats = async () => {
-      try {
-        const evRef = ref(database, `events/${selectedEventId}`);
-        const snapshot = await get(evRef);
-        if (!snapshot.exists()) {
-          setError('Event not found');
-          return;
-        }
-        const ev = snapshot.val();
-        const maleList: Guest[] = ev.maleGuestList || [];
-        const femaleList: Guest[] = ev.femaleGuestList || [];
-        const allGuests = [...maleList, ...femaleList];
-        const checked = allGuests.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
-        const notChecked = allGuests.length - checked;
-        // Find top brother: count check-ins per addedBy
-        const counts: Record<string, number> = {};
-        allGuests.forEach(g => {
-          if (g.checkedIn !== undefined && g.checkedIn !== -1) {
-            counts[g.addedBy] = (counts[g.addedBy] || 0) + 1;
+        try {
+          const evRef = ref(database, `events/${selectedEventId}`);
+          const snapshot = await get(evRef);
+          if (!snapshot.exists()) {
+            setError('Event not found');
+            return;
           }
-        });
-        let topUid = '';
-        let max = 0;
-        Object.entries(counts).forEach(([uid, c]) => {
-          if (c > max) { max = c; topUid = uid; }
-        });
-        let topName = '';
-        if (topUid) {
-          const userRef = ref(database, `users/${topUid}`);
-          const usnap = await get(userRef);
-          topName = usnap.exists() ? usnap.val().displayName : topUid;
+          const ev = snapshot.val();
+  
+          // Ensure guest lists are arrays
+          const maleRaw = ev.maleGuestList;
+          const femaleRaw = ev.femaleGuestList;
+          const maleList: Guest[] = Array.isArray(maleRaw) ? maleRaw : Object.values(maleRaw || {});
+          const femaleList: Guest[] = Array.isArray(femaleRaw) ? femaleRaw : Object.values(femaleRaw || {});
+  
+          const allGuests = [...maleList, ...femaleList];
+          const checked = allGuests.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
+          const notChecked = allGuests.length - checked;
+  
+          // Find top brother: count check-ins per addedBy
+          const counts: Record<string, number> = {};
+          allGuests.forEach(g => {
+            if (g.checkedIn !== undefined && g.checkedIn !== -1) {
+              counts[g.addedBy] = (counts[g.addedBy] || 0) + 1;
+            }
+          });
+          let topUid = '';
+          let max = 0;
+          Object.entries(counts).forEach(([uid, c]) => {
+            if (c > max) {
+              max = c;
+              topUid = uid;
+            }
+          });
+          let topName = '';
+          if (topUid) {
+            const userRef = ref(database, `users/${topUid}`);
+            const usnap = await get(userRef);
+            topName = usnap.exists() ? usnap.val().displayName : topUid;
+          }
+  
+          setStats({
+            maleCount: maleList.length,
+            femaleCount: femaleList.length,
+            checkedIn: checked,
+            notCheckedIn: notChecked,
+            topBrother: topName,
+          });
+        } catch (e) {
+          console.error(e);
+          setError('Failed to load stats');
+        } finally {
+          setLoading(false);
         }
-        setStats({
-          maleCount: maleList.length,
-          femaleCount: femaleList.length,
-          checkedIn: checked,
-          notCheckedIn: notChecked,
-          topBrother: topName,
-        });
-      } catch (e) {
-        console.error(e);
-        setError('Failed to load stats');
-      } 
-    };
-    fetchStats();
+      };
+  
+      fetchStats();
   }, [selectedEventId]);
 
   if (error) return <div className="text-red-500 text-center mt-10">{error}</div>;
