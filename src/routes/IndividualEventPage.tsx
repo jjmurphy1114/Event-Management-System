@@ -455,19 +455,46 @@ const IndividualEventPage = () => {
   };  
 
   // Extract male and female guests from the event object
-  // Filtered guest lists based on search input
-  const filteredMaleGuests: Record<string, Guest> = Object.fromEntries(Object.entries(event?.maleGuestList).filter(([, guest]) =>
-    guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ));
-  const filteredFemaleGuests: Record<string, Guest> = Object.fromEntries(Object.entries(event?.femaleGuestList).filter(([, guest]) =>
-    guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ));
-  const filteredMaleWaitListed: Record<string, Guest> = Object.fromEntries(Object.entries(event?.maleWaitList).filter(([, guest]) =>
-    guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ));
-  const filteredFemaleWaitListed: Record<string, Guest> = Object.fromEntries(Object.entries(event?.femaleWaitList).filter(([, guest]) =>
-    guest.name.toLowerCase().includes(guestName.toLowerCase())
-  ));
+  // Filtered guest lists based on search input for guest name and addedBy name
+  const filteredMaleGuests: Record<string, Guest> = Object.fromEntries(
+    Object.entries(event?.maleGuestList).filter(([, guest]) => {
+      const addedByName = userNames[guest.addedBy]?.toLowerCase() || "";
+      return (
+        guest.name.toLowerCase().includes(guestName.toLowerCase()) ||
+        addedByName.includes(guestName.toLowerCase())
+      );
+    })
+  );
+
+  const filteredFemaleGuests: Record<string, Guest> = Object.fromEntries(
+    Object.entries(event?.femaleGuestList).filter(([, guest]) => {
+      const addedByName = userNames[guest.addedBy]?.toLowerCase() || "";
+      return (
+        guest.name.toLowerCase().includes(guestName.toLowerCase()) ||
+        addedByName.includes(guestName.toLowerCase())
+      );
+    })
+  );
+
+  const filteredMaleWaitListed: Record<string, Guest> = Object.fromEntries(
+    Object.entries(event?.maleWaitList).filter(([, guest]) => {
+      const addedByName = userNames[guest.addedBy]?.toLowerCase() || "";
+      return (
+        guest.name.toLowerCase().includes(guestName.toLowerCase()) ||
+        addedByName.includes(guestName.toLowerCase())
+      );
+    })
+  );
+
+  const filteredFemaleWaitListed: Record<string, Guest> = Object.fromEntries(
+    Object.entries(event?.femaleWaitList).filter(([, guest]) => {
+      const addedByName = userNames[guest.addedBy]?.toLowerCase() || "";
+      return (
+        guest.name.toLowerCase().includes(guestName.toLowerCase()) ||
+        addedByName.includes(guestName.toLowerCase())
+      );
+    })
+  );
 
   return (
     <div className={"absolute box-border p-5 w-full h-fit min-h-screen-with-nav top-nav items-center overflow-auto min-w-[375px]"}>
