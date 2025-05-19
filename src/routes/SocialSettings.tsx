@@ -11,6 +11,7 @@ export default function SocialSettings() {
   const navigate = useNavigate();
   const auth = getAuth();
   const user = auth.currentUser;
+  const [searchName, setSearchName] = useState("");
 
   // Fetch users from Firebase when the component loads
   useEffect(() => {
@@ -143,13 +144,22 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
           Manage Blacklist (Admin)
         </button>
       </div>
-  
+      <div className="flex flex-col items-center col-span-full my-4 w-full">
+      <input
+              type="text"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              placeholder="Search by name"
+              className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+      </div>
       <div className="container mx-auto lg:w-[80%] bg-white p-4 md:p-6 shadow-md rounded-lg">
         {/* Table Container */}
         <div className={"w-full overflow-x-auto"}>
           <table className="box-border w-full bg-white text-gray-700 text-center border-collapse">
             <thead>
               <tr className="bg-gray-100">
+                <th className="py-2 px-4 border">Display Name</th>
                 <th className="py-2 px-4 border">Email</th>
                 <th className="py-2 px-4 border">Status</th>
                 <th className="py-2 px-4 border">Actions</th>
@@ -157,54 +167,61 @@ const changeSocialPrivileges = async (userId: string, newPrivileges: boolean) =>
                 <th className="py-2 px-4 border">Delete User</th>
               </tr>
             </thead>
+            {/* Filter users based on the searchName input */}
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="border px-4 py-2">{user.email}</td>
-                  <td className="border px-4 py-2">
-                    <select
-                      value={user.status}
-                      onChange={(e) => changeStatus(user.id, e.target.value)}
-                      className="border border-gray-300 text-white rounded-md px-2 py-1"
-                      disabled={userStatus !== "Admin"}
-                    >
-                      <option value="Default">Default</option>
-                      <option value="Social">Social</option>
-                      <option value="Admin">Admin</option>
-                    </select>
-                  </td>
-                  <td className="border px-4 py-2">
-                    {user.approved ? (
-                      <span className="text-green-500 font-bold">Approved</span>
-                    ) : (
-                      <button
-                        onClick={() => approveUser(user.id)}
-                        className="bg-green-500 hover:bg-green-700 text-white font-medium py-1 px-3 rounded"
+              {users
+                .filter((user) => 
+                  user.displayName.toLowerCase().includes(searchName.toLowerCase()) || 
+                  user.email.toLowerCase().includes(searchName.toLowerCase())
+                )
+                .map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="border px-4 py-2">{user.displayName}</td>
+                    <td className="border px-4 py-2">{user.email}</td>
+                    <td className="border px-4 py-2">
+                      <select
+                        value={user.status}
+                        onChange={(e) => changeStatus(user.id, e.target.value)}
+                        className="border border-gray-300 text-white rounded-md px-2 py-1"
+                        disabled={userStatus !== "Admin"}
                       >
-                        Approve
+                        <option value="Default">Default</option>
+                        <option value="Social">Social</option>
+                        <option value="Admin">Admin</option>
+                      </select>
+                    </td>
+                    <td className="border px-4 py-2">
+                      {user.approved ? (
+                        <span className="text-green-500 font-bold">Approved</span>
+                      ) : (
+                        <button
+                          onClick={() => approveUser(user.id)}
+                          className="bg-green-500 hover:bg-green-700 text-white font-medium py-1 px-3 rounded"
+                        >
+                          Approve
+                        </button>
+                      )}
+                    </td>
+                    <td className="border px-4 py-2">
+                      <input
+                        type="checkbox"
+                        checked={user.privileges}
+                        onChange={(e) => changeSocialPrivileges(user.id, e.target.checked)}
+                        className="transform scale-125"
+                      />
+                    </td>
+                    <td className="border px-4 py-2">
+                      <button
+                        onClick={() => {
+                          if (confirm(`Delete user, ${user.displayName}?\n(uid: ${user.id})`)) deleteUser(user.id).then(() => console.debug("Successfully deleted user"));
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded"
+                      >
+                        Delete
                       </button>
-                    )}
-                  </td>
-                  <td className="border px-4 py-2">
-                    <input
-                      type="checkbox"
-                      checked={user.privileges}
-                      onChange={(e) => changeSocialPrivileges(user.id, e.target.checked)}
-                      className="transform scale-125"
-                    />
-                  </td>
-                  <td className="border px-4 py-2">
-                    <button
-                      onClick={() => {
-                        if(confirm(`Delete user, ${user.displayName}?\n(uid: ${user.id})`)) deleteUser(user.id).then(() => console.debug("Successfully deleted user"));
-                      }}
-                      className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
