@@ -15,10 +15,12 @@ export default function StatsPage() {
     femaleCount: 0,
     checkedIn: 0,
     notCheckedIn: 0,
-    mostCheckIns: "",
     checkInTimes: [] as Guest[],
     checkedGirls: 0,
     checkedGuys: 0,
+    mostCheckIns: "",
+    mostGirlsCheckIns: "",
+    mostGuysCheckIns: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -75,37 +77,21 @@ export default function StatsPage() {
 
           const checkInTimes: Guest[] = allGuests.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1)
   
-          // Find top brother: count check-ins per addedBy
-          const counts: Record<string, number> = {};
-          allGuests.forEach(g => {
-            if (g.checkedIn !== undefined && g.checkedIn !== -1) {
-              counts[g.addedBy] = (counts[g.addedBy] || 0) + 1;
-            }
-          });
-          let topUid = '';
-          let max = 0;
-          Object.entries(counts).forEach(([uid, c]) => {
-            if (c > max) {
-              max = c;
-              topUid = uid;
-            }
-          });
-          let topName = '';
-          if (topUid) {
-            const userRef = ref(database, `users/${topUid}`);
-            const usnap = await get(userRef);
-            topName = usnap.exists() ? usnap.val().displayName : topUid;
-          }
+          const topGuestsChecked = await calculateTopBrother(allGuests);
+          const topGirlsChecked = await calculateTopBrother(femaleList.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1));
+          const topGuysChecked = await calculateTopBrother(maleList.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1));
   
           setStats({
             maleCount: maleList.length,
             femaleCount: femaleList.length,
             checkedIn: checked,
             notCheckedIn: notChecked,
-            mostCheckIns: topName,
             checkInTimes: checkInTimes,
             checkedGirls: checkedGirls,
             checkedGuys: checkedGuys,
+            mostCheckIns: topGuestsChecked,
+            mostGirlsCheckIns: topGirlsChecked,
+            mostGuysCheckIns: topGuysChecked,
           });
         } catch (e) {
           console.error(e);
@@ -154,12 +140,39 @@ export default function StatsPage() {
           </div>
           
           <div className="p-4 bg-purple-500 rounded-lg">
-            <p className="text-2xl font-semibold">Most Check-Ins</p>
-            <p className="text-lg">{stats.mostCheckIns || '—'}</p>
+            <p className="text-2xl font-semibold">Records</p>
+            <p className="text-md">Most Check-ins: {stats.mostCheckIns}</p>
+            <p className="text-md">Most Female Check-ins: {stats.mostGirlsCheckIns}</p>
+            <p className="text-md">Most Male Check-ins: {stats.mostGuysCheckIns}</p>
           </div>
         </div>
       </div>
       <CheckInGraph checkInTimes={stats.checkInTimes} />
       </div>
   );
+}
+
+async function calculateTopBrother(guests: Guest[]): Promise<string> {
+  const counts: Record<string, number> = {};
+  guests.forEach(g => {
+    if (g.checkedIn !== undefined && g.checkedIn !== -1) {
+      counts[g.addedBy] = (counts[g.addedBy] || 0) + 1;
+    }
+  });
+  let topUid = '';
+  let max = 0;
+  Object.entries(counts).forEach(([uid, c]) => {
+    if (c > max) {
+      max = c;
+      topUid = uid;
+    }
+  });
+  let topName = '';
+  if (topUid) {
+    const userRef = ref(database, `users/${topUid}`);
+    const usnap = await get(userRef);
+    topName = usnap.exists() ? usnap.val().displayName : topUid;
+    return topName;
+  }
+  return '—';
 }
