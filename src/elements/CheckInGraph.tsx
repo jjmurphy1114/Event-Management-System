@@ -1,73 +1,113 @@
-import { Scatter } from 'react-chartjs-2';
-import { Chart as ChartJS, Title, Tooltip, Legend, PointElement, LinearScale } from 'chart.js';
+import React from 'react';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import Guest from "../types/Guest";
 
 // Register Chart.js components
-ChartJS.register(Title, Tooltip, Legend, PointElement, LinearScale);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface CheckInGraphProps {
-    checkInTimes: Guest[];
+  checkInTimes: Guest[];
 }
 
 export default function CheckInGraph({ checkInTimes }: CheckInGraphProps) {
-    // Filter check-ins between 10 PM and 2 AM
-    const filteredCheckIns = checkInTimes.filter((guest) => {
-        const checkInTime = new Date(guest.checkedIn as string);
-        const hours = checkInTime.getHours();
-        return (hours >= 22 || hours < 2); // 10 PM to 2 AM
-    });
+  // Filter check-ins between 10 PM and 2 AM
+  const filteredCheckIns = checkInTimes.filter((guest) => {
+    if (!guest.checkedIn) return false;
+    const checkInTime = new Date(guest.checkedIn as string);
+    const hours = checkInTime.getHours();
+    return hours >= 22 || hours < 2;
+  });
 
-    // Format data for scatter plot
-    const scatterData = filteredCheckIns.map((guest) => {
-        const checkInTime = new Date(guest.checkedIn as string);
-        const hours = checkInTime.getHours();
-        const minutes = checkInTime.getMinutes();
-        const timeInHours = hours + minutes / 60; // Convert to decimal hours
-        return { x: timeInHours, y: 1 }; // y is a constant for distribution
-    });
+  // Aggregate check-ins per minute bucket
+  const bucketCounts: Record<number, number> = {};
+  filteredCheckIns.forEach((guest) => {
+    const date = new Date(guest.checkedIn as string);
+    const bucketHour = date.getHours();
+    const bucketMinute = date.getMinutes();
+    const timeInHours = bucketHour + bucketMinute / 60;
+    bucketCounts[timeInHours] = (bucketCounts[timeInHours] || 0) + 1;
+  });
 
-    // Chart.js data and options
-    const data = {
-        datasets: [
-        {
-            label: 'Check-In Times',
-            data: scatterData,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            pointRadius: 5,
+  // Format data for line chart
+  const dataPoints = Object.entries(bucketCounts)
+    .map(([key, count]) => ({ x: parseFloat(key), y: count }))
+    .sort((a, b) => a.x - b.x);
+
+  const data = {
+    datasets: [
+      {
+        label: 'Guests Checked-In',
+        data: dataPoints,
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        fill: false,
+        pointRadius: 5,
+        showLine: true,
+      },
+    ],
+  };
+
+  const options = {
+    scales: {
+      x: {
+        type: 'linear' as const,
+        position: 'bottom' as const,
+        title: {
+          display: true,
+          text: 'Time',
         },
-        ],
-    };
-
-    const options = {
-        scales: {
-            x: {
-                type: "linear", // Explicitly set the type to "linear"
-                position: "bottom",
-                title: {
-                    display: true,
-                    text: "Check-In Time",
-                },
-                ticks: {
-                    callback: (value: number) => {
-                        const hours = Math.floor(value);
-                        const minutes = Math.round((value - hours) * 60);
-                        const date = new Date();
-                        date.setHours(hours, minutes);
-                        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-                    },
-                },
-            },
-            y: {
-                display: true,
-            },
+        ticks: {
+          callback: (value: number | string) => {
+            const num = Number(value);
+            const hrs = Math.floor(num);
+            const mins = Math.round((num - hrs) * 60);
+            const date = new Date();
+            date.setHours(hrs, mins);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+          },
         },
-        plugins: {
-            legend: {
-                display: false,
-            },
-        },
-    };
+      },
+      y: {
+        title: {
+            display: true,
+            text: 'Check-Ins',
+          },
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: 'Check-In Times (10 PM - 2 AM)',
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+  };
 
-    // Render the scatter plot
-    return <Scatter data={data} options={options}/>;
+  return (
+    <div style={{ height: '300px', width: '100%' }}>
+      <Line data={data} options={options} />
+    </div>
+  );
 }
