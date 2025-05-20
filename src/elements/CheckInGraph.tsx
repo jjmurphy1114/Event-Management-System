@@ -45,10 +45,16 @@ export default function CheckInGraph({ checkInTimes }: CheckInGraphProps) {
                 position: "bottom",
                 title: {
                     display: true,
-                    text: "X-Axis Title",
+                    text: "Check-In Time",
                 },
                 ticks: {
-                    callback: (value: number) => `${value}`, // Ensure the callback returns a string
+                    callback: (value: number) => {
+                        const hours = Math.floor(value);
+                        const minutes = Math.round((value - hours) * 60);
+                        const date = new Date();
+                        date.setHours(hours, minutes);
+                        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+                    },
                 },
             },
             y: {
@@ -63,5 +69,5 @@ export default function CheckInGraph({ checkInTimes }: CheckInGraphProps) {
     };
 
     // Render the scatter plot
-    return <Scatter data={data}/>;
+    return <Scatter data={data} options={options}/>;
 }

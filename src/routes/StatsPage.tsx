@@ -15,7 +15,7 @@ export default function StatsPage() {
     femaleCount: 0,
     checkedIn: 0,
     notCheckedIn: 0,
-    topBrother: "",
+    mostCheckIns: "",
     checkInTimes: [] as Guest[],
   });
   const [loading, setLoading] = useState(true);
@@ -97,7 +97,7 @@ export default function StatsPage() {
             femaleCount: femaleList.length,
             checkedIn: checked,
             notCheckedIn: notChecked,
-            topBrother: topName,
+            mostCheckIns: topName,
             checkInTimes: checkInTimes,
           });
         } catch (e) {
@@ -133,15 +133,15 @@ export default function StatsPage() {
       <div className="grid grid-cols-1 gap-4">
         <div className="p-4 bg-blue-500 rounded-lg">
           <p className="text-lg">Girls : Guys</p>
-          <p className="text-2xl font-semibold">{stats.femaleCount / stats.maleCount}</p>
+          <p className="text-2xl font-semibold">{(stats.femaleCount / stats.maleCount).toFixed(2)}</p>
         </div>
         <div className="p-4 bg-green-500 rounded-lg">
           <p className="text-lg">Checked In : Not Checked In</p>
           <p className="text-2xl font-semibold">{stats.checkedIn} : {stats.notCheckedIn}</p>
         </div>
         <div className="p-4 bg-purple-500 rounded-lg">
-          <p className="text-lg">Top Brother</p>
-          <p className="text-2xl font-semibold">{stats.topBrother || '—'}</p>
+          <p className="text-lg">Most Check-Ins</p>
+          <p className="text-2xl font-semibold">{stats.mostCheckIns || '—'}</p>
         </div>
       </div>
       <CheckInGraph checkInTimes={stats.checkInTimes} />
