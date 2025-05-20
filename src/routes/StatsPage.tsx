@@ -3,6 +3,7 @@ import { ref, get } from "firebase/database";
 import { database } from "../services/firebaseConfig";
 // import { getAuth } from "firebase/auth";
 import Guest from "../types/Guest";
+import CheckInGraph from "../elements/CheckInGraph";
 
 export default function StatsPage() {
 //   const auth = getAuth();
@@ -15,6 +16,7 @@ export default function StatsPage() {
     checkedIn: 0,
     notCheckedIn: 0,
     topBrother: "",
+    checkInTimes: [] as Guest[],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,6 +67,8 @@ export default function StatsPage() {
           const allGuests = [...maleList, ...femaleList];
           const checked = allGuests.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
           const notChecked = allGuests.length - checked;
+
+          const checkInTimes: Guest[] = allGuests.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1)
   
           // Find top brother: count check-ins per addedBy
           const counts: Record<string, number> = {};
@@ -94,6 +98,7 @@ export default function StatsPage() {
             checkedIn: checked,
             notCheckedIn: notChecked,
             topBrother: topName,
+            checkInTimes: checkInTimes,
           });
         } catch (e) {
           console.error(e);
@@ -128,7 +133,7 @@ export default function StatsPage() {
       <div className="grid grid-cols-1 gap-4">
         <div className="p-4 bg-blue-500 rounded-lg">
           <p className="text-lg">Girls : Guys</p>
-          <p className="text-2xl font-semibold">{stats.femaleCount} : {stats.maleCount}</p>
+          <p className="text-2xl font-semibold">{stats.femaleCount / stats.maleCount}</p>
         </div>
         <div className="p-4 bg-green-500 rounded-lg">
           <p className="text-lg">Checked In : Not Checked In</p>
@@ -139,6 +144,7 @@ export default function StatsPage() {
           <p className="text-2xl font-semibold">{stats.topBrother || '—'}</p>
         </div>
       </div>
+      <CheckInGraph checkInTimes={stats.checkInTimes} />
       </div>
   );
 }
