@@ -36,7 +36,7 @@ export default function StatsPage() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const loaded = Object.entries(data).map(([id, ev]: [string, any]) => ({ id, name: ev.name }));
           setEvents(loaded);
-        //   if (loaded.length) setSelectedEventId(loaded[0].id);
+          if (loaded.length) setSelectedEventId(loaded[0].id);
         }
       } catch (e) {
         console.error(e);
