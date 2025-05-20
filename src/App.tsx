@@ -186,7 +186,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/stats",
-        element: <ProtectedRoute element={<StatsPage />}/>,
+        element: <RoleProtectedRoute allowedStatuses={["Admin", "Social"]} element={<StatsPage />}/>,
       }
     ],
   },
