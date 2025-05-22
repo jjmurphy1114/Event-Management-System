@@ -13,6 +13,7 @@ dist-ssr
 *.local
 .turbo
 build
+.yarn/install-state.gz
 
 # Firebase config
 **/zm-parties-service-account-key.json
