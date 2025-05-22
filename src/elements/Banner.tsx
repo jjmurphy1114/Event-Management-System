@@ -151,6 +151,13 @@ function Banner() {
       {mobileMenuOpen && (
         <div className="bg-gray-700 md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <Link
+              to="/"
+              className="block text-gray-300 hover:bg-gray-600 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+
+            >
+              Home
+            </Link>
             {(userStatus === "Admin" || userStatus === "Social") && (
               <>
                 <Link
@@ -164,6 +171,12 @@ function Banner() {
                   className="block text-gray-300 hover:bg-gray-600 hover:text-white px-3 py-2 rounded-md text-base font-medium"
                 >
                   Social Settings
+                </Link>
+                <Link
+                  to="/stats"
+                  className="block text-gray-300 hover:bg-gray-600 hover:text-white px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Stats Page
                 </Link>
               </>
             )}
