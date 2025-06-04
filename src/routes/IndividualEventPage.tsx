@@ -415,6 +415,12 @@ const IndividualEventPage = () => {
       const validatedGuestData = validateAndReturnGuest(guestSnapshot.val());
       
       if(validatedGuestData) {
+        // Check if the guest is blacklisted
+        if (blacklist.includes(validatedGuestData.name.trim())) {
+          setError("This guest is blacklisted and cannot be added.");
+          return;
+        }
+
         const mainGuestRef = await push(mainListRef);
         await update(mainGuestRef, validatedGuestData);
       }
