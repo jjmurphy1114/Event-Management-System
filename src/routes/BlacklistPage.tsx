@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import {ref, get, remove, set, onValue} from "firebase/database";
 import { database } from "../services/firebaseConfig";
 import { getAuth } from "firebase/auth";
+import { validateAndReturnBlacklisted } from "../types/Blacklisted";
+import Blacklisted from "../types/Blacklisted";
 
 const BlacklistPage = () => {
-  const [blacklist, setBlacklist] = useState<string[]>([]);
+  const [blacklist, setBlacklist] = useState<Record<string, Blacklisted>>({});
   const [loading, setLoading] = useState(true);
   const [guestName, setGuestName] = useState("");
   const [error, setError] = useState("");
@@ -15,34 +17,25 @@ const BlacklistPage = () => {
   useEffect(() => {
     const blacklistRef = ref(database, "blacklist");
     onValue(blacklistRef, (snapshot) => {
-      if(snapshot.exists()) setBlacklist(Object.keys(snapshot.val()));
-      else setBlacklist([]);
+      if (snapshot.exists()) {
+        const blacklistObj = snapshot.val();
+        // Validate and filter only valid Blacklisted objects
+        const validBlacklist: Record<string, Blacklisted> = {};
+        Object.entries(blacklistObj).forEach(([key, value]) => {
+          const validated = validateAndReturnBlacklisted(value);
+          if (validated) {
+        validBlacklist[key] = validated;
+          }
+        });
+        setBlacklist(validBlacklist);
+      } else {
+        setBlacklist({});
+      }
       setLoading(false);
     }, (err) => {
       console.error("Unable to fetch blacklist!", err);
     });
   }, []);
-  
-  // useEffect(() => {
-  //   const fetchBlacklist = async () => {
-  //     try {
-  //       const blacklistRef = ref(database, "blacklist");
-  //       const snapshot = await get(blacklistRef);
-  //       if (snapshot.exists()) {
-  //         setBlacklist(Object.keys(snapshot.val()));
-  //       } else {
-  //         setBlacklist([]);
-  //       }
-  //     } catch (err) {
-  //       console.error("Error fetching blacklist:", err);
-  //       setError("Failed to load the blacklist.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //
-  //   fetchBlacklist().then();
-  // }, []);
 
   // Ensure only admins can access this page
   useEffect(() => {
@@ -65,8 +58,11 @@ const BlacklistPage = () => {
     }
 
     try {
+
+      const blacklistedData = new Blacklisted(guestName, user?.displayName || "Unknown User");
+
       const blacklistRef = ref(database, `blacklist/${guestName}`);
-      await set(blacklistRef, true); // Store a truthy value (e.g., true) to represent the name in the blacklist
+      await set(blacklistRef, blacklistedData); // Store a truthy value (e.g., true) to represent the name in the blacklist
       setGuestName("");
       setError("");
       setNotification("Guest added to the blacklist.");
@@ -95,9 +91,18 @@ const BlacklistPage = () => {
     return <div className="text-center mt-20 text-red-500 text-xl">{error}</div>;
   }
 
-  const filteredBlacklist = blacklist.filter((name: string) =>
-        name.toLowerCase().includes(guestName.toLowerCase())
-  );
+  const filteredBlacklist = Object.entries(blacklist)
+    .filter(([name, blacklisted]) => {
+      const addedByName = blacklisted.addedBy?.toLowerCase() || "";
+      return (
+        name.toLowerCase().includes(guestName.toLowerCase()) ||
+        addedByName.includes(guestName.toLowerCase())
+      );
+    });
+  
+  // const filteredBlacklist = blacklist.filter((name: string) =>
+  //       name.toLowerCase().includes(guestName.toLowerCase())
+  // );
 
   return (
     <div className="absolute top-nav min-w-[420px] h-screen-with-nav w-screen overflow-auto bg-gradient-to-b from-blue-50 to-gray-100 p-5">
@@ -128,12 +133,13 @@ const BlacklistPage = () => {
         <h2 className="text-2xl font-semibold text-center text-gray-800 my-4">Blacklisted Guests</h2>
         {filteredBlacklist.length > 0 ? (
           <ul className="space-y-2">
-            {filteredBlacklist.map((name, idx) => (
+            {filteredBlacklist.map(([name, blacklisted], idx) => (
               <li
                 key={idx}
                 className="p-4 border border-gray-200 rounded-lg flex justify-between items-center"
               >
                 <p className="text-lg font-semibold text-gray-700">{name}</p>
+                <p className="text-sm text-gray-700">Added By: {blacklisted.addedBy}</p>
                 <button
                   onClick={() => handleRemoveFromBlacklist(name)}
                   className="bg-red-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-600"
