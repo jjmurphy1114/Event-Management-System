@@ -54,12 +54,11 @@ function Banner() {
         <div className="flex items-center justify-between h-16">
           {/* Logo and Site Title */}
           <div className="flex items-center">
-            <img src={bannerImage} className="w-8 h-8 mr-2" alt="TKE Banner Image" />
             <Link
               to="/"
               className="text-white font-bold text-lg md:text-2xl truncate"
             >
-              ZM PARTIES
+              Event Management
             </Link>
           </div>
     
