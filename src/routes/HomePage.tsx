@@ -59,7 +59,7 @@ export default function HomePage() {
                       <Link to={`/events/${event.id}`} className="text-lg items-center text-center font-semibold text-indigo-500 hover:underline">
                         {event.name}
                       </Link>
-                      <p className="text-sm text-gray-600">Total Guests: {(Object.keys(event.maleGuestList).length || 0) + (Object.keys(event.femaleGuestList).length || 0)}</p>
+                      <p className="text-sm text-gray-600">Total Guests: {(Object.keys(event.guestList).length || 0) + (Object.keys(event.femaleGuestList).length || 0)}</p>
                       {(userStatus === 'Admin' || userStatus === 'Social') && (
                         <div className="mt-2 flex items-center">
                           <label htmlFor={`event-toggle-${event.id}`} className="flex items-center cursor-pointer">

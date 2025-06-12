@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {database} from "../services/firebaseConfig";
 import {get, onValue, push, ref, remove, set, update} from "firebase/database";
-import Event, {EventType, getGenderAndTypeFromGuestList, GuestListTypes, validateAndReturnEvent} from "../types/Event";
+import Event, {EventType, getTypeFromGuestList, GuestListTypes, validateAndReturnEvent} from "../types/Event";
 import Guest, {validateAndReturnGuest} from "../types/Guest";
 import {getAuth, User as FirebaseUser} from "firebase/auth";
 import JobsButton from "../elements/JobsButton.tsx";
@@ -152,7 +152,7 @@ const IndividualEventPage = () => {
   
     // Create new guest data
     const newGuestData = new Guest(guestName, user.id);
-    const userAddedMales = countUserGuests(event.maleGuestList || [], user.id);
+    const userAddedMales = countUserGuests(event.guestList || [], user.id);
     const userAddedFemales = countUserGuests(event.femaleGuestList || [], user.id);
     const totalUserGuests = userAddedMales + userAddedFemales;
   
@@ -163,14 +163,14 @@ const IndividualEventPage = () => {
     try {
       if (user.status === "Admin" || totalUserGuests < maxGuests) {
         if (gender === "male" && (user.status === "Admin" || userAddedMales < maxMales)) {
-          await addGuestToList(GuestListTypes.MaleGuestList, newGuestData);
+          await addGuestToList(GuestListTypes.GuestList, newGuestData);
         } else if (gender === "female" && (user.status === "Admin" || userAddedFemales < maxFemales)) {
           await addGuestToList(GuestListTypes.FemaleGuestList, newGuestData);
         } else {
-          await addGuestToList(gender === "male" ? GuestListTypes.MaleWaitList : GuestListTypes.FemaleWaitList, newGuestData);
+          await addGuestToList(gender === "male" ? GuestListTypes.WaitList : GuestListTypes.FemaleWaitList, newGuestData);
         }
       } else {
-        await addGuestToList(gender === "male" ? GuestListTypes.MaleWaitList : GuestListTypes.FemaleWaitList, newGuestData);
+        await addGuestToList(gender === "male" ? GuestListTypes.WaitList : GuestListTypes.FemaleWaitList, newGuestData);
       }
     } catch (error) {
       console.error(`Error adding ${gender} guest: `, error);
@@ -191,7 +191,7 @@ const IndividualEventPage = () => {
       
       await update(newGuestRef, guestData);
 
-      const genderAndType = getGenderAndTypeFromGuestList(listName);
+      const genderAndType = getTypeFromGuestList(listName);
       setNotification(`Added guest to ${genderAndType.gender} ${genderAndType.type}`);
       setGuestName("");
       setError("");
@@ -254,7 +254,7 @@ const IndividualEventPage = () => {
     if(user.status !== "Admin") return;
     
     try {
-      const guestListName = gender === "male" ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList;
+      const guestListName = gender === "male" ? GuestListTypes.GuestList : GuestListTypes.FemaleGuestList;
       
       const guestRef = ref(database, `events/${id}/${guestListName}/${guestID}/checkedIn`);
       await set(guestRef, -1);
@@ -275,7 +275,7 @@ const IndividualEventPage = () => {
 
     try {
       const checkedIn = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-      const guestListName = gender === 'male' ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList;
+      const guestListName = gender === 'male' ? GuestListTypes.GuestList : GuestListTypes.FemaleGuestList;
 
       const guestRef = ref(database, `events/${id}/${guestListName}/${guestID}/checkedIn`);
       await set(guestRef, checkedIn);
@@ -297,7 +297,7 @@ const IndividualEventPage = () => {
       const guestRef = ref(database, `events/${id}/${listName}/${guestID}`);
       await remove(guestRef);
       
-      const genderAndType = getGenderAndTypeFromGuestList(listName);
+      const genderAndType = getTypeFromGuestList(listName);
       
       setNotification(`Removed guest from ${genderAndType.gender} ${genderAndType.type}`);
     } catch (error) {
@@ -314,8 +314,8 @@ const IndividualEventPage = () => {
     }
   
     try {
-      const mainListRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList}`);
-      const waitListGuestRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.MaleWaitList : GuestListTypes.FemaleWaitList}/${guestID}`);
+      const mainListRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.GuestList : GuestListTypes.FemaleGuestList}`);
+      const waitListGuestRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.WaitList : GuestListTypes.FemaleWaitList}/${guestID}`);
       
       const guestSnapshot = await get(waitListGuestRef);
       
@@ -370,7 +370,7 @@ const IndividualEventPage = () => {
     try {
       if (!event.open) { // Vouching is allowed even if the event is closed
         if (gender === "male") {
-          await addGuestToList(GuestListTypes.MaleGuestList, newGuestData);
+          await addGuestToList(GuestListTypes.GuestList, newGuestData);
         } else if (gender === "female") {
           await addGuestToList(GuestListTypes.FemaleGuestList, newGuestData);
         }
@@ -406,8 +406,8 @@ const IndividualEventPage = () => {
       return;
     }
     
-    const mainListRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.MaleGuestList : GuestListTypes.FemaleGuestList}`);
-    const personalGuestRef = ref(database, `users/${user.id}/${gender === 'male' ? GuestListTypes.MalePersonalGuestList : GuestListTypes.FemalePersonalGuestList}/${guestID}`);
+    const mainListRef = ref(database, `events/${id}/${gender === 'male' ? GuestListTypes.GuestList : GuestListTypes.FemaleGuestList}`);
+    const personalGuestRef = ref(database, `users/${user.id}/${gender === 'male' ? GuestListTypes.PersonalGuestList : GuestListTypes.FemalePersonalGuestList}/${guestID}`);
     
     const guestSnapshot = await get(personalGuestRef);
     
@@ -442,7 +442,7 @@ const IndividualEventPage = () => {
     const rows: string[][] = [];
 
     // Add male guests
-    Object.values(event.maleGuestList)?.forEach((guest: Guest) => {
+    Object.values(event.guestList)?.forEach((guest: Guest) => {
       rows.push([guest.name, userNames[guest.addedBy] || "Unknown User", "Male", guest.checkedIn !== -1 ? guest.checkedIn as string : "Not Checked In"]);
     });
 
@@ -463,7 +463,7 @@ const IndividualEventPage = () => {
   // Extract male and female guests from the event object
   // Filtered guest lists based on search input for guest name and addedBy name
   const filteredMaleGuests: Record<string, Guest> = Object.fromEntries(
-    Object.entries(event?.maleGuestList).filter(([, guest]) => {
+    Object.entries(event?.guestList).filter(([, guest]) => {
       const addedByName = userNames[guest.addedBy]?.toLowerCase() || "";
       return (
         guest.name.toLowerCase().includes(guestName.toLowerCase()) ||
@@ -483,7 +483,7 @@ const IndividualEventPage = () => {
   );
 
   const filteredMaleWaitListed: Record<string, Guest> = Object.fromEntries(
-    Object.entries(event?.maleWaitList).filter(([, guest]) => {
+    Object.entries(event?.waitList).filter(([, guest]) => {
       const addedByName = userNames[guest.addedBy]?.toLowerCase() || "";
       return (
         guest.name.toLowerCase().includes(guestName.toLowerCase()) ||
@@ -595,13 +595,13 @@ const IndividualEventPage = () => {
             {/* Information Section */}
             <div className="text-center col-span-full my-4 w-full">
             <p className="text-lg font-semibold text-gray-700">
-              There are {Object.keys(event?.femaleGuestList).length || 0} females and {Object.keys(event?.maleGuestList).length || 0} males on the list for a total of {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.maleGuestList).length || 0)} guests.
+              There are {Object.keys(event?.femaleGuestList).length || 0} females and {Object.keys(event?.guestList).length || 0} males on the list for a total of {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.guestList).length || 0)} guests.
             </p>
             <p className="text-lg font-semibold text-gray-700">
-              You have added {countUserGuests(event?.femaleGuestList || {}, authUser?.uid || '')} females and {countUserGuests(event?.maleGuestList || {}, authUser?.uid || '')} males for a total of {countUserGuests(event?.femaleGuestList || {}, authUser?.uid || '') + countUserGuests(event?.maleGuestList || {}, authUser?.uid || '')}/{event.maxGuests} added.
+              You have added {countUserGuests(event?.femaleGuestList || {}, authUser?.uid || '')} females and {countUserGuests(event?.guestList || {}, authUser?.uid || '')} males for a total of {countUserGuests(event?.femaleGuestList || {}, authUser?.uid || '') + countUserGuests(event?.guestList || {}, authUser?.uid || '')}/{event.maxGuests} added.
             </p>
             <p className="text-lg font-semibold text-gray-700">
-              If everyone from the approval list was added, there would be {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.femaleWaitList).length || 0)} females and {(Object.keys(event?.maleGuestList).length || 0) + (Object.keys(event?.maleWaitList).length || 0)} males on the list. For a total of {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.femaleWaitList).length || 0) + (Object.keys(event?.maleGuestList).length || 0) + (Object.keys(event?.maleWaitList).length || 0)} guests.
+              If everyone from the approval list was added, there would be {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.femaleWaitList).length || 0)} females and {(Object.keys(event?.guestList).length || 0) + (Object.keys(event?.waitList).length || 0)} males on the list. For a total of {(Object.keys(event?.femaleGuestList).length || 0) + (Object.keys(event?.femaleWaitList).length || 0) + (Object.keys(event?.guestList).length || 0) + (Object.keys(event?.waitList).length || 0)} guests.
             </p>
             <JobsButton event={event} className={`mt-4 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:text-gray-200 disabled:hover:border-transparent disabled:cursor-not-allowed`}/>
           </div>

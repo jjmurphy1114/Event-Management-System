@@ -1,6 +1,6 @@
 import Guest from "../types/Guest.ts";
 import {useRef} from "react";
-import {getGuestListTypeFromGenderAndType, GuestListTypes} from "../types/Event.ts";
+import {getGuestListType, GuestListTypes} from "../types/Event.ts";
 
 interface GuestListProps {
     guestList: Record<string, Guest>;
@@ -24,7 +24,7 @@ const GuestList = (props: GuestListProps) => {
   const checkInHoverColor = useRef<string>(props.gender === "female" ? "bg-pink-600" : "bg-blue-600");
   const backgroundColor = useRef<string>(props.gender === "female" ? "bg-pink-100" : "bg-blue-100");
   
-  const guestListType = getGuestListTypeFromGenderAndType(props.gender, props.type);
+  const guestListType = getGuestListType(props.gender, props.type);
   
   if(props.type === "general" && (!props.handleCheckInGuest || !props.handleUncheckInGuest))
     throw new Error("If rendering GuestList as a normal guest list, you must define the handleCheckInGuest and handleUncheckInGuest methods! Did you mean to set isWaitlist to true?");

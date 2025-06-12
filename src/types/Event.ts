@@ -7,24 +7,17 @@ export type EventType = {
     name: string,
     date: string,
     type: string,
-    maxMales: number,
-    maxFemales: number,
     maxGuests: number,
     open: boolean,
     jobsURL: string,
-    maleGuestList?: Record<string, Guest>,
-    femaleGuestList?: Record<string, Guest>,
-    maleWaitList?: Record<string, Guest>,
-    femaleWaitList?: Record<string, Guest>
+    guestList?: Record<string, Guest>,
+    waitList?: Record<string, Guest>,
 }
 
 export enum GuestListTypes {
-    MaleGuestList = "maleGuestList",
-    FemaleGuestList = "femaleGuestList",
-    MaleWaitList = "maleWaitList",
-    FemaleWaitList = "femaleWaitList",
-    MalePersonalGuestList = "malePersonalGuestList",
-    FemalePersonalGuestList = "femalePersonalGuestList"
+    GuestList = "guestList",
+    WaitList = "waitList",
+    PersonalGuestList = "PersonalGuestList",
 }
 
 const eventSchema = z.object({
@@ -32,15 +25,11 @@ const eventSchema = z.object({
     name: z.string(),
     date: z.string(),
     type: z.string(),
-    maxMales: z.number(),
-    maxFemales: z.number(),
     maxGuests: z.number(),
     open: z.boolean(),
     jobsURL: z.string().optional(),
-    maleGuestList: z.record(guestSchema).optional(),
-    femaleGuestList: z.record(guestSchema).optional(),
-    maleWaitList: z.record(guestSchema).optional(),
-    femaleWaitList: z.record(guestSchema).optional(),
+    guestList: z.record(guestSchema).optional(),
+    waitList: z.record(guestSchema).optional(),
 })
 
 export default class Event implements EventType{
@@ -48,13 +37,9 @@ export default class Event implements EventType{
     name: string = '';
     date: string = '';
     type: string = '';
-    maxMales: number = 0;
-    maxFemales: number = 0;
     maxGuests: number = 0;
-    maleGuestList: Record<string, Guest> = {};
-    femaleGuestList: Record<string, Guest> = {};
-    maleWaitList: Record<string, Guest> = {};
-    femaleWaitList: Record<string, Guest> = {};
+    guestList: Record<string, Guest> = {};
+    waitList: Record<string, Guest> = {};
     open: boolean = true;
     jobsURL: string = '';
 
@@ -66,15 +51,11 @@ export default class Event implements EventType{
             this.name = params.name;
             this.date = params.date;
             this.type = params.type;
-            this.maxMales = params.maxMales;
-            this.maxFemales = params.maxFemales;
             this.maxGuests = params.maxGuests;
             this.open = params.open;
             this.jobsURL = params.jobsURL;
-            this.maleGuestList = params.maleGuestList ?? {};
-            this.femaleGuestList = params.femaleGuestList ?? {};
-            this.maleWaitList = params.maleWaitList ?? {};
-            this.femaleWaitList = params.femaleWaitList ?? {};
+            this.guestList = params.guestList ?? {};
+            this.waitList = params.waitList ?? {};
         }
     }
 
@@ -84,13 +65,9 @@ export default class Event implements EventType{
             name: this.name,
             date: this.date,
             type: this.type,
-            maxMales: this.maxMales,
-            maxFemales: this.maxFemales,
             maxGuests: this.maxGuests,
-            maleGuestList: this.maleGuestList,
-            femaleGuestList: this.femaleGuestList,
-            maleWaitList: this.maleWaitList,
-            femaleWaitList: this.femaleWaitList,
+            guestList: this.guestList,
+            waitList: this.waitList,
             open: this.open,
             jobsURL: this.jobsURL,
         };
@@ -106,15 +83,11 @@ export function validateAndReturnEvent(data: unknown): EventType | undefined {
             name: parsedData.data.name,
             date: parsedData.data.date,
             type: parsedData.data.type,
-            maxMales: parsedData.data.maxMales,
-            maxFemales: parsedData.data.maxFemales,
             maxGuests: parsedData.data.maxGuests,
             open: parsedData.data.open,
             jobsURL: parsedData.data.jobsURL ?? '',
-            maleGuestList: parsedData.data.maleGuestList ?? {},
-            femaleGuestList: parsedData.data.femaleGuestList ?? {},
-            maleWaitList: parsedData.data.maleWaitList ?? {},
-            femaleWaitList: parsedData.data.femaleWaitList ?? {}
+            guestList: parsedData.data.guestList ?? {},
+            waitList: parsedData.data.waitList ?? {},
         };
     } else {
         console.error('Event data is unrecognized! Returned data is missing required fields.', parsedData.error);
@@ -123,27 +96,18 @@ export function validateAndReturnEvent(data: unknown): EventType | undefined {
     }
 }
 
-export function getGuestListTypeFromGenderAndType(gender: 'male' | 'female', type: 'general' | 'waitlist' | 'personal') {
-    if(gender === 'male') {
-        if(type === 'general') return GuestListTypes.MaleGuestList;
-        else if (type === 'waitlist') return GuestListTypes.MaleWaitList;
-        else return GuestListTypes.MalePersonalGuestList;
-    } else {
-        if(type === 'general') return GuestListTypes.FemaleGuestList;
-        else if (type === 'waitlist') return GuestListTypes.FemaleWaitList;
-        else return GuestListTypes.FemalePersonalGuestList;
-    }
+export function getGuestListType(type: 'general' | 'waitlist' | 'personal') {
+    if(type === 'general') return GuestListTypes.GuestList;
+    else if (type === 'waitlist') return GuestListTypes.WaitList;
+    else return GuestListTypes.PersonalGuestList;
 }
 
-export function getGenderAndTypeFromGuestList(guestList: GuestListTypes): {gender: 'male' | 'female' | '', type: 'guest list' | 'waitlist' | 'personal guest list' | ''} {
+export function getTypeFromGuestList(guestList: GuestListTypes): {type: 'guest list' | 'waitlist' | 'personal guest list' | ''} {
     switch(guestList) {
-        case GuestListTypes.MaleGuestList: return {gender: "male", type: "guest list"};
-        case GuestListTypes.FemaleGuestList: return {gender: "female", type: "guest list"};
-        case GuestListTypes.MaleWaitList: return {gender: "male", type: "waitlist"};
-        case GuestListTypes.FemaleWaitList: return {gender: "female", type: "waitlist"};
-        case GuestListTypes.MalePersonalGuestList: return {gender: "male", type: "personal guest list"};
-        case GuestListTypes.FemalePersonalGuestList: return {gender: "female", type: "personal guest list"};
-        default: return {gender: "", type: ""};
+        case GuestListTypes.GuestList: return {type: "guest list"};
+        case GuestListTypes.WaitList: return {type: "waitlist"};
+        case GuestListTypes.PersonalGuestList: return {type: "personal guest list"};
+        default: return {type: ""};
     }
 }
 
