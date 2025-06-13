@@ -4,7 +4,6 @@ import { database } from '../services/firebaseConfig';
 import { Link } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import Event, {validateAndReturnEvent} from '../types/Event';
-import JobsButton from "../elements/JobsButton.tsx";
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -59,7 +58,7 @@ export default function HomePage() {
                       <Link to={`/events/${event.id}`} className="text-lg items-center text-center font-semibold text-indigo-500 hover:underline">
                         {event.name}
                       </Link>
-                      <p className="text-sm text-gray-600">Total Guests: {(Object.keys(event.guestList).length || 0) + (Object.keys(event.femaleGuestList).length || 0)}</p>
+                      <p className="text-sm text-gray-600">Total Guests: {Object.keys(event.guestList).length || 0}</p>
                       {(userStatus === 'Admin' || userStatus === 'Social') && (
                         <div className="mt-2 flex items-center">
                           <label htmlFor={`event-toggle-${event.id}`} className="flex items-center cursor-pointer">
@@ -86,7 +85,6 @@ export default function HomePage() {
                     <div className='text-right'>
                       <p className="text-sm text-gray-600">Date: {event.date}</p>
                       <p className='text-sm text-gray-600'>Event Type: {event.type}</p>
-                      <JobsButton event={event} className={`mt-3 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:text-gray-200 disabled:hover:border-transparent disabled:cursor-not-allowed`} />
                     </div>
                   </div>
                 </li>
