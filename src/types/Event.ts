@@ -17,7 +17,7 @@ export type EventType = {
 export enum GuestListTypes {
     GuestList = "guestList",
     WaitList = "waitList",
-    PersonalGuestList = "PersonalGuestList",
+    PersonalGuestList = "personalGuestList",
 }
 
 const eventSchema = z.object({

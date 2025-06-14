@@ -17,7 +17,7 @@ const IndividualEventPage = () => {
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
-  const [frontDoorMode, setFrontDoorMode] = useState(false);
+  const [checkInMode, setCheckInMode] = useState(false);
   const [vouchGuestName, setVouchGuestName] = useState("");
   const [vouchPassword, setVouchPassword] = useState("");
   const [isVouching, setIsVouching] = useState(false);
@@ -130,7 +130,7 @@ const IndividualEventPage = () => {
     }
 
     if (!event.open) {
-      if (user.status === "Admin" && !frontDoorMode){
+      if (user.status === "Admin" && !checkInMode){
         setNotification("The list is closed but u good");
       } else {
         setError("The event is closed and no guests can be added");
@@ -190,20 +190,20 @@ const IndividualEventPage = () => {
     }
   };
   
-  // Function to handle toggling front door mode
+  // Function to handle toggling check-in mode
   const handleToggleFrontDoorMode = async () => {
     if (!event.open){
       try {
         const eventRef = ref(database, `events/${id}`);
-        await update(eventRef, { frontDoorMode: !frontDoorMode });
-        setFrontDoorMode(!frontDoorMode);
+        await update(eventRef, { frontDoorMode: !checkInMode });
+        setCheckInMode(!checkInMode);
       } catch (error) {
-        console.error("Error toggling front door mode: ", error);
-        setError("Failed to toggle front door mode.");
+        console.error("Error toggling check-in mode: ", error);
+        setError("Failed to toggle check-in mode.");
       }
     } else {
-      setFrontDoorMode(false);
-      setError("List must be closed to use front door mode");
+      setCheckInMode(false);
+      setError("List must be closed to use check-in mode");
     }
     
   };
@@ -374,7 +374,7 @@ const IndividualEventPage = () => {
     }
 
     if (!event.open) {
-      if (user.status === "Admin" && !frontDoorMode){
+      if (user.status === "Admin" && !checkInMode){
         setNotification("The list is closed but u good");
       } else {
         setError("The event is closed and no guests can be added");
@@ -473,23 +473,23 @@ const IndividualEventPage = () => {
                   <input
                     type="checkbox"
                     id="front-door-toggle"
-                    checked={frontDoorMode}
+                    checked={checkInMode}
                     onChange={handleToggleFrontDoorMode}
                     className="sr-only"
                   />
-                  <div className={`block w-14 h-8 rounded-full transition ${frontDoorMode ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                  <div className={`block w-14 h-8 rounded-full transition ${checkInMode ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
                   <div
                     className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${
-                      frontDoorMode ? 'transform translate-x-full' : ''
+                      checkInMode ? 'transform translate-x-full' : ''
                     }`}
                   ></div>
                 </div>
-                <span className="ml-3 text-gray-700">Front Door Mode</span>
+                <span className="ml-3 text-gray-700">Check-In Mode</span>
               </label>
             </div>
           )}
           {/* Vouch for Guest Section */}
-          {user.status === "Admin" && frontDoorMode && (
+          {user.status === "Admin" && checkInMode && (
             <div className="flex justify-center items-center col-span-full mb-2 w-full">
               <button
                 onClick={() => setIsVouching(true)}
@@ -583,7 +583,7 @@ const IndividualEventPage = () => {
               fetchUserName={fetchUserName}
               userID={authUser ? authUser.uid : ""}
               userStatus={user.status}
-              frontDoorMode={frontDoorMode}
+              frontDoorMode={checkInMode}
               handleCheckInGuest={handleCheckInGuest}
               handleUncheckInGuest={handleUncheckInGuest}
               handleDeleteGuest={handleDeleteGuest}
@@ -598,7 +598,7 @@ const IndividualEventPage = () => {
               fetchUserName={fetchUserName}
               userID={authUser ? authUser.uid : ""}
               userStatus={user.status}
-              frontDoorMode={frontDoorMode}
+              frontDoorMode={checkInMode}
               handleDeleteGuest={handleDeleteGuest}
               handleApproveGuest={handleApproveGuest}
               searching={guestName.length != 0}
@@ -606,13 +606,13 @@ const IndividualEventPage = () => {
             
             {/* Personal Guest List */}
             <GuestList
-              guestList={user.malePersonalGuestList}
+              guestList={user.personalGuestList}
               type={"personal"}
               userNames={userNames}
               fetchUserName={fetchUserName}
               userID={authUser ? authUser.uid : ""}
               userStatus={user.status}
-              frontDoorMode={frontDoorMode}
+              frontDoorMode={checkInMode}
               handleAddGuestFromPersonal={handleAddGuestFromPersonal}
             />
           </div>

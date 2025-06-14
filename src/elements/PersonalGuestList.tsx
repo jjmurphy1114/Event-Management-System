@@ -3,14 +3,13 @@ import {useRef} from "react";
 
 interface PersonalGuestListProps {
   guestList: Record<string, Guest>;
-  gender: 'male' | 'female';
   editingMode: boolean;
-  handleDeletePersonalGuest?: (gender: 'male' | 'female', id: string) => Promise<void>;
-  handleAddPersonalGuestToList?: (gender: 'male' | 'female', id: string) => Promise<void>;
+  handleDeletePersonalGuest?: (id: string) => Promise<void>;
+  handleAddPersonalGuestToList?: (id: string) => Promise<void>;
 }
 
 const PersonalGuestList = (props: PersonalGuestListProps) => {
-  const backgroundColor = useRef<string>(props.gender === "female" ? "bg-pink-100" : "bg-blue-100");
+  const backgroundColor = useRef<string>("bg-blue-100");
   
   if(props.editingMode && !props.handleDeletePersonalGuest) {
     console.error(`When in editing mode, the personal guest list must define the handleDeletePersonalGuest prop!`);
@@ -24,9 +23,7 @@ const PersonalGuestList = (props: PersonalGuestListProps) => {
   
   return (
     <div className={`p-4 rounded-lg col-span-1 lg:col-span-1`}>
-      <h2
-        className="text-3xl font-bold mb-4 text-center text-gray-800">{props.gender === "female" ? "Female" : "Male"} Guests</h2>
-      <div className="mb-8 space-y-4 min-h-[20rem]">
+      <div className="mb-8 space-y-4 justify-center min-h-[20rem]">
         {Object.keys(props.guestList).length > 0 ? (
           
           Object.entries<Guest>(props.guestList).map(([guestID, guestData]) => (
@@ -41,7 +38,7 @@ const PersonalGuestList = (props: PersonalGuestListProps) => {
               >
                 {!props.editingMode &&
                   <button
-                    onClick={() => props.handleAddPersonalGuestToList!(props.gender, guestID)}
+                    onClick={() => props.handleAddPersonalGuestToList!(guestID)}
                     className="sm:mt-0 bg-purple-500 text-white rounded-md font-semibold hover:bg-purple-600"
                   >
                     Add to list
@@ -49,7 +46,7 @@ const PersonalGuestList = (props: PersonalGuestListProps) => {
                 }
                 {props.editingMode && (
                   <button
-                    onClick={() => props.handleDeletePersonalGuest!(props.gender, guestID)}
+                    onClick={() => props.handleDeletePersonalGuest!(guestID)}
                     className="sm:mt-0 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
                   >
                     Delete
