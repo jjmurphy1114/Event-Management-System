@@ -102,12 +102,12 @@ export function getGuestListType(type: 'general' | 'waitlist' | 'personal') {
     else return GuestListTypes.PersonalGuestList;
 }
 
-export function getTypeFromGuestList(guestList: GuestListTypes): {type: 'guest list' | 'waitlist' | 'personal guest list' | ''} {
+export function getTypeFromGuestList(guestList: GuestListTypes): string {
     switch(guestList) {
-        case GuestListTypes.GuestList: return {type: "guest list"};
-        case GuestListTypes.WaitList: return {type: "waitlist"};
-        case GuestListTypes.PersonalGuestList: return {type: "personal guest list"};
-        default: return {type: ""};
+        case GuestListTypes.GuestList: return "guest list";
+        case GuestListTypes.WaitList: return "waitlist";
+        case GuestListTypes.PersonalGuestList: return "personal guest list";
+        default: return "";
     }
 }
 
