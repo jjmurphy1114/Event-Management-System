@@ -11,16 +11,11 @@ export default function StatsPage() {
   const [events, setEvents] = useState<{ id: string; name: string }[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
   const [stats, setStats] = useState({
-    maleCount: 0,
-    femaleCount: 0,
+    guestCount: 0,
     checkedIn: 0,
     notCheckedIn: 0,
     checkInTimes: [] as Guest[],
-    checkedGirls: 0,
-    checkedGuys: 0,
-    mostCheckIns: "",
-    mostGirlsCheckIns: "",
-    mostGuysCheckIns: "",
+    checkedGuests: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,35 +58,22 @@ export default function StatsPage() {
           const ev = snapshot.val();
   
           // Ensure guest lists are arrays
-          const maleRaw = ev.maleGuestList;
-          const femaleRaw = ev.femaleGuestList;
-          const maleList: Guest[] = Array.isArray(maleRaw) ? maleRaw : Object.values(maleRaw || {});
-          const femaleList: Guest[] = Array.isArray(femaleRaw) ? femaleRaw : Object.values(femaleRaw || {});
+          const guestRaw = ev.guestList;
+          const list: Guest[] = Array.isArray(guestRaw) ? guestRaw : Object.values(guestRaw || {});
   
-          const allGuests = [...maleList, ...femaleList];
-          const checked = allGuests.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
-          const notChecked = allGuests.length - checked;
+          const checked = list.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
+          const notChecked = list.length - checked;
 
-          const checkedGirls = femaleList.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
-          const checkedGuys = maleList.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
+          const checkedGuests = list.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1).length;
 
-          const checkInTimes: Guest[] = allGuests.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1)
-  
-          const topGuestsChecked = await calculateTopBrother(allGuests);
-          const topGirlsChecked = await calculateTopBrother(femaleList.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1));
-          const topGuysChecked = await calculateTopBrother(maleList.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1));
-  
+          const checkInTimes: Guest[] = list.filter(g => g.checkedIn !== undefined && g.checkedIn !== -1)
+    
           setStats({
-            maleCount: maleList.length,
-            femaleCount: femaleList.length,
+            guestCount: list.length,
             checkedIn: checked,
             notCheckedIn: notChecked,
             checkInTimes: checkInTimes,
-            checkedGirls: checkedGirls,
-            checkedGuys: checkedGuys,
-            mostCheckIns: topGuestsChecked,
-            mostGirlsCheckIns: topGirlsChecked,
-            mostGuysCheckIns: topGuysChecked,
+            checkedGuests: checkedGuests,
           });
         } catch (e) {
           console.error(e);
@@ -124,55 +106,15 @@ export default function StatsPage() {
         </select>
       </div>
       <div className="grid-cols-1 gap-4 justify-center items-center flex flex-col">
-        <div className="w-3/4 justify-self-center grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          
+        <div className="w-3/4 justify-self-center justify-center items-center flex flex-col">   
           <div className="p-4 bg-green-500 rounded-lg">
             <p className="text-2xl font-semibold">Number of Guests</p>
-            <p className="text-lg">List: {stats.femaleCount + stats.maleCount}</p>
             <p className="text-lg">Checked-In: {stats.checkedIn}</p>
-            <p className="text-lg">Check-In Percentage: {((stats.checkedIn / (stats.femaleCount + stats.maleCount)) *100 ).toFixed(1)}%</p>
+            <p className="text-lg">Check-In Percentage: {((stats.checkedIn / stats.guestCount) *100 ).toFixed(1)}%</p>
           </div>
-          
-          <div className="p-4 bg-blue-500 rounded-lg">
-            <p className="text-2xl font-semibold">Ratio (Girls : Guys)</p>
-            <p className="text-lg">List ratio: {(stats.femaleCount / stats.maleCount).toFixed(2)}</p>
-            <p className="text-lg">Checked-In ratio: {(stats.checkedGirls / stats.checkedGuys).toFixed(2)}</p>
-          </div>
-          
-          <div className="p-4 bg-purple-500 rounded-lg">
-            <p className="text-2xl font-semibold">Records</p>
-            <p className="text-md">Most Check-ins: {stats.mostCheckIns}</p>
-            <p className="text-md">Most Female Check-ins: {stats.mostGirlsCheckIns}</p>
-            <p className="text-md">Most Male Check-ins: {stats.mostGuysCheckIns}</p>
-          </div>
-        </div>
       </div>
       <CheckInGraph checkInTimes={stats.checkInTimes} />
       </div>
+    </div>
   );
-}
-
-async function calculateTopBrother(guests: Guest[]): Promise<string> {
-  const counts: Record<string, number> = {};
-  guests.forEach(g => {
-    if (g.checkedIn !== undefined && g.checkedIn !== -1) {
-      counts[g.addedBy] = (counts[g.addedBy] || 0) + 1;
-    }
-  });
-  let topUid = '';
-  let max = 0;
-  Object.entries(counts).forEach(([uid, c]) => {
-    if (c > max) {
-      max = c;
-      topUid = uid;
-    }
-  });
-  let topName = '';
-  if (topUid) {
-    const userRef = ref(database, `users/${topUid}`);
-    const usnap = await get(userRef);
-    topName = usnap.exists() ? usnap.val().displayName : topUid;
-    return topName;
-  }
-  return '—';
 }
