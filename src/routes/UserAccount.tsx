@@ -173,9 +173,9 @@ const UserAccount = () => {
     }
   }
   
-  const handleAddGuest = async (gender: 'male' | 'female') => {
+  const handleAddGuest = async () => {
     const databaseRef = ref(database,
-      `/users/${user.id}/${gender == 'male' ? 'malePersonalGuestList' : 'femalePersonalGuestList'}`);
+      `/users/${user.id}/personalGuestList`);
     
     const newGuestRef = await push(databaseRef);
     const newGuestData = new Guest(guestName, user.id);
@@ -192,8 +192,8 @@ const UserAccount = () => {
     });
   }
   
-  const handleDeleteGuest = async (gender: 'male' | 'female', id: string) => {
-    const databaseRef = ref(database, `/users/${user.id}/${gender == 'male' ? 'malePersonalGuestList' : 'femalePersonalGuestList'}/${id}`);
+  const handleDeleteGuest = async (id: string) => {
+    const databaseRef = ref(database, `/users/${user.id}/personalGuestList/${id}`);
     await remove(databaseRef);
     
     fetchUserData().then(() => {
@@ -357,24 +357,17 @@ const UserAccount = () => {
               placeholder="Enter guest name"
               className="w-2/3 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-            <div className="mt-7 flex flex-auto justify-between space-x-5 m-2 w-[70%] sm:w-[50%] lg:w-[35%]">
+            <div className="mt-7 flex flex-auto justify-center space-x-5 m-2 w-[70%] sm:w-[50%] lg:w-[35%]">
               <button
-                onClick={() => handleAddGuest('male')}
+                onClick={() => handleAddGuest()}
                 className="bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600 p-2 w-[50%]"
               >
-                Add Male
-              </button>
-              <button
-                  onClick={() => handleAddGuest('female')}
-                  className="bg-pink-500 text-white rounded-md font-semibold hover:bg-pink-600 p-2 w-[50%]"
-                >
-                  Add Female
+                Add Guest
               </button>
             </div>
           </div>
-          <div className={`grid grid-cols-1 xl:grid-cols-2 gap-4 w-full`}>
-            <PersonalGuestList guestList={user.malePersonalGuestList} gender={"male"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
-            <PersonalGuestList guestList={user.femalePersonalGuestList} gender={"female"} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
+          <div className={`grid grid-cols-1 xl:grid-cols-2 gap-4 w-full content-center`}>
+            <PersonalGuestList guestList={user.personalGuestList} editingMode={true} handleDeletePersonalGuest={handleDeleteGuest}/>
           </div>
         </div>
       </div>

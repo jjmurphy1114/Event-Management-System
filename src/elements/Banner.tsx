@@ -3,7 +3,6 @@ import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { database } from "../services/firebaseConfig";
 import { ref, get } from "firebase/database";
-import bannerImage from '../assets/ZM Parties.png';
 
 function Banner() {
   const auth = getAuth();
@@ -58,7 +57,7 @@ function Banner() {
               to="/"
               className="text-white font-bold text-lg md:text-2xl truncate"
             >
-              Event Management
+              Event Management System
             </Link>
           </div>
     

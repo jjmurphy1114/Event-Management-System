@@ -4,7 +4,6 @@ import { database } from '../services/firebaseConfig';
 import { Link } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import Event, {validateAndReturnEvent} from '../types/Event';
-import JobsButton from "../elements/JobsButton.tsx";
 
 export default function HomePage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -47,7 +46,7 @@ export default function HomePage() {
 
   return (
     <div className="absolute box-border top-nav h-screen-with-nav w-full bg-gradient-to-b justify-center items-top from-blue-50 to-gray-100 p-5 min-w-[420px] overflow-auto">
-      <h1 className="text-4xl font-bold text-center w-full align-top text-indigo-600 py-5">ZM PARTIES</h1>
+      <h1 className="text-4xl font-bold text-center w-full align-top text-indigo-600 py-5">Current Events</h1>
       <div className="md:w-[80%] lg:w-[70%] py-5 flex w-full justify-center mx-auto bg-gradient-to-b from-blue-50 to-gray-100">
         <div className="bg-white shadow-md w-full item-center rounded-lg p-6">
           {events.length > 0 ? (
@@ -59,7 +58,7 @@ export default function HomePage() {
                       <Link to={`/events/${event.id}`} className="text-lg items-center text-center font-semibold text-indigo-500 hover:underline">
                         {event.name}
                       </Link>
-                      <p className="text-sm text-gray-600">Total Guests: {(Object.keys(event.maleGuestList).length || 0) + (Object.keys(event.femaleGuestList).length || 0)}</p>
+                      <p className="text-sm text-gray-600">Total Guests: {Object.keys(event.guestList).length || 0}</p>
                       {(userStatus === 'Admin' || userStatus === 'Social') && (
                         <div className="mt-2 flex items-center">
                           <label htmlFor={`event-toggle-${event.id}`} className="flex items-center cursor-pointer">
@@ -86,7 +85,6 @@ export default function HomePage() {
                     <div className='text-right'>
                       <p className="text-sm text-gray-600">Date: {event.date}</p>
                       <p className='text-sm text-gray-600'>Event Type: {event.type}</p>
-                      <JobsButton event={event} className={`mt-3 w-40 bg-purple-500 text-white semi-bold rounded-md hover:bg-purple-600 p-2 disabled:bg-purple-600 disabled:text-gray-200 disabled:hover:border-transparent disabled:cursor-not-allowed`} />
                     </div>
                   </div>
                 </li>

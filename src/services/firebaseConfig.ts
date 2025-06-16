@@ -4,14 +4,13 @@ import {getAnalytics} from "firebase/analytics";
 import {getFunctions, connectFunctionsEmulator} from "firebase/functions";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC5b_gVBSgn-WQqvniO1VU1Cze5ANsj-kc",
-  authDomain: "zm-parties-2.firebaseapp.com",
-  databaseURL: "https://zm-parties-2-default-rtdb.firebaseio.com",
-  projectId: "zm-parties-2",
-  storageBucket: "zm-parties-2.firebasestorage.app",
-  messagingSenderId: "115188668937",
-  appId: "1:115188668937:web:32c25b823d96726fe876d8",
-  measurementId: "G-P5R0BYBFNV"
+  apiKey: "AIzaSyBRkCiaHTsUbEbOB5lnpcVQv0OMabhbzoU",
+  authDomain: "event-management-system-f7160.firebaseapp.com",
+  projectId: "event-management-system-f7160",
+  storageBucket: "event-management-system-f7160.firebasestorage.app",
+  messagingSenderId: "30715869607",
+  appId: "1:30715869607:web:fb3741f07c1e1613d79e82",
+  measurementId: "G-W0QB77YNWE"
 };
 
 const app = initializeApp(firebaseConfig);
