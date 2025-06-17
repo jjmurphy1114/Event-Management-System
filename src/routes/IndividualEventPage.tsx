@@ -4,9 +4,10 @@ import {database} from "../services/firebaseConfig";
 import {get, onValue, push, ref, remove, set, update} from "firebase/database";
 import Event, {EventType, getTypeFromGuestList, GuestListTypes, validateAndReturnEvent} from "../types/Event";
 import Guest, {validateAndReturnGuest} from "../types/Guest";
-import {getAuth, User as FirebaseUser} from "firebase/auth";
 import GuestList from "../elements/GuestList.tsx";
-import User, {defaultUserType, UserType, validateAndReturnUser} from "../types/User.ts";
+import { RootState, AppDispatch } from "../state/store.ts";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchUser } from "../state/userSlice.ts";
 
 const IndividualEventPage = () => {
   
@@ -22,16 +23,15 @@ const IndividualEventPage = () => {
   const [vouchPassword, setVouchPassword] = useState("");
   const [isVouching, setIsVouching] = useState(false);
   const [blacklist, setBlacklist] = useState<string[]>([]);
-  const auth = getAuth();
   
-  const [authUser] = useState<FirebaseUser>(auth.currentUser!);
-  
-  const [user, setUser] = useState<User>(new User(defaultUserType));
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
   
   useEffect(() => {
     const eventRef = ref(database, `events/${id}`);
     const blacklistRef = ref(database, "blacklist");
-    const userRef = ref(database, `users/${authUser.uid}`);
+    dispatch(fetchUser());
+    
   
     onValue(eventRef, (snapshot) => {
       if(snapshot.exists()) {
@@ -49,30 +49,7 @@ const IndividualEventPage = () => {
       else setBlacklist([]);
     }, (err) => console.error("Error fetching blacklist!", err));
     
-    onValue(userRef, (snapshot) => {
-      if(snapshot.exists()) {
-        const validatedUser = validateAndReturnUser(snapshot.val());
-        if(validatedUser) setUser(new User(validatedUser));
-      }
-    }, (err) => console.error("Error fetching user!", err));
-  }, [authUser.uid, id]);
-  
-  const fetchUserData = useCallback(async () => {
-    if(authUser) {
-      const userRef = ref(database, `users/${authUser.uid}`);
-      const userSnapshot = await get(userRef);
-      if (userSnapshot.exists()) {
-        const userData: UserType | undefined = validateAndReturnUser(userSnapshot.val());
-        if(userData) {
-          setUser(new User(userData));
-        } else {
-          console.error("Failed to validate user data!");
-        }
-      } else {
-        console.error("Failed to get user data from database!");
-      }
-    }
-  }, [authUser]);
+  }, []);
   
   const fetchBlacklist = useCallback(async () => {
     try {
@@ -93,20 +70,13 @@ const IndividualEventPage = () => {
   useEffect(() => {
     setLoading(true);
     
-    fetchUserData()
-      .then(() => console.debug("User data fetched successfully"))
-      .catch((err) => {
-        console.error("User data not fetched successfully");
-        console.error(err);
-      });
-    
     fetchBlacklist()
       .then(() => console.debug(`Blacklist data fetched successfully!`))
       .catch((err) => {
         console.error("Blacklist data not fetched successfully!");
         console.error(err);
       }).finally(() => setLoading(false));
-  }, [fetchBlacklist, fetchUserData]);
+  }, [fetchBlacklist]);
 
   // Guarded render
   if (loading) {
@@ -124,8 +94,8 @@ const IndividualEventPage = () => {
 
   // Function to count the number of guests added by a specific user
   const handleAddGuest = async () => {
-    if (!event || !authUser) {
-      console.error("Event or user not available. Event:", event, "User:", authUser);
+    if (!event || !user) {
+      console.error("Event or user not available. Event:", event, "User:", user);
       return;
     }
 
@@ -276,7 +246,7 @@ const IndividualEventPage = () => {
     listName: GuestListTypes,
     guestID: string
   ) => {
-    if (!event || !authUser) return;
+    if (!event || !user) return;
   
     try {
       const guestRef = ref(database, `events/${id}/${listName}/${guestID}`);
@@ -328,8 +298,8 @@ const IndividualEventPage = () => {
 
   // Function to handle vouching for a guest (Password Protected)
   const handleVouchGuest = async () => {
-    if (!event || !authUser) {
-      console.error("Event or user not available. Event:", event, "User:", authUser);
+    if (!event || !user) {
+      console.error("Event or user not available. Event:", event, "User:", user);
       return;
     }
 
@@ -350,7 +320,7 @@ const IndividualEventPage = () => {
     }
 
     // Create new guest data
-    const newGuestData = { name: vouchGuestName, addedBy: authUser.uid, checkedIn: new Date().toLocaleString("en-US", { timeZone: "America/New_York" })};
+    const newGuestData = { name: vouchGuestName, addedBy: user.id, checkedIn: new Date().toLocaleString("en-US", { timeZone: "America/New_York" })};
 
     try {
       if (!event.open) { // Vouching is allowed even if the event is closed
@@ -368,8 +338,8 @@ const IndividualEventPage = () => {
   };
   
   const handleAddGuestFromPersonal = async (guestID: string) => {
-    if (!event || !authUser) {
-      console.error("Event or user not available. Event: ", event, "User: ", authUser);
+    if (!event || !user) {
+      console.error("Event or user not available. Event: ", event, "User: ", user);
       return;
     }
 
@@ -548,7 +518,7 @@ const IndividualEventPage = () => {
               There are {Object.keys(event?.guestList).length || 0} guests on the list
             </p>
             <p className="text-lg font-semibold text-gray-700">
-              You have added {countUserGuests(event?.guestList || {}, authUser?.uid || '')} guests.
+              You have added {countUserGuests(event?.guestList || {}, user.id || '')} guests.
             </p>
             <p className="text-lg font-semibold text-gray-700">
               If everyone from the approval list was added, there would be {(Object.keys(event?.guestList).length || 0) + (Object.keys(event?.waitList).length || 0)} guests.
@@ -581,7 +551,7 @@ const IndividualEventPage = () => {
               type={"general"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={authUser ? authUser.uid : ""}
+              userID={user ? user.id : ""}
               userStatus={user.status}
               frontDoorMode={checkInMode}
               handleCheckInGuest={handleCheckInGuest}
@@ -596,7 +566,7 @@ const IndividualEventPage = () => {
               type={"waitlist"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={authUser ? authUser.uid : ""}
+              userID={user ? user.id : ""}
               userStatus={user.status}
               frontDoorMode={checkInMode}
               handleDeleteGuest={handleDeleteGuest}
@@ -610,7 +580,7 @@ const IndividualEventPage = () => {
               type={"personal"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={authUser ? authUser.uid : ""}
+              userID={user ? user.id : ""}
               userStatus={user.status}
               frontDoorMode={checkInMode}
               handleAddGuestFromPersonal={handleAddGuestFromPersonal}
