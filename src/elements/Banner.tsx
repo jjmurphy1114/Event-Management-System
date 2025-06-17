@@ -77,12 +77,14 @@ function Banner() {
     
           {/* Desktop Nav Links */}
           <div className="hidden md:flex space-x-4">
+            {(user.approved) && (
             <Link
               to="/"
               className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
             >
               Home
             </Link>
+            )}
             {(user.status === "Admin" || user.status === "Social") && (
               <>
                 <Link
