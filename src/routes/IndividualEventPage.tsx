@@ -49,7 +49,7 @@ const IndividualEventPage = () => {
       else setBlacklist([]);
     }, (err) => console.error("Error fetching blacklist!", err));
     
-  }, []);
+  }, [dispatch, id]);
   
   const fetchBlacklist = useCallback(async () => {
     try {
@@ -551,7 +551,6 @@ const IndividualEventPage = () => {
               type={"general"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={user ? user.id : ""}
               userStatus={user.status}
               frontDoorMode={checkInMode}
               handleCheckInGuest={handleCheckInGuest}
@@ -566,7 +565,6 @@ const IndividualEventPage = () => {
               type={"waitlist"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={user ? user.id : ""}
               userStatus={user.status}
               frontDoorMode={checkInMode}
               handleDeleteGuest={handleDeleteGuest}
@@ -580,7 +578,6 @@ const IndividualEventPage = () => {
               type={"personal"}
               userNames={userNames}
               fetchUserName={fetchUserName}
-              userID={user ? user.id : ""}
               userStatus={user.status}
               frontDoorMode={checkInMode}
               handleAddGuestFromPersonal={handleAddGuestFromPersonal}
