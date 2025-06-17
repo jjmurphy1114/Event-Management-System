@@ -1,40 +1,31 @@
 import {Link, useLocation, useNavigate} from "react-router-dom";
-import { getAuth, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
-import { database } from "../services/firebaseConfig";
-import { ref, get } from "firebase/database";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../state/store";
+import { fetchUser } from "../state/userSlice";
 
 function Banner() {
   const auth = getAuth();
-  const [user, setUser] = useState<User | null>(null);
-  const [userStatus, setUserStatus] = useState("");
-  const [loading, setLoading] = useState(true); // Loading state for auth
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const onWaitingScreen: boolean = useLocation().pathname === "/waiting-approval";
   const navigate = useNavigate();
 
   useEffect(() => {
     // Track auth state changes to ensure user info is loaded on first render
-    const unsubscribe = onAuthStateChanged(auth, (currentUser: User | null) => {
-      setUser(currentUser);
-      setLoading(false); // Stop loading once auth state is determined
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        // User is signed in, set user state
+        dispatch(fetchUser());
+      }
     });
 
-    // Fetch status for the current user
-    const fetchUserStatus = async () => {
-      if (user) {
-        const userRef = ref(database, `users/${user.uid}`);
-        const userSnapshot = await get(userRef);
-        if (userSnapshot.exists()) {
-          setUserStatus(userSnapshot.val().status);
-        }
-      }
-    }
-    
-    fetchUserStatus().then();
     return () => unsubscribe();
-  }, [auth, user]);
+  }, [auth, dispatch]);
 
   const handleSignOut = () => {
 
@@ -43,7 +34,7 @@ function Banner() {
     }).catch((error) => console.error("Error signing out:", error));
   };
 
-  if (loading) {
+  if (user.loading) {
     return <div className="bg-gray-800 fixed top-0 left-0 right-0 h-16 shadow-md z-50"></div>;
   }
 
@@ -92,7 +83,7 @@ function Banner() {
             >
               Home
             </Link>
-            {(userStatus === "Admin" || userStatus === "Social") && (
+            {(user.status === "Admin" || user.status === "Social") && (
               <>
                 <Link
                   to="/events"
@@ -156,7 +147,7 @@ function Banner() {
             >
               Home
             </Link>
-            {(userStatus === "Admin" || userStatus === "Social") && (
+            {(user.status === "Admin" || user.status === "Social") && (
               <>
                 <Link
                   to="/events"

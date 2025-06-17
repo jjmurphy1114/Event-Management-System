@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { ref, get } from "firebase/database";
 import { database } from "../services/firebaseConfig";
-// import { getAuth } from "firebase/auth";
 import Guest from "../types/Guest";
 import CheckInGraph from "../elements/CheckInGraph";
 
 export default function StatsPage() {
-//   const auth = getAuth();
-//   const user = auth.currentUser;
   const [events, setEvents] = useState<{ id: string; name: string }[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
   const [stats, setStats] = useState({

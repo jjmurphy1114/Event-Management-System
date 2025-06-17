@@ -21,7 +21,17 @@ export const fetchUser = createAsyncThunk(
 
 const userSlice = createSlice({
   name: 'user',
-  initialState: { id: '', displayName: '', status: '', approved: false, privileges: false, personalGuestList: {}, email: '' },
+  initialState: { 
+    id: '', 
+    displayName: '', 
+    status: '', 
+    approved: false, 
+    privileges: false, 
+    personalGuestList: 
+    {}, email: '',
+    loading: true,
+    error: null as string | null, 
+},
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchUser.pending, () => {
@@ -38,6 +48,14 @@ const userSlice = createSlice({
         state.approved = action.payload.approved || false;
         state.privileges = action.payload.privileges || false;
         state.personalGuestList = action.payload.personalGuestList || {};
+        state.email = action.payload.email || "";
+        state.loading = false;
+        state.error = null as string | null;
+    });
+    builder.addCase(fetchUser.rejected, (state, action) => {
+        console.error("Failed to fetch user data:", action.error.message);
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch user data";
     });
   },
 });
