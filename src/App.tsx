@@ -21,6 +21,8 @@ import BlacklistPage from "./routes/BlacklistPage.tsx";
 import {database} from "./services/firebaseConfig";
 import UserAccount from "./routes/UserAccount.tsx";
 import StatsPage from "./routes/StatsPage.tsx";
+import { Provider } from "react-redux";
+import { store } from "./state/store";
 
 const auth = getAuth();
 
@@ -194,7 +196,9 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   );
 }
 

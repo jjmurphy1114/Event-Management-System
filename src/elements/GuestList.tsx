@@ -1,13 +1,15 @@
 import Guest from "../types/Guest.ts";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {getGuestListType, GuestListTypes} from "../types/Event.ts";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../state/store.ts";
+import { fetchUser } from "../state/userSlice.ts";
 
 interface GuestListProps {
     guestList: Record<string, Guest>;
     type: "general" | "waitlist" | "personal";
     userNames: { [p: string]: string };
     fetchUserName: (userID: string) => Promise<string>;
-    userID: string;
     userStatus: string;
     frontDoorMode: boolean;
     searching?: boolean;
@@ -24,6 +26,14 @@ const GuestList = (props: GuestListProps) => {
   const backgroundColor = useRef<string>("bg-blue-100");
   
   const guestListType = getGuestListType(props.type);
+
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
+  
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
+
   
   if(props.type === "general" && (!props.handleCheckInGuest || !props.handleUncheckInGuest))
     throw new Error("If rendering GuestList as a normal guest list, you must define the handleCheckInGuest and handleUncheckInGuest methods! Did you mean to set isWaitlist to true?");
@@ -51,7 +61,7 @@ const GuestList = (props: GuestListProps) => {
                 })()}</p>)}
               </div>
               <div
-                className={`${props.userStatus !== "Admin" && guest.addedBy !== props.userID && guest.checkedIn != -1 ? "basis-[25%]" : "basis-[40%] xl:basis-[50%]"} flex flex-row items-center align-middle justify-end space-x-5`}
+                className={`${props.userStatus !== "Admin" && guest.addedBy !== user.id && guest.checkedIn != -1 ? "basis-[25%]" : "basis-[40%] xl:basis-[50%]"} flex flex-row items-center align-middle justify-end space-x-5`}
               >
                 {props.type === "waitlist" ?
                   (props.userStatus === "Admin" || props.userStatus === "Social") && (
@@ -81,7 +91,7 @@ const GuestList = (props: GuestListProps) => {
                     </button>
                   )
                 }
-                {props.type !== 'personal' ? (props.userID === guest.addedBy || props.userStatus === "Admin") && (
+                {props.type !== 'personal' ? (user.id === guest.addedBy || props.userStatus === "Admin") && (
                   <button
                     onClick={() => props.handleDeleteGuest!(guestListType, guestID)}
                     className="sm:mt-0 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
