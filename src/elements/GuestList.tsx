@@ -1,30 +1,39 @@
 import Guest from "../types/Guest.ts";
-import {useRef} from "react";
-import {getGuestListTypeFromGenderAndType, GuestListTypes} from "../types/Event.ts";
+import {useEffect, useRef} from "react";
+import {getGuestListType, GuestListTypes} from "../types/Event.ts";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../state/store.ts";
+import { fetchUser } from "../state/userSlice.ts";
 
 interface GuestListProps {
     guestList: Record<string, Guest>;
-    gender: "male" | "female";
     type: "general" | "waitlist" | "personal";
     userNames: { [p: string]: string };
     fetchUserName: (userID: string) => Promise<string>;
-    userID: string;
     userStatus: string;
     frontDoorMode: boolean;
     searching?: boolean;
     handleDeleteGuest?: (listName: GuestListTypes, guestID: string) => Promise<void>;
-    handleCheckInGuest?: (gender: "male" | "female", guestID: string) => Promise<void>;
-    handleUncheckInGuest?: (gender: "male" | "female", guestID: string) => Promise<void>;
-    handleApproveGuest?: (gender: "male" | "female", guestID: string) => Promise<void>;
-    handleAddGuestFromPersonal?: (gender: 'male' | 'female', guestID: string) => Promise<void>;
+    handleCheckInGuest?: (guestID: string) => Promise<void>;
+    handleUncheckInGuest?: (guestID: string) => Promise<void>;
+    handleApproveGuest?: (guestID: string) => Promise<void>;
+    handleAddGuestFromPersonal?: (guestID: string) => Promise<void>;
 }
 
 const GuestList = (props: GuestListProps) => {
-  const checkInIdleColor = useRef<string>(props.gender === "female" ? "bg-pink-500" : "bg-blue-500");
-  const checkInHoverColor = useRef<string>(props.gender === "female" ? "bg-pink-600" : "bg-blue-600");
-  const backgroundColor = useRef<string>(props.gender === "female" ? "bg-pink-100" : "bg-blue-100");
+  const checkInIdleColor = useRef<string>("bg-blue-500");
+  const checkInHoverColor = useRef<string>("bg-blue-600");
+  const backgroundColor = useRef<string>("bg-blue-100");
   
-  const guestListType = getGuestListTypeFromGenderAndType(props.gender, props.type);
+  const guestListType = getGuestListType(props.type);
+
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
+  
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
+
   
   if(props.type === "general" && (!props.handleCheckInGuest || !props.handleUncheckInGuest))
     throw new Error("If rendering GuestList as a normal guest list, you must define the handleCheckInGuest and handleUncheckInGuest methods! Did you mean to set isWaitlist to true?");
@@ -37,7 +46,7 @@ const GuestList = (props: GuestListProps) => {
   
   return (
     <div className="p-4 rounded-lg col-span-1 lg:col-span-1">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">{props.gender === "female" ? "Female" : "Male"} {props.type === "waitlist" ? "Waitlist" : props.type === "general" ? "Guests" : "Personal Guests"}</h2>
+      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">{props.type === "waitlist" ? "Waitlist" : props.type === "general" ? "Guests" : "Personal Guests"}</h2>
       <div className="mb-8 space-y-4 min-h-[20rem]">
         {Object.keys(props.guestList).length > 0 ? (
           Object.entries(props.guestList).map(([guestID, guest]) => (
@@ -52,12 +61,12 @@ const GuestList = (props: GuestListProps) => {
                 })()}</p>)}
               </div>
               <div
-                className={`${props.userStatus !== "Admin" && guest.addedBy !== props.userID && guest.checkedIn != -1 ? "basis-[25%]" : "basis-[40%] xl:basis-[50%]"} flex flex-row items-center align-middle justify-end space-x-5`}
+                className={`${props.userStatus !== "Admin" && guest.addedBy !== user.id && guest.checkedIn != -1 ? "basis-[25%]" : "basis-[40%] xl:basis-[50%]"} flex flex-row items-center align-middle justify-end space-x-5`}
               >
                 {props.type === "waitlist" ?
                   (props.userStatus === "Admin" || props.userStatus === "Social") && (
                     <button
-                      onClick={() => props.handleApproveGuest!(props.gender, guestID)}
+                      onClick={() => props.handleApproveGuest!(guestID)}
                       className="sm:mt-0 bg-purple-500 text-white rounded-md font-semibold hover:bg-purple-600"
                     >
                       Approve
@@ -65,7 +74,7 @@ const GuestList = (props: GuestListProps) => {
                   ) :
                   (guest.checkedIn !== -1 || (props.userStatus === "Admin" && props.frontDoorMode)) && (props.type !== "personal") && (
                     <button
-                      onClick={guest.checkedIn === -1 ? () => props.handleCheckInGuest!(props.gender, guestID) : () => confirm(`Uncheck in ${guest.name}?`) ? props.handleUncheckInGuest!(props.gender, guestID) : undefined}
+                      onClick={guest.checkedIn === -1 ? () => props.handleCheckInGuest!(guestID) : () => confirm(`Uncheck in ${guest.name}?`) ? props.handleUncheckInGuest!(guestID) : undefined}
                       className={`${guest.checkedIn !== -1 ? "text-sm": ""} self-stretch flex-grow sm:mt-0 rounded-md font-semibold ${checkInIdleColor.current} text-white ${props.userStatus !== "Admin" ? 'cursor-not-allowed border-none hover:border-none' : `hover:${checkInHoverColor.current}`}`}
                       disabled={props.userStatus !== "Admin"}
                       
@@ -82,7 +91,7 @@ const GuestList = (props: GuestListProps) => {
                     </button>
                   )
                 }
-                {props.type !== 'personal' ? (props.userID === guest.addedBy || props.userStatus === "Admin") && (
+                {props.type !== 'personal' ? (user.id === guest.addedBy || props.userStatus === "Admin") && (
                   <button
                     onClick={() => props.handleDeleteGuest!(guestListType, guestID)}
                     className="sm:mt-0 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
@@ -91,7 +100,7 @@ const GuestList = (props: GuestListProps) => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => props.handleAddGuestFromPersonal!(props.gender, guestID)}
+                    onClick={() => props.handleAddGuestFromPersonal!(guestID)}
                     className={`sm:mt-0 ${checkInIdleColor.current} text-white rounded-md font-semibold hover:${checkInHoverColor.current}`}
                   >
                     Add
@@ -101,7 +110,7 @@ const GuestList = (props: GuestListProps) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 text-center">{!props.searching ? `No ${props.gender} guests ${props.type === "waitlist" ? "on the waitlist" : "added"} yet.` : `No guest found.`}</p>
+          <p className="text-gray-500 text-center">{!props.searching ? `No guests ${props.type === "waitlist" ? "on the waitlist" : "added"} yet.` : `No guest found.`}</p>
         )}
       </div>
     </div>

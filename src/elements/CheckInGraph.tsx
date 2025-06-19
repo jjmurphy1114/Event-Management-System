@@ -30,9 +30,6 @@ export default function CheckInGraph({ checkInTimes }: CheckInGraphProps) {
   // Filter check-ins between 10 PM and 2 AM
   const filteredCheckIns = checkInTimes.filter((guest) => {
     if (!guest.checkedIn) return false;
-    const checkInTime = new Date(guest.checkedIn as string);
-    const hours = checkInTime.getHours();
-    return hours >= 22 || hours < 2;
   });
 
   // Aggregate check-ins per minute bucket
@@ -97,7 +94,7 @@ export default function CheckInGraph({ checkInTimes }: CheckInGraphProps) {
       },
       title: {
         display: true,
-        text: 'Check-In Times (10 PM - 2 AM)',
+        text: 'Check-In Times',
       },
     },
     responsive: true,

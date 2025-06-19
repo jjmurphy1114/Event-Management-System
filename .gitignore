@@ -16,7 +16,9 @@ build
 .yarn/install-state.gz
 
 # Firebase config
-**/zm-parties-service-account-key.json
+**/event-management-system.json
+src/services/firebaseConfig.ts
+
 
 # Editor directories and files
 .vscode/*

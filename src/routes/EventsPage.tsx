@@ -32,8 +32,8 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
  
   // Function to add an event to Firebase
-  function addEventToDatabase(name: string, date: string, type: string, maxMales: number, maxFemales: number, maxGuests: number, open: boolean, jobsURL: string) {
-    const event = new Event({id: '', name: name, date: date, type: type, maxMales: maxMales, maxFemales: maxFemales, maxGuests: maxGuests, open: open, jobsURL: jobsURL});
+  function addEventToDatabase(name: string, date: string, type: string, maxGuests: number, open: boolean, jobsURL: string) {
+    const event = new Event({id: '', name: name, date: date, type: type, maxGuests: maxGuests, open: open, jobsURL: jobsURL});
     const newEventRef = push(eventsRef); // Creates a unique ID
     if(newEventRef.key) event.id = newEventRef.key;
     console.log(event.toJSON());
@@ -44,24 +44,18 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
 
   // Handler for form submission
   const handleAddEvent = () => {
-    const { name, date, type, maxMales, maxFemales, maxGuests, jobsURL } = newEvent;
+    const { name, date, type, maxGuests, jobsURL } = newEvent;
     // Make sure none of the fields are empty
     if (name == ""){
       setError("Name is required");
     } else if (date == ""){
-      setError("No date??");
+      setError("Date is required");
     } else if (type == ""){
       setError("Type is empty");
-    } else if (maxMales <= 0){
-      setError("I'm ok with this but this was probably a mistake");
-    } else if (maxFemales <= 0){
-      setError("Sausage party!! Fix this asap");
     } else if (maxGuests <= 0){
-      setError("Can't have a party without guests");
-    } else if (Number.isNaN(maxMales) || Number.isNaN(maxFemales) || Number.isNaN(maxGuests)) {
-      setError("You gotta enter a number you numnut");
-    } else if (maxMales + maxFemales > maxGuests) {
-      setError("Put the blocks down and focus you business major, set max invites to number of males and females. Or more I don't care");
+      setError("Guests must be greater than 0");
+    } else if (Number.isNaN(maxGuests)) {
+      setError("Guests must be a number");
     } else {
       setError("");
       
@@ -70,7 +64,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
       if(!jobsURL.startsWith("http")) cleanedJobsURL = `https://${jobsURL}`;
       else cleanedJobsURL = jobsURL;
       
-      addEventToDatabase(name, date, type, maxMales as number, maxFemales as number, maxGuests as number, true, cleanedJobsURL);
+      addEventToDatabase(name, date, type, maxGuests as number, true, cleanedJobsURL);
       setNewEvent(emptyEvent); // Clear form
     }
   };
@@ -94,16 +88,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
         setEditError("No date??");
       } else if (updatedEvent.type == ""){
         setEditError("Type is empty");
-      } else if (updatedEvent.maxMales <= 0){
-        setEditError("I'm ok with this but this was probably a mistake");
-      } else if (updatedEvent.maxFemales <= 0){
-        setEditError("WHY WOULD YOU REMOVE THEM BRUH");
-      }  else if (updatedEvent.maxGuests <= 0){
-        setEditError("Can't have a party without guests");
-      } else if (Number.isNaN(updatedEvent.maxMales) || Number.isNaN(updatedEvent.maxFemales) || Number.isNaN(updatedEvent.maxGuests)) {
-        setEditError("You gotta enter a number you numnut");
-      } else if (updatedEvent.maxMales + updatedEvent.maxFemales > updatedEvent.maxGuests) {
-        setEditError("Put the blocks down and focus you business major, set max invites to number of males and females. Or more I don't care");
+      } else if (updatedEvent.maxGuests <= 0){
+        setEditError("Guests must be greater than 0");
+      } else if (Number.isNaN(updatedEvent.maxGuests)) {
+        setEditError("Guests must be a number");
       } else {
         setEditError('');
         const eventRef = ref(database, `events/${id}`);
@@ -111,15 +99,11 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
           name: updatedEvent.name,
           date: updatedEvent.date,
           type: updatedEvent.type,
-          maxMales: updatedEvent.maxMales,
-          maxFemales: updatedEvent.maxFemales,
           maxGuests: updatedEvent.maxGuests,
           open: updatedEvent.open,
           jobsURL: updatedEvent.jobsURL,
-          maleGuestList: updatedEvent.maleGuestList ?? [],
-          femaleGuestList: updatedEvent.femaleGuestList ?? [],
-          maleWaitList: updatedEvent.maleWaitList ?? [],
-          femaleWaitList: updatedEvent.femaleWaitList ?? [],
+          guestList: updatedEvent.guestList ?? [],
+          waitList: updatedEvent.waitList ?? [],
         }).catch((e) => {
           console.error(`Error updating event: ${e}`);
         });
@@ -183,27 +167,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
               />
             </div>
             <div className='col-span-1'>
-              <label htmlFor="males" className="block text-sm font-medium text-gray-700">Male Invites Per Brother</label>
-              <input
-                id="males"
-                type="number"
-                value={Number.isNaN(newEvent.maxMales) ? "" : newEvent.maxMales}
-                onChange={(e) => setNewEvent(new Event({ ...newEvent, maxMales: parseInt(e.target.value)}))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <div className='col-span-1'>
-              <label htmlFor="females" className="block text-sm font-medium text-gray-700">Female Invites Per Brother</label>
-              <input
-                id="females"
-                type="number"
-                value={Number.isNaN(newEvent.maxFemales) ? "" : newEvent.maxFemales}
-                onChange={(e) => setNewEvent(new Event({ ...newEvent, maxFemales: parseInt(e.target.value) }))}
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <div className='col-span-1'>
-              <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
+              <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Person</label>
               <input
                   id="maxGuests"
                   type="number"
@@ -215,7 +179,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
             <div
               className="col-span-1 md:col-span-2"
             >
-              <label htmlFor="jobsURL" className="block text-sm font-medium text-gray-700">Party Jobs URL</label>
+              <label htmlFor="jobsURL" className="block text-sm font-medium text-gray-700">Jobs URL (Optional)</label>
               <input
                   id="jobsURL"
                   type="string"
@@ -276,26 +240,6 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="editMales" className="block text-sm font-medium text-gray-700">Males Per Brother</label>
-                    <input
-                      id="editMales"
-                      type="number"
-                      value={Number.isNaN(event.maxMales) ? "" : event.maxMales}
-                      onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxMales: parseInt(e.target.value) }) : ev)))}
-                      className="border p-2 w-full mb-2"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="editFemales" className="block text-sm font-medium text-gray-700">Females Per Brother</label>
-                    <input
-                      id="editFemales"
-                      type="number"
-                      value={Number.isNaN(event.maxFemales) ? "" : event.maxFemales}
-                      onChange={(e) => setEvents(events.map((ev) => (ev.id === event.id ? new Event({ ...ev, maxFemales: parseInt(e.target.value) }) : ev)))}
-                      className="border p-2 w-full mb-2"
-                    />
-                  </div>
-                  <div>
                     <label htmlFor="editMaxGuests" className="block text-sm font-medium text-gray-700">Max Invites Per Brother</label>
                     <input
                       id="editMaxGuests"
@@ -343,8 +287,6 @@ const EventsPage: React.FC<EventsPageProps> = ({ database }) => {
                   <h2 className="text-xl font-bold text-gray-800 mb-2">{event.name}</h2>
                   <p className="text-gray-600">Date: {event.date}</p>
                   <p className="text-gray-600">Type: {event.type}</p>
-                  <p className="text-gray-600">Max Male Guests Per: {event.maxMales}</p>
-                  <p className="text-gray-600">Max Female Guests Per: {event.maxFemales}</p>
                   <p className="text-gray-600">Max Invites Per: {event.maxGuests}</p>
                   <p className="text-gray-600">Jobs URL: {event.jobsURL === "" ? "No URL specified": <a href={event.jobsURL} target="_blank">Jobs URL</a>}</p>
                   <button
