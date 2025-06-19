@@ -2,7 +2,7 @@ import {getAuth, updateEmail, updateProfile, updatePassword, reauthenticateWithC
 import {useNavigate} from "react-router-dom";
 import {useCallback, useEffect, useState} from "react";
 import User, {defaultUserType, UserType, validateAndReturnUser} from "../types/User.ts";
-import {database} from "../services/firebaseConfig.ts";
+import {database} from "../firebaseConfig.ts";
 import {get, push, ref, remove, update} from "firebase/database";
 import {isEqual} from "lodash";
 import {FirebaseError} from "firebase/app";
