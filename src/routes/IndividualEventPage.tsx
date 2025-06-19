@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
-import {database} from "../services/firebaseConfig";
+import {database} from "../firebaseConfig";
 import {get, onValue, push, ref, remove, set, update} from "firebase/database";
 import Event, {EventType, getTypeFromGuestList, GuestListTypes, validateAndReturnEvent} from "../types/Event";
 import Guest, {validateAndReturnGuest} from "../types/Guest";

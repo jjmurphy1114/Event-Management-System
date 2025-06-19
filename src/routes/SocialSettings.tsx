@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ref, onValue, update, remove, get } from 'firebase/database';
-import { database } from '../services/firebaseConfig'; // Firebase config
+import { database } from '../firebaseConfig'; // Firebase config
 import User, {UserType, validateAndReturnUser} from '../types/User';
 import { useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ref, get } from "firebase/database";
-import { database } from "../services/firebaseConfig";
+import { database } from "../firebaseConfig";
 import Guest from "../types/Guest";
 import CheckInGraph from "../elements/CheckInGraph";
 

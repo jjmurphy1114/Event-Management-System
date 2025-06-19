@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {ref, get, remove, set, onValue} from "firebase/database";
-import { database } from "../services/firebaseConfig";
+import { database } from "../firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { validateAndReturnBlacklisted } from "../types/Blacklisted";
 import Blacklisted from "../types/Blacklisted";

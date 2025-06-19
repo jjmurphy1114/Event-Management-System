@@ -17,7 +17,7 @@ build
 
 # Firebase config
 **/event-management-system.json
-src/services/firebaseConfig.ts
+src/firebaseConfig.ts
 
 
 # Editor directories and files

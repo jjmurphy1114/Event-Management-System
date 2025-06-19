@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ref, onValue, update } from 'firebase/database';
-import { database } from '../services/firebaseConfig';
+import { database } from '../firebaseConfig';
 import { Link } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import Event, {validateAndReturnEvent} from '../types/Event';
