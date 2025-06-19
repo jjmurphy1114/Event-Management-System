@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, set } from 'firebase/database'; // Or use Firestore for more flexibility
-import { database } from '../services/firebaseConfig'; // Your Firebase config
+import { database } from '../firebaseConfig'; // Your Firebase config
 import { useNavigate } from 'react-router-dom';
 import User, {defaultUserType} from '../types/User';
 

@@ -2,7 +2,7 @@ import React, {useRef, useState} from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 import { ref, get, child } from "firebase/database";
-import { database } from '../services/firebaseConfig';
+import { database } from '../firebaseConfig';
 
 export default function LoginPage() { 
   const [email, setEmail] = useState<string>('');

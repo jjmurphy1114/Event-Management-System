@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { validateAndReturnUser } from "../types/User";
 import { getAuth } from "firebase/auth";
 import { get, ref } from "firebase/database";
-import { database } from "../services/firebaseConfig";
+import { database } from "../firebaseConfig";
 
 export const fetchUser = createAsyncThunk(
     "user/fetchUser",

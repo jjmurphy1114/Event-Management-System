@@ -18,7 +18,7 @@ import SocialSettings from "./routes/SocialSettings";
 import Banner from "./elements/Banner";
 import IndividualEventPage from "./routes/IndividualEventPage.tsx";
 import BlacklistPage from "./routes/BlacklistPage.tsx";
-import {database} from "./services/firebaseConfig";
+import {database} from "./firebaseConfig";
 import UserAccount from "./routes/UserAccount.tsx";
 import StatsPage from "./routes/StatsPage.tsx";
 import { Provider } from "react-redux";
